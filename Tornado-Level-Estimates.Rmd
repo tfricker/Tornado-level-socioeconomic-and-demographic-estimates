@@ -1,0 +1,910 @@
+---
+output: html_document
+---
+
+Tornado-level estimates of socioeconomic and demographic variables: 1995--2016
+==============================================================================
+
+Tyler Fricker and James B. Elsner
+
+### Introduction
+
+Tornadoes are rapidly rotating wind storms capable of catastrophic damage and mass casualties. In 2011 alone, tornadoes resulted in nearly \$10 billion in property damage and 553 deaths. Even in years with below average tornado reports, the threat to human life and property still exists. For example, in 2016 tornadoes caused more than \$180 million in property damage and 17 deaths. In fact, tornadoes that impact large urban areas have the potential to cause hundreds to thousands of casualties. Data from the Storm Prediction Center (SPC) of the National Oceanic and Atmospheric Administration (NOAA) show that the 27 April, 2011 Tuscaloosa-Birmingham, Alabama tornado produced 1,564 casualties with 64 deaths. Less than a month later the 22 May 2011 Joplin, Missouri tornado produced 1,308 casualties with 158 deaths. More recently, the 26 December 2015 Garland-Rowlett, Texas tornado resulted in 478 casualties with 10 deaths.
+
+The United States experiences more tornadoes than any country on Earth. Extremely fast winds, relatively short warning lead times, and the quality of built environments increase the potential for a large number of casualties. According to the Centers for Disease Control and Prevention (CDC) note that risk factors for becoming a casualty in a tornado include being a woman, being an older adult (65+), and sheltering in a mobile home. In fact, early warnings and strong shelters are the most effective way to reduce death and injury.
+
+Simmons and Sutter (2005, 2008, 2009) evaluate the impact of some risk factors, including median income and the percentage of mobile homes, in regression analyses for tornadoes occurring between 1986 and 2004. Using county-level data they find, when controlling for Enhanced Fujita (EF) scale and population density, that an increase in household median income results in an increase in the number of casualties and that an increase in the percentage of mobile homes results in an increase in the number of casualties. 
+
+Lim et al. (2017) verify and expand on these results by evaluating the impact additional socioeconomic and demographic variables have, including the percentage of people over the age of 65 and under the age of 18. They again find that an increase in percentage of mobile homes results in an increase in the number of casualties, while also identifying that an increase in the percentage of female-headed households results in an increase in the number of deaths.
+
+While previous studies have investigated the impact different factors have had on the number of tornado casualties using county level data, no work has been done at the scale of the tornado. In response, here we describe a method to estimate socioeconomic and demographic variables at the individual tornado level. The result is a dataset of estimates that can be used to better understand tornado casualties and is freely available on GitHub. The method to produce the estimates is reproducible with open-source software and all analyses are done using the R project for statistical computing.
+
+Set working directory and load packages.
+```{r}
+setwd("~/Dropbox/Tyler")
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("ggmap"))
+suppressPackageStartupMessages(library("ggthemes"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("tidyr"))
+suppressPackageStartupMessages(library("rgdal"))
+suppressPackageStartupMessages(library("rgeos"))
+suppressPackageStartupMessages(library("scales"))
+suppressPackageStartupMessages(library("broom"))
+suppressPackageStartupMessages(library("RColorBrewer"))
+suppressPackageStartupMessages(library("maps"))
+suppressPackageStartupMessages(library("maptools"))
+suppressPackageStartupMessages(library("wesanderson"))
+suppressPackageStartupMessages(library("sf"))
+suppressPackageStartupMessages(library("classInt"))
+suppressPackageStartupMessages(library("leaflet"))
+suppressPackageStartupMessages(library("Hmisc"))
+suppressPackageStartupMessages(library("devtools"))
+suppressPackageStartupMessages(library("tidycensus"))
+suppressPackageStartupMessages(library("purrr"))
+suppressPackageStartupMessages(library("tidyverse"))
+suppressPackageStartupMessages(library("reshape2"))
+suppressPackageStartupMessages(library("raster"))
+suppressPackageStartupMessages(library("MASS"))
+suppressPackageStartupMessages(library("tmap"))
+suppressPackageStartupMessages(library("tmaptools"))
+load(file = "January10.RData")
+```
+
+### Data and Methods
+
+Tornado data:
+
+Load the tornado data. Start year in 1995. Remove tornadoes from Hawaii, Alaska, and Puerto Rico. Keep only tornadoes with at least one casualty. Remove tornadoes over water.
+```{r}
+Tor.sfdf = sf::st_read(dsn = "torn", 
+                      layer = "torn", 
+                      stringsAsFactors = FALSE)
+Tor.sfdf = Tor.sfdf %>%
+  mutate(Date = as.Date(date),
+         DateTime = as.POSIXct(paste(date, time), format = "%Y-%m-%d %H:%M:%S"),
+         Year = yr,
+         Length = len * 1609.34,
+         Width = wid * .9144,
+         Width = ifelse(Width == 0, min(Width[Width > 0]), Width), #takes care of zero width tornadoes
+         cas = inj + fat,
+         AreaPath = Length * Width,
+         AreaVortex = pi * (Width/2)^2,
+         Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
+         filter(Year >= 1995) %>%
+         filter(st != "HI" & st != "AK" & st != "PR") %>%
+         filter(cas > 0) %>%
+  sf::st_sf()
+
+TornL = as(Tor.sfdf, "Spatial")
+```
+
+Tornado Energy:
+
+Compute tornado energies and add these as columns in the spatial data frame. Tornado energy will be used for modeling tornado casualties later.
+
+Empirical model from Table 3-1 of NRC (2007). Percent area by EF rating for each EF category. Threshold wind speeds (m/s) are a lower bound 3 sec gusts on the operational EF Scale (Table 2-1 of NRC, 2007). Area * 1000 = volume in cubic meters.
+```{r}
+perc = c(1, 0, 0, 0, 0, 0, 
+         .772, .228, 0, 0, 0, 0,
+         .616, .268, .115, 0, 0, 0,
+         .529, .271, .133, .067, 0, 0,
+         .543, .238, .131, .056, .032, 0,
+         .538, .223, .119, .07, .033, .017)
+percM = matrix(perc, ncol = 6, byrow = TRUE)
+```
+
+Compute tornado energy metrics. Here we are interested in energy dissipation (ED) given by the equation $E = A_p \rho \sum_{j=0}^{J} w_j v_j^{3},$ where $A_p$ is the area of the approximate path (width times length), $\rho$ is the air density (assumed to be 1 kg/m$^3$ at the surface), $v_j$ is the midpoint wind speed for each damage rating $j$, and $w_j$ is the corresponding fraction of path area.
+```{r}
+threshW = c(29.06, 38.45, 49.62, 60.8, 74.21, 89.41)
+midptW = c(diff(threshW)/2 + threshW[-length(threshW)], threshW[length(threshW)] + 7.5)
+ef = TornL$mag + 1
+EW3 = numeric()
+for(i in 1:length(ef)) EW3[i] = midptW^3 %*% percM[ef[i], ]
+height = 1000
+
+TornL$e3 = EW3
+TornL$ED = TornL$e3 * TornL$AreaPath
+```
+
+Population Density:
+
+Population data are obtained from the Gridded Population of the World, version four (GPW, v4) from the Socioeconomic Data and Applications Center at Columbia University, USA. The database contain decennial census density estimates for 1990, 2000, and 2010 represented as people per square kilometer. Densities are based on residential population. The native cell resolution is .0083$^{\circ}$ latitude/longitude, which at 36$^{\circ}$ N latitude means a cell having the dimension of .9 km in the north-south direction and .7 km in the east-west direction. 
+
+Load the population raster(s) and crop to defined extent. Use the `extract` function to obtain the population density. The `projectRaster` and `extract` functions take about 10 minutes per raster. Group years by mid-year of the census year. Assign the population density using the first decennial estimate then successively replace with later estimates by grouped years.
+```{r}
+TornP = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "FLAT")
+PopD2000 = raster("gpw-v4-population-density_2000.tif")
+PopD2010 = raster("gpw-v4-population-density_2010.tif")
+ext = raster::extent(c(-125, -67, 24, 50))
+PopD2000 = crop(PopD2000, ext)
+PopD2010 = crop(PopD2010, ext)
+
+PopD2000p = projectRaster(PopD2000, crs = proj4string(TornP))
+PopD2010p = projectRaster(PopD2010, crs = proj4string(TornP))
+TornP$popD2000 = raster::extract(PopD2000p, TornP, fun = mean, na.rm = TRUE,
+                                       weights = TRUE, normalizeWeights = FALSE)[, 1]
+TornP$popD2010 = raster::extract(PopD2010p, TornP, fun = mean, na.rm = TRUE,
+                                       weights = TRUE, normalizeWeights = FALSE)[, 1]
+
+TornP$popD = TornP$popD2000
+yearGroup = TornP$yr > 2005
+TornP$popD[yearGroup] = TornP$popD2010[yearGroup]
+
+TornP$pop = TornP$popD * TornP$AreaPath/10^6
+```
+
+Socioeconomic/Demographic data:
+
+Load API and variables from ACS. Here we use the 2000 Census summary file 3, and 2010 ACS 5-year estimates.
+```{r}
+census_api_key("2814de123d5d0461a3347a42849d25106688daa8", install = TRUE)
+v00 = load_variables(2000, "sf3", cache = FALSE)
+v10 = load_variables(2010, "acs5", cache = FALSE)
+v15 = load_variables(2015, "acs5", cache = FALSE)
+```
+
+Create dataframes of all Tracts. The variables for the Census (2000) and ACS (2010) include:
+----------------------------------------------------------------------------------
+
+Total Population (P001001/B01001_001E)
+-----------------------------------------
+Male Population (P008002/B01001_002E)
+Male Population (Under 17) (P008003-P008020/B01001_003E-B01001_006E)
+Male Population (18-44) (P008021-P008029/B01001_007E-B01001_0014E)
+Male Population (45-64) (P008030-P008034/B01001_015E-B01001_019E)
+Male Population (Over 65) (P008035-P008040/B01001_020E-B01001_025E)
+-----------------------------------------
+Female Population (P008041/B01001_026E)
+Female Population (Under 17) (P008042-P008059/B01001_027E-B01001_030E)
+Female Population (18-44) (P008060-P008068/B01001_031E-B01001_038E)
+Female Population (45-64) (P008069-P008073/B01001_039E-B01001_043E)
+Female Population (Over 65) (P008074-P008079/B01001_044E-B01001_049E)
+-----------------------------------------
+White alone (P006002/B02001_002E)
+-----------------------------------------
+Black or African-American alone (P006003/B02001_003E)
+-----------------------------------------
+Household Median Income (P053001/B19013_001E)
+-----------------------------------------
+Mobile Homes (H030010/B25024_010E)
+-----------------------------------------
+
+Use output = "wide" to have columns of the variables in the dataframe.
+
+This code chunk collects socioeconomic and demographic information from each Census Tract. 
+```{r}
+us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+us2010.sfdf = reduce(map(us, function(x) {
+  get_acs(state = x,
+          geography = "tract", 
+          variables = c("B01001_001E", "B01001_002E", "B01001_003E", "B01001_004E", "B01001_005E", "B01001_006E", "B01001_007E", "B01001_008E", "B01001_009E", "B01001_010E", "B01001_011E", "B01001_012E", "B01001_013E", "B01001_014E", "B01001_015E", "B01001_016E", "B01001_017E", "B01001_018E", "B01001_019E", "B01001_020E", "B01001_021E", "B01001_022E", "B01001_023E", "B01001_024E", "B01001_025E", "B01001_026E", "B01001_027E", "B01001_028E", "B01001_029E", "B01001_030E", "B01001_031E", "B01001_032E", "B01001_033E", "B01001_034E", "B01001_035E", "B01001_036E", "B01001_037E", "B01001_038E", "B01001_039E", "B01001_040E", "B01001_041E", "B01001_042E", "B01001_043E", "B01001_044E", "B01001_045E", "B01001_046E", "B01001_047E", "B01001_048E", "B01001_049E", "B02001_002E", "B02001_003E", "B19013_001E", "B25024_010E"),
+          endyear = 2010,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2000.sfdf = reduce(map(us, function(x) {
+  get_decennial(state = x,
+          geography = "tract", 
+          variables = c("P001001", "P008002", "P008003", "P008004", "P008005", "P008006", "P008007", "P008008", "P008009", "P008010", "P008011", "P008012", "P008013", "P008014", "P008015", "P008016", "P008017", "P008018", "P008019", "P008020", "P008021", "P008022", "P008023", "P008024", "P008025", "P008026", "P008027", "P008028", "P008029", "P008030", "P008031", "P008032", "P008033", "P008034", "P008035", "P008036", "P008037", "P008038", "P008039", "P008040", "P008041", "P008042", "P008043", "P008044", "P008045", "P008046", "P008047", "P008048", "P008049", "P008050", "P008051", "P008052", "P008053", "P008054", "P008055", "P008056", "P008057", "P008058", "P008059", "P008060", "P008061", "P008062", "P008063", "P008064", "P008065", "P008066", "P008067", "P008068", "P008069", "P008070", "P008071", "P008072", "P008073", "P008074", "P008075", "P008076", "P008077", "P008078", "P008079", "P006002", "P006003",  "P053001", "H030010"),
+          year = 2000,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2000SP = as(us2000.sfdf, "Spatial")
+us2010SP = as(us2010.sfdf, "Spatial")
+spT2000 = spTransform(us2000SP, CRS(proj4string(TornL)))
+spT2010 = spTransform(us2010SP, CRS(proj4string(TornL)))
+```
+
+Determine the proportion of the tornado path by area that falls inside each tract. The rows index the tornado number and the columns index the tract number. Call these tornado segments.
+
+Start with 2000 Census Tracts.
+```{r}
+inter = gIntersects(spT2000, TornP, byid = TRUE)
+ids = which(inter, arr.ind = TRUE)
+
+Areas2000 = list()
+for(i in 1:nrow(ids)){
+    Areas2000[[i]] = gArea(gIntersection(spT2000[ids[i, 2], ], TornP[ids[i, 1], ]))
+    }
+Areas2000.df = data.frame(matrix(unlist(Areas2000), ncol = 1, byrow = TRUE))
+names(Areas2000.df) = "TornAreaInTract"
+Areas2000.df$Tract = ids[, 2]
+Areas2000.df$Torn = ids[, 1]
+```
+
+There are 2,199 tornadoes in Areas200.df. This is down from 2,208 tornadoes, which means that 9 of the tornadoes do not intersect with Census tracts. This is because of boundary issues. For example, a tornado is geolocated in the dataset as occurring over water.
+
+Add tract and torndo area to the dataframe, as well as the GEOID, total number of people in each tract, total number of males and females in each tract, total number of people in each age group in each tract, and total number of black and white people in each tract.
+```{r}
+AreaTor2000 = gArea(TornP, byid = TRUE)
+AreaTract2000 = gArea(spT2000, byid = TRUE)
+Areas2000.df$TractArea = AreaTract2000[Areas2000.df$Tract]
+Areas2000.df$TornArea = AreaTor2000[Areas2000.df$Torn]
+Areas2000.df$GEOID = spT2000$GEOID[Areas2000.df$Tract]
+Areas2000.df$TractPopulation2000 = us2000SP$P001001[Areas2000.df$Tract]
+Areas2000.df$TractMalePopulation2000 = us2000SP$P008002[Areas2000.df$Tract]
+Areas2000.df$TractMale2000PopulationUnder17 = us2000SP$P008003[Areas2000.df$Tract] + us2000SP$P008004[Areas2000.df$Tract] + 
+  us2000SP$P008005[Areas2000.df$Tract] + 
+  us2000SP$P008006[Areas2000.df$Tract] + 
+  us2000SP$P008007[Areas2000.df$Tract] + 
+  us2000SP$P008008[Areas2000.df$Tract] + 
+  us2000SP$P008009[Areas2000.df$Tract] + 
+  us2000SP$P008010[Areas2000.df$Tract] + 
+  us2000SP$P008011[Areas2000.df$Tract] + 
+  us2000SP$P008012[Areas2000.df$Tract] + 
+  us2000SP$P008013[Areas2000.df$Tract] + 
+  us2000SP$P008014[Areas2000.df$Tract] + 
+  us2000SP$P008015[Areas2000.df$Tract] + 
+  us2000SP$P008016[Areas2000.df$Tract] + 
+  us2000SP$P008017[Areas2000.df$Tract] + 
+  us2000SP$P008018[Areas2000.df$Tract] + 
+  us2000SP$P008019[Areas2000.df$Tract] + 
+  us2000SP$P008020[Areas2000.df$Tract]
+Areas2000.df$TractMale2000Population18to44 = us2000SP$P008021[Areas2000.df$Tract] + us2000SP$P008022[Areas2000.df$Tract] + 
+  us2000SP$P008023[Areas2000.df$Tract] + 
+  us2000SP$P008024[Areas2000.df$Tract] + 
+  us2000SP$P008025[Areas2000.df$Tract] + 
+  us2000SP$P008026[Areas2000.df$Tract] + 
+  us2000SP$P008027[Areas2000.df$Tract] + 
+  us2000SP$P008028[Areas2000.df$Tract] + 
+  us2000SP$P008029[Areas2000.df$Tract]
+Areas2000.df$TractMale2000Population45to64 = us2000SP$P008030[Areas2000.df$Tract] + us2000SP$P008031[Areas2000.df$Tract] + 
+  us2000SP$P008032[Areas2000.df$Tract] + 
+  us2000SP$P008033[Areas2000.df$Tract] + 
+  us2000SP$P008034[Areas2000.df$Tract]
+Areas2000.df$TractMale2000PopulationOver65 = us2000SP$P008035[Areas2000.df$Tract] + us2000SP$P008036[Areas2000.df$Tract] + 
+  us2000SP$P008037[Areas2000.df$Tract] + 
+  us2000SP$P008038[Areas2000.df$Tract] + 
+  us2000SP$P008039[Areas2000.df$Tract] + 
+  us2000SP$P008040[Areas2000.df$Tract]
+Areas2000.df$TractFemalePopulation2000 = us2000SP$P008041[Areas2000.df$Tract]
+Areas2000.df$TractFemale2000PopulationUnder17 = us2000SP$P008042[Areas2000.df$Tract] + 
+  us2000SP$P008043[Areas2000.df$Tract] + 
+  us2000SP$P008044[Areas2000.df$Tract] + 
+  us2000SP$P008045[Areas2000.df$Tract] + 
+  us2000SP$P008046[Areas2000.df$Tract] + 
+  us2000SP$P008047[Areas2000.df$Tract] + 
+  us2000SP$P008048[Areas2000.df$Tract] + 
+  us2000SP$P008049[Areas2000.df$Tract] + 
+  us2000SP$P008050[Areas2000.df$Tract] + 
+  us2000SP$P008051[Areas2000.df$Tract] + 
+  us2000SP$P008052[Areas2000.df$Tract] + 
+  us2000SP$P008053[Areas2000.df$Tract] + 
+  us2000SP$P008054[Areas2000.df$Tract] + 
+  us2000SP$P008055[Areas2000.df$Tract] + 
+  us2000SP$P008056[Areas2000.df$Tract] + 
+  us2000SP$P008057[Areas2000.df$Tract] + 
+  us2000SP$P008058[Areas2000.df$Tract] + 
+  us2000SP$P008059[Areas2000.df$Tract]
+Areas2000.df$TractFemale2000Population18to44 = us2000SP$P008060[Areas2000.df$Tract] + 
+  us2000SP$P008061[Areas2000.df$Tract] + 
+  us2000SP$P008062[Areas2000.df$Tract] + 
+  us2000SP$P008063[Areas2000.df$Tract] + 
+  us2000SP$P008064[Areas2000.df$Tract] + 
+  us2000SP$P008065[Areas2000.df$Tract] + 
+  us2000SP$P008066[Areas2000.df$Tract] + 
+  us2000SP$P008067[Areas2000.df$Tract] + 
+  us2000SP$P008068[Areas2000.df$Tract]
+Areas2000.df$TractFemale2000Population45to64 = us2000SP$P008069[Areas2000.df$Tract] + 
+  us2000SP$P008070[Areas2000.df$Tract] + 
+  us2000SP$P008071[Areas2000.df$Tract] + 
+  us2000SP$P008072[Areas2000.df$Tract] + 
+  us2000SP$P008073[Areas2000.df$Tract]
+Areas2000.df$TractFemale2000PopulationOver65 = us2000SP$P008074[Areas2000.df$Tract] + 
+  us2000SP$P008075[Areas2000.df$Tract] + 
+  us2000SP$P008076[Areas2000.df$Tract] + 
+  us2000SP$P008077[Areas2000.df$Tract] + 
+  us2000SP$P008078[Areas2000.df$Tract] + 
+  us2000SP$P008079[Areas2000.df$Tract]
+Areas2000.df$TractWhitePopulation2000 = us2000SP$P006002[Areas2000.df$Tract]
+Areas2000.df$TractBlackPopulation2000 = us2000SP$P006003[Areas2000.df$Tract]
+Areas2000.df$TractMedianIncome2000 = us2000SP$P053001[Areas2000.df$Tract]
+Areas2000.df$TractMobileHomes2000 = us2000SP$H030010[Areas2000.df$Tract]
+
+
+df = Areas2000.df %>%
+  mutate(ratio = TornAreaInTract/TractArea,
+         ratio2 = TornAreaInTract/TornArea,
+         PeopleInTornadoPerTract2000 = TractPopulation2000 * ratio,
+         MalesInTornadoPerTract2000 = TractMalePopulation2000 * ratio,
+         MalesUnder17InTornaoPerTract2000 = TractMale2000PopulationUnder17 * ratio,
+         Males18to44InTornaoPerTract2000 = TractMale2000Population18to44 * ratio,
+         Males45to64InTornaoPerTract2000 = TractMale2000Population45to64 * ratio,
+         MalesOver65InTornaoPerTract2000 = TractMale2000PopulationOver65 * ratio,
+         FemalesInTornadoPerTract2000 = TractFemalePopulation2000 * ratio,
+         FemalesUnder17InTornaoPerTract2000 = TractFemale2000PopulationUnder17 * ratio,
+         Females18to44InTornaoPerTract2000 = TractFemale2000Population18to44 * ratio,
+         Females45to64InTornaoPerTract2000 = TractFemale2000Population45to64 * ratio,
+         FemalesOver65InTornaoPerTract2000 = TractFemale2000PopulationOver65 * ratio,
+         WhitePeopleInTornadoPerTract2000 = TractWhitePopulation2000 * ratio,
+         BlackPeopleInTornadoPerTract2000 = TractBlackPopulation2000 * ratio,
+         IncomeInTornadoPerTract2000 = TractMedianIncome2000 * ratio2,
+         MobileHomesInTornadoPerTract2000 = TractMobileHomes2000 * ratio) %>%
+  group_by(Torn) %>%
+  dplyr::summarize(TotalPeople2000 = sum(PeopleInTornadoPerTract2000),
+                   TotalMales2000 = sum(MalesInTornadoPerTract2000),
+                   Total2000MalesUnder17 = sum(MalesUnder17InTornaoPerTract2000),
+                   Total2000Males18to44 = sum(Males18to44InTornaoPerTract2000),
+                   Total2000Males45to64 = sum(Males45to64InTornaoPerTract2000),
+                   Total2000MalesOver65 = sum(MalesOver65InTornaoPerTract2000),
+                   TotalFemales2000 = sum(FemalesInTornadoPerTract2000),
+                   Total2000FemalesUnder17 = sum(FemalesUnder17InTornaoPerTract2000),
+                   Total2000Females18to44 = sum(Females18to44InTornaoPerTract2000),
+                   Total2000Females45to64 = sum(Females45to64InTornaoPerTract2000),
+                   Total2000FemalesOver65 = sum(FemalesOver65InTornaoPerTract2000),
+                   TotalWhitePeople2000 = sum(WhitePeopleInTornadoPerTract2000),
+                   TotalBlackPeople2000 = sum(BlackPeopleInTornadoPerTract2000),
+                   MedianIncome2000 = sum(IncomeInTornadoPerTract2000),
+                   MobileHomes2000 = sum(MobileHomesInTornadoPerTract2000))
+```
+
+Create a new dataframe using the tornadoes in df. Call this TornP2, as it is a SpatialPolygonsDataFrame that includes per tornado information. The median income variable in this dataframe is in 1999 dollars. To convert 1999 dollars to 2015 dollars, multiply by 1.423 in accordance with the Consumer Price Index (CPI-U).
+```{r}
+TornP2 = TornP[df$Torn, ]
+TornP2$TotalPeople2000 = df$TotalPeople2000
+TornP2$TotalMales2000 = df$TotalMales2000
+TornP2$Total2000MalesUnder17 = df$Total2000MalesUnder17
+TornP2$Total2000Males18to44 = df$Total2000Males18to44
+TornP2$Total2000Males45to64 = df$Total2000Males45to64
+TornP2$Total2000MalesOver65 = df$Total2000MalesOver65
+TornP2$TotalFemales2000 = df$TotalFemales2000
+TornP2$Total2000FemalesUnder17 = df$Total2000FemalesUnder17
+TornP2$Total2000Females18to44 = df$Total2000Females18to44
+TornP2$Total2000Females45to64 = df$Total2000Females45to64
+TornP2$Total2000FemalesOver65 = df$Total2000FemalesOver65
+TornP2$TotalWhitePeople2000 = df$TotalWhitePeople2000
+TornP2$TotalBlackPeople2000 = df$TotalBlackPeople2000
+TornP2$MedianIncome2000 = df$MedianIncome2000 * 1.423
+TornP2$MobileHomes2000 = df$MobileHomes2000
+
+df2 = data.frame(TornP2)
+```
+
+Do the same thing for 2010 Census Tracts. This data is from the American Community Survey.
+```{r}
+inter = gIntersects(spT2010, TornP, byid = TRUE)
+ids = which(inter, arr.ind = TRUE)
+
+Areas2010 = list()
+for(i in 1:nrow(ids)){
+    Areas2010[[i]] = gArea(gIntersection(spT2010[ids[i, 2], ], TornP[ids[i, 1], ]))
+    }
+Areas2010.df = data.frame(matrix(unlist(Areas2010), ncol = 1, byrow = TRUE))
+names(Areas2010.df) = "TornAreaInTract"
+Areas2010.df$Tract = ids[, 2]
+Areas2010.df$Torn = ids[, 1]
+```
+
+There are 2,198 tornadoes in Areas2010.df. This is down from 2,199 tornadoes in Areas2000.df, which means that one tornado intersects with 2000 Census tracts, but not 2010 Census tracts. This is because of a boundary issue, where the 2000 Census Tracts included some waterbody, while the 2010 Census Tracts did not.
+```{r}
+AreaTor2010 = gArea(TornP, byid = TRUE)
+AreaTract2010 = gArea(spT2010, byid = TRUE)
+Areas2010.df$TractArea = AreaTract2010[Areas2010.df$Tract]
+Areas2010.df$TornArea = AreaTor2010[Areas2010.df$Torn]
+Areas2010.df$GEOID = spT2010$GEOID[Areas2010.df$Tract]
+Areas2010.df$TractPopulation2010 = us2010SP$B01001_001E[Areas2010.df$Tract]
+Areas2010.df$TractMalePopulation2010 = us2010SP$B01001_002E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationUnder17 = us2010SP$B01001_003E[Areas2010.df$Tract] + us2010SP$B01001_004E[Areas2010.df$Tract] + us2010SP$B01001_005E[Areas2010.df$Tract] + us2010SP$B01001_006E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population18to44 = us2010SP$B01001_007E[Areas2010.df$Tract] + us2010SP$B01001_008E[Areas2010.df$Tract] + us2010SP$B01001_009E[Areas2010.df$Tract] + us2010SP$B01001_010E[Areas2010.df$Tract] + us2010SP$B01001_011E[Areas2010.df$Tract] + us2010SP$B01001_012E[Areas2010.df$Tract] + us2010SP$B01001_013E[Areas2010.df$Tract] + us2010SP$B01001_014E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population45to64 = us2010SP$B01001_015E[Areas2010.df$Tract] + us2010SP$B01001_016E[Areas2010.df$Tract] + us2010SP$B01001_017E[Areas2010.df$Tract] + us2010SP$B01001_018E[Areas2010.df$Tract] + us2010SP$B01001_019E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationOver65 = us2010SP$B01001_020E[Areas2010.df$Tract] + us2010SP$B01001_021E[Areas2010.df$Tract] + us2010SP$B01001_022E[Areas2010.df$Tract] + us2010SP$B01001_023E[Areas2010.df$Tract] + us2010SP$B01001_024E[Areas2010.df$Tract] + us2010SP$B01001_025E[Areas2010.df$Tract]
+Areas2010.df$TractFemalePopulation2010 = us2010SP$B01001_026E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationUnder17 = us2010SP$B01001_027E[Areas2010.df$Tract] + us2010SP$B01001_028E[Areas2010.df$Tract] + us2010SP$B01001_029E[Areas2010.df$Tract] + us2010SP$B01001_030E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population18to44 = us2010SP$B01001_031E[Areas2010.df$Tract] + us2010SP$B01001_032E[Areas2010.df$Tract] + us2010SP$B01001_033E[Areas2010.df$Tract] + us2010SP$B01001_034E[Areas2010.df$Tract] + us2010SP$B01001_035E[Areas2010.df$Tract] + us2010SP$B01001_036E[Areas2010.df$Tract] + us2010SP$B01001_037E[Areas2010.df$Tract] + us2010SP$B01001_038E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population45to64 = us2010SP$B01001_039E[Areas2010.df$Tract] + us2010SP$B01001_040E[Areas2010.df$Tract] + us2010SP$B01001_041E[Areas2010.df$Tract] + us2010SP$B01001_042E[Areas2010.df$Tract] + us2010SP$B01001_043E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationOver65 = us2010SP$B01001_044E[Areas2010.df$Tract] + us2010SP$B01001_045E[Areas2010.df$Tract] + us2010SP$B01001_046E[Areas2010.df$Tract] + us2010SP$B01001_047E[Areas2010.df$Tract] + us2010SP$B01001_048E[Areas2010.df$Tract] + us2010SP$B01001_049E[Areas2010.df$Tract]
+Areas2010.df$TractWhitePopulation2010 = us2010SP$B02001_002E[Areas2010.df$Tract]
+Areas2010.df$TractBlackPopulation2010 = us2010SP$B02001_003E[Areas2010.df$Tract]
+Areas2010.df$TractMedianIncome2010 = us2010SP$B19013_001E[Areas2010.df$Tract]
+Areas2010.df$TractMobileHomes2010 = us2010SP$B25024_010E[Areas2010.df$Tract]
+
+df3 = Areas2010.df %>%
+  mutate(ratio = TornAreaInTract/TractArea,
+         ratio2 = TornAreaInTract/TornArea,
+         PeopleInTornadoPerTract2010 = TractPopulation2010 * ratio,
+         MalesInTornadoPerTract2010 = TractMalePopulation2010 * ratio,
+         MalesUnder17InTornaoPerTract2010 = TractMale2010PopulationUnder17 * ratio,
+         Males18to44InTornaoPerTract2010 = TractMale2010Population18to44 * ratio,
+         Males45to64InTornaoPerTract2010 = TractMale2010Population45to64 * ratio,
+         MalesOver65InTornaoPerTract2010 = TractMale2010PopulationOver65 * ratio,
+         FemalesInTornadoPerTract2010 = TractFemalePopulation2010 * ratio,
+         FemalesUnder17InTornaoPerTract2010 = TractFemale2010PopulationUnder17 * ratio,
+         Females18to44InTornaoPerTract2010 = TractFemale2010Population18to44 * ratio,
+         Females45to64InTornaoPerTract2010 = TractFemale2010Population45to64 * ratio,
+         FemalesOver65InTornaoPerTract2010 = TractFemale2010PopulationOver65 * ratio,
+         WhitePeopleInTornadoPerTract2010 = TractWhitePopulation2010 * ratio,
+         BlackPeopleInTornadoPerTract2010 = TractBlackPopulation2010 * ratio,
+         IncomeInTornadoPerTract2010 = TractMedianIncome2010 * ratio2,
+         MobileHomesInTornadoPerTract2010 = TractMobileHomes2010 * ratio) %>%
+  group_by(Torn) %>%
+  dplyr::summarize(TotalPeople2010 = sum(PeopleInTornadoPerTract2010),
+                   TotalMales2010 = sum(MalesInTornadoPerTract2010),
+                   Total2010MalesUnder17 = sum(MalesUnder17InTornaoPerTract2010),
+                   Total2010Males18to44 = sum(Males18to44InTornaoPerTract2010),
+                   Total2010Males45to64 = sum(Males45to64InTornaoPerTract2010),
+                   Total2010MalesOver65 = sum(MalesOver65InTornaoPerTract2010),
+                   TotalFemales2010 = sum(FemalesInTornadoPerTract2010),
+                   Total2010FemalesUnder17 = sum(FemalesUnder17InTornaoPerTract2010),
+                   Total2010Females18to44 = sum(Females18to44InTornaoPerTract2010),
+                   Total2010Females45to64 = sum(Females45to64InTornaoPerTract2010),
+                   Total2010FemalesOver65 = sum(FemalesOver65InTornaoPerTract2010),
+                   TotalWhitePeople2010 = sum(WhitePeopleInTornadoPerTract2010),
+                   TotalBlackPeople2010 = sum(BlackPeopleInTornadoPerTract2010),
+                   MedianIncome2010 = sum(IncomeInTornadoPerTract2010),
+                   MobileHomes2010 = sum(MobileHomesInTornadoPerTract2010))
+```
+
+To find which tornado has information for the 2000 Census Tracts, but not the 2010 Census Tracts use the %in% function. Then remove the tornado from df2.
+```{r}
+x = data.frame(df$Torn %in% df3$Torn) # Torn 1169 [Row 1161] is not in df3
+df2 = df2[-1161,]
+```
+
+Now that the dataframes (df2 and df3) contain the same number of tornadoes and the same information, merge together. If there is data for the 2000 Census Tracts, but not the 2010 Census tracts, use the 2000 count.
+```{r}
+df2$TotalPeople2010 = df3$TotalPeople2010
+df2$TotalPeople2010[df2$TotalPeople2010 == 0] = df2$TotalPeople2000[df2$TotalPeople2010 == 0]
+
+df2$TotalMales2010 = df3$TotalMales2010
+df2$Total2010MalesUnder17 = df3$Total2010MalesUnder17
+df2$Total2010Males18to44 = df3$Total2010Males18to44
+df2$Total2010Males45to64 = df3$Total2010Males45to64
+df2$Total2010MalesOver65 = df3$Total2010MalesOver65
+
+df2$TotalFemales2010 = df3$TotalFemales2010
+df2$Total2010FemalesUnder17 = df3$Total2010FemalesUnder17
+df2$Total2010Females18to44 = df3$Total2010Females18to44
+df2$Total2010Females45to64 = df3$Total2010Females45to64
+df2$Total2010FemalesOver65 = df3$Total2010FemalesOver65
+
+df2$TotalWhitePeople2010 = df3$TotalWhitePeople2010
+df2$TotalBlackPeople2010 = df3$TotalBlackPeople2010
+  
+df2$MedianIncome2010 = df3$MedianIncome2010
+df2$MedianIncome2010[is.na(df2$MedianIncome2010)] = df2$MedianIncome2000[is.na(df2$MedianIncome2010)]
+
+df2$MobileHomes2010 = df3$MobileHomes2010
+```
+
+Interpolation Function.
+```{r}
+interpolateFun = function(x, y1, y2, data){
+data = data
+interp = numeric()
+for(i in 1:nrow(df3)){
+  interp[i] = approx(x = x, 
+                  y = c(y1[i], y2[i]), 
+                  xout = data$Year[i],
+                  rule = 2)$y
+}
+return(interp)
+}
+
+```
+
+Perform interpolations of each variable to get an estimate of the variable at the year of the tornado. The interpolation function returns a list of 2,198 estimates.
+```{r}
+interpPop = interpolateFun(c(2000, 2010), df2$TotalPeople2000, df2$TotalPeople2010, df2)
+
+interMales = interpolateFun(c(2000, 2010), df2$TotalMales2000, df2$TotalMales2010, df2)
+interMalesUnder17 = interpolateFun(c(2000, 2010), df2$Total2000MalesUnder17, df2$Total2010MalesUnder17, df2)
+interMales18to44 = interpolateFun(c(2000, 2010), df2$Total2000Males18to44, df2$Total2010Males18to44, df2)
+interMales45to64 = interpolateFun(c(2000, 2010), df2$Total2000Males45to64, df2$Total2010Males45to64, df2)
+interMalesOver65 = interpolateFun(c(2000, 2010), df2$Total2000MalesOver65, df2$Total2010MalesOver65, df2)
+
+interFemales = interpolateFun(c(2000, 2010), df2$TotalFemales2000, df2$TotalFemales2010, df2)
+interFemalesUnder17 = interpolateFun(c(2000, 2010), df2$Total2000FemalesUnder17, df2$Total2010FemalesUnder17, df2)
+interFemales18to44 = interpolateFun(c(2000, 2010), df2$Total2000Females18to44, df2$Total2010Females18to44, df2)
+interFemales45to64 = interpolateFun(c(2000, 2010), df2$Total2000Females45to64, df2$Total2010Females45to64, df2)
+interFemalesOver65 = interpolateFun(c(2000, 2010), df2$Total2000FemalesOver65, df2$Total2010FemalesOver65, df2)
+
+interWhites = interpolateFun(c(2000, 2010), df2$TotalWhitePeople2000, df2$TotalWhitePeople2010, df2)
+interBlacks = interpolateFun(c(2000, 2010), df2$TotalBlackPeople2000, df2$TotalBlackPeople2010, df2)
+
+interInc = interpolateFun(c(2000, 2010), df2$MedianIncome2000, df2$MedianIncome2010, df2)
+
+interMobile = interpolateFun(c(2000, 2010), df2$MobileHomes2000, df2$MobileHomes2010, df2)
+
+
+df2$TotalPeople = interpPop
+df2$TotalMales = interMales
+df2$TotalFemales = interFemales
+df2$PeopleUnder17 = interMalesUnder17 + interFemalesUnder17
+df2$People18to44 = interMales18to44 + interFemales18to44
+df2$People45to64 = interMales45to64 + interFemales45to64
+df2$PeopleOver65 = interMalesOver65 + interFemalesOver65
+df2$WhitePeople = interWhites
+df2$BlackPeople = interBlacks
+df2$MedianIncome = interInc
+df2$MobileHomes = interMobile
+```
+
+Create the final data frame and make it into a .csv to be read in another RMD.
+```{r}
+Torn.df = df2 %>%
+  dplyr::select(om, Year, slat, slon, elat, elon, Date, time, DateTime, st, mag, inj, fat, cas, AreaPath, ED, popD, pop, TotalPeople, TotalMales, TotalFemales, PeopleUnder17, People18to44, People45to64, PeopleOver65, WhitePeople, BlackPeople, MedianIncome, MobileHomes) %>%
+  mutate(popD2 = TotalPeople/AreaPath * 10^6)
+
+#write.csv(Torn.df, "SocialCorrelates.csv")
+```
+
+Create a final spatial data frame and turn it into a shapefile.
+```{r}
+TornP3 = TornP[df$Torn,]
+TornP3 = TornP3[-1161,]
+TornP3$TotalPeople = interpPop
+TornP3$TotalMales = interMales
+TornP3$TotalFemales = interFemales
+TornP3$PeopleUnder17 = interMalesUnder17 + interFemalesUnder17
+TornP3$People18to44 = interMales18to44 + interFemales18to44
+TornP3$People45to64 = interMales45to64 + interFemales45to64
+TornP3$PeopleOver65 = interMalesOver65 + interFemalesOver65
+TornP3$WhitePeople = interWhites
+TornP3$BlackPeople = interBlacks
+TornP3$MedianIncome = interInc
+TornP3$MobileHomes = interMobile
+TornP3$popD2 = TornP3$TotalPeople/TornP3$AreaPath * 10^6
+
+#writeOGR(TornP3, ".", "SocialCorrelates", driver="ESRI Shapefile")
+```
+
+Import .shp of the tornado-level estimates.
+```{r}
+TorSC.sfdf = sf::st_read(dsn = "SocialCorrelates", 
+                      layer = "SocialCorrelates", 
+                      stringsAsFactors = FALSE)
+
+TorSC.sfdf$Date_1 = as.Date(TorSC.sfdf$date)
+TorSC.sfdf = rename(TorSC.sfdf, "Date" = "Date_1")
+```
+
+Maps of casualty producing tornadoes
+```{r}
+#download.file("http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_state_20m.zip", destfile = "states.zip")
+#unzip("states.zip")
+
+us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+us_geo = subset(us_geo, !(NAME %in% c("Alaska", "Hawaii", "Puerto Rico")))
+colnames(us_geo)[5] = "st"
+
+us_geo = us_geo %>%
+  dplyr::select("st", "NAME" ,"geometry")
+
+sfdf = TorSC.sfdf
+
+tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf) +
+  tm_polygons(col = "black") +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+```
+
+Idealized model of the dasymetric procedure.
+```{r}
+EF0m = matrix(c(0, 0, 200, 200, 0, 0, 50, 50, 0, 0), 
+              nrow = 5, ncol = 2)
+EF1m = matrix(c(52.9, 52.9, 147.1, 147.1, 52.9, 13.225, 36.775, 36.775, 13.225, 13.225),
+              nrow = 5, ncol = 2)
+EF2m = matrix(c(80, 80, 120, 120, 80, 20, 30, 30, 20, 20), 
+              nrow = 5, ncol = 2)
+EF3m = matrix(c(93.3, 93.3, 106.7, 106.7, 93.3, 23.325, 26.675, 26.675, 23.325, 23.325), 
+              nrow = 5, ncol = 2)
+trackm = matrix(c(-20, 25, 220, 25), nrow = 2, ncol = 2, byrow = TRUE)
+
+theta = -pi/6
+rot = matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)),
+             nrow = 2, ncol = 2, byrow = TRUE)
+EF0r = EF0m %*% rot
+EF1r = EF1m %*% rot
+EF2r = EF2m %*% rot
+EF3r = EF3m %*% rot
+trackr = trackm %*% rot
+
+EF0 = Polygons(list(Polygon(EF0r)), 0)
+EF1 = Polygons(list(Polygon(EF1r)), 1)
+EF2 = Polygons(list(Polygon(EF2r)), 2)
+EF3 = Polygons(list(Polygon(EF3r)), 3)
+spsNRC3 = SpatialPolygons(list(EF0, EF1, EF2, EF3))
+
+spsNRC3A.df = fortify(spsNRC3)
+spsNRC3A.df$EF = paste("EF", spsNRC3A.df$id, sep = "")
+
+box1 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(0, 50, 50, 0, 0))
+box2 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(0, 50, 50, 0, 0))
+box3 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(0, 50, 50, 0, 0))
+box4 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(0, 50, 50, 0, 0))
+box5 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(0, 50, 50, 0, 0))
+box6 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(50, 100, 100, 50, 50))
+box7 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(50, 100, 100, 50, 50))
+box8 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(50, 100, 100, 50, 50))
+box9 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(50, 100, 100, 50, 50))
+box10 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(50, 100, 100, 50, 50))
+box11 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(100, 150, 150, 100, 100))
+box12 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(100, 150, 150, 100, 100))
+box13 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(100, 150, 150, 100, 100))
+box14 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(100, 150, 150, 100, 100))
+box15 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(100, 150, 150, 100, 100))
+
+box.df = rbind(box1, box2, box3, box4, box5, box6, box7, box8, box9, box10, box11, box12, box13, box14, box15)
+box.df$inc = rep(c("< $10,000", "$10,000 - $20,000", "$30,001 - $40,000", "$10,000 - $20,000", "< $10,000", "< $10,000", "$20,001 - $30,000", "> $40,000", "$20,001 - $30,000", "< $10,000", "< $10,000", "$10,000 - $20,000", "$30,001 - $40,000", "$10,000 - $20,000", "< $10,000"), each = 5)
+box.df$id = rep(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), each = 5)
+
+lims = c("< $10,000", "$10,000 - $20,000", "$20,001 - $30,000", "$30,001 - $40,000", "> $40,000")
+brks = c("< $10,000", "$10,000 - $20,000", "$20,001 - $30,000", "$30,001 - $40,000", "> $40,000") 
+vals = c("#edf8e9", "#bae4b3", "#74c476", "#31a354", "#006d2c") 
+
+ggplot(spsNRC3A.df[spsNRC3A.df$EF == "EF0", ], aes(x = long, y = lat)) +
+  scale_x_continuous(limits = c(-50, 200)) +
+  scale_y_continuous(limits = c(0, 150)) +
+  coord_fixed() +
+  geom_polygon(mapping = aes(long, lat, fill = factor(inc), group = id), data = box.df) +
+  geom_polygon(mapping = aes(long, lat, fill = factor(inc), group = id), data = box.df, color = "white", show_guide=FALSE) +
+  geom_polygon(fill = "transparent", color = "black") +
+  scale_fill_manual(name = expression("Household Median Income\n(USD)"), limits = lims, breaks = brks, values = vals) +
+  geom_segment(x = trackr[1, 1], xend = trackr[2, 1], y = trackr[1, 2], yend = trackr[2, 2],
+               arrow = grid::arrow(length = grid::unit(.6, "cm"), type = "closed"), size = 1.0, color = "black") +
+  xlab("") + ylab("") +
+   theme(panel.background = element_blank(),
+        panel.grid.major = element_line(colour = "gray", size = .25, linetype = 'dashed'),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        strip.background = element_blank()) 
+```
+
+### Results
+
+The procedure results in estimates of 12 variables that can be analyzed independently or in combination with the other attributes. 
+```{r}
+Torn.df = read.csv("SocialCorrelates.csv", header = TRUE)
+Torn.df$X = NULL
+
+summary(Torn.df$TotalPeople); summary(Torn.df$popD2)
+
+df = Torn.df %>%
+  arrange(desc(TotalPeople))
+df = df[1:10,] %>%
+  dplyr::select(Date, st, cas, TotalPeople)
+df
+```
+
+For the set of 2,198 tornadoes, the median total population is 39.7 people with an interquartile range between 3.63 and 242 people. The median population density is 17.5 people per square kilometer with an interquartile range between 6.23 and 57.2 people per square kilometer. It is estimated that as many as 116,167 people were in the path of the Detroit, Michigan, EF2 tornado on 2 July 1997 resulting in 90 injuries. Of the top ten tornadoes ranked by total population, only one (1997 Detroit, Michigan tornado) is estimated to have impacted over 100,000 people. The next closest tornado (2013 St. Louis, Missouri tornado) is estimated to have impacted almost 70,000 fewer people at 46,902.
+
+```{r}
+summary(Torn.df$TotalMales); summary(Torn.df$TotalFemales)
+summary(Torn.df$WhitePeople); summary(Torn.df$BlackPeople)
+```
+
+For the same set of tornadoes, the median number of males is 19.7 with an interquartile range between 1.8 and 119. Similarly, the median number of females is 19.9 with and interquartile range between 1.9 and 122. The median white population is 31.4 people with an interquartile range between 2.92 and 189 people, and the median black population is 0.87 people with an interquartile range between 0.02 and 15.5 people. On average, casualty-producing tornadoes have impacted about three times as many whites (421 people) as blacks (155 people).
+
+```{r}
+summary(Torn.df$MedianIncome); summary(Torn.df$MobileHomes)
+df = Torn.df %>%
+  arrange(desc(MobileHomes))
+df = df[1:10,] %>%
+  dplyr::select(Date, st, inj, fat, cas, MobileHomes)
+df
+```
+
+Additionally, the median household median income is \$46,002 with an interquartile range between \$38,734 and \$55,371 and the median number of mobile homes is 2.11 with an interquartile range between .17 and 11.9. It is estimated that as many as 1,014 mobile homes were in the path of the Hackleburg--Phil Campbell, Alabama EF5 tornado on 27 April 2011 resulting in 145 injuries and 72 deaths. Of the top 10 tornadoes ranked by the number of mobile homes, only two (1999 Bridge Creek--Moore, Oklahoma and 2012 Wichita, Kansas tornadoes) occurred in states outside of the Southeast. Five of the top 10 tornadoes ranked by the number of mobile homes occurred in the state of Alabama alone.
+
+### Validation
+
+Our method is validated by comparing results with demographic statistics of fatalities available in the Storm Events database (https://www.ncdc.noaa.gov/stormevents/). The database records all tornado segments from 1950 through 2016. The tornado segments are divided by county and each segment includes both an episode narrative and event narrative. Event fatality data are available within each event and include the type of death (direct or indirect) along with the age, sex, and location (if known) of the victim. No information about injuries is available.
+
+To link the tornado in the SPC database with the associated tornado segments in the Storm Events database, we use information available in both data sources (e.g. state of occurrence, and number of deaths). For example, the 2011 Joplin, Missouri tornado caused 158 direct deaths. To find this tornado in the Storm Events database, we search for Missouri in the State/Area drop down menu. Next, we choose May 22, 2011 as the begin and end date, and tornado as the event type. After sorting by Death/Injury, the Storm Events database shows an event occurring in Jasper County, Missouri that caused 158 deaths. Choosing the hyper-linked location opens the Storm Events database, where information on the number of deaths, as well as the ages and sex of the fatalities exist.
+
+```{r}
+validation.df = data.frame(om = c(296616, 1147, 140, 634, 613600, 266, 133, 1253, 69, 850, 558, 893, 23, 22, 161, 289605, 833, 305268, 504758, 610234, 368708, 914, 877, 783),
+                          date = c("2011-05-22", "1999-05-03", "2010-04-24", "2000-02-13", "2016-02-24", "2006-04-02", "2008-02-05", "2005-11-06", "1996-03-06", "1999-04-09", "2010-06-05", "1998-02-22", "2007-02-02", "2007-02-02", "2008-02-06", "2011-04-25", "1998-04-08", "2011-04-27", "2014-04-27", "2015-12-23", "2012-03-02", "2002-11-10", "1998-04-16", "1998-04-16") ,
+                          fat = c(158, 36, 10, 11, 3, 16, 22, 24, 4, 4, 7, 25, 13, 8, 4, 4, 32, 20, 16, 9, 6, 4, 2, 2),
+                          EstimatedMale = c(74.7, 17.7, 5.1, 6.1, 1.6, 7.8, 11, 11.6, 1.9, 2, 3.5, 12.7, 6, 3.8, 2.1, 2.1, 15.1, 9.9, 8.1, 4.4, 3, 2, 1, 1),
+                          ActualMale = c(73, 15, 4, 2, 3, 9, 14, 11, 2, 3, 4, 13, 7, 3, 2, 3, 13, 10, 9, 4, 2, 3, 1, 2),
+                          EstimatedFemale = c(83.3, 18.3, 4.9, 4.9, 1.4, 8.2, 11, 12.4, 2.1, 2, 3.5, 12.3, 7, 4.2, 1.9, 1.9, 16.9, 10.1, 7.9, 4.6, 3, 2, 1, 1),
+                          ActualFemale = c(85, 21, 6, 9, 0, 7, 8, 13, 2, 1, 3, 12, 6, 5, 2, 1, 19, 10, 7, 5, 4, 1, 1, 0),
+                          EstimatedUnder17 = c(33.9, 9.5, 2.6, 2.5, 0.4, 3.9, 5.4, 6.1, 1.1, 1.2, 1.6, 5.8, 3.3, 1, 0.8, 1, 7.4, 5.1, 4.2, 2.2, 1.5, 1.1, 0.5, 0.5),
+                          ActualUnder17 = c(13, 3, 3, 2, 1, 2, 1, 4, 1, 0, 1, 1, 3, 1, 1, 0, 4, 3, 4, 1, 0, 0, 0, 0),
+                          Estimated18to44 = c(48.9, 14.5, 3.5, 5.2, 1.2, 5.5, 7.5, 8.7, 1.5, 1.3, 2.2, 9.1, 4.1, 1.4, 1.1, 1.4, 11.4, 7.6, 5.6, 3.3, 1.9, 1.5, 0.7, 0.8),
+                          Actual18to44 = c(32, 15, 1, 4, 1, 5, 7, 9, 0, 2, 3, 7, 3, 1, 0, 0, 5, 5, 3, 1, 1, 1, 0, 0),
+                          Estimated45to64 = c(47.3, 8.4, 2.5, 2.2, 0.9, 4.4, 6.1, 6.1, 1, 1.1, 2.2, 6.5, 3.3, 2.4, 1.3, 1.1, 8.3, 5, 4.4, 2.3, 1.8, 0.9, 0.6, 0.5),
+                          Actual45to64 = c(55, 10, 4, 5, 1, 4, 8, 9, 2, 2, 2, 7, 6, 0, 3, 4, 10, 8, 7, 3, 3, 0, 2, 1),
+                          EstimatedOver65 = c(27.9, 3.6, 1.4, 1.1, 0.5, 2.2, 3, 3.1, 0.4, 0.4, 1, 3.6, 2.3, 3.2, 0.8, 0.5, 4.9, 2.3, 1.8, 1.2, 0.8, 0.5, 0.2, 0.2),
+                          ActualOver65 = c(58, 8, 2, 0, 0, 5, 6, 2, 1, 0, 1, 10, 1, 6, 0, 0, 13, 4, 2, 4, 2, 3, 0, 1))
+
+```
+
+Estimated deaths by age and sex from our methodology are compared to observed deaths for two dozen tornadoes.
+
+Begin with sex.
+```{r}
+A = validation.df %>%
+  ggplot(aes(x = ActualMale, y = EstimatedMale)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Male Deaths") +
+  ylab("Estimated Male Deaths") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+B = validation.df %>%
+  ggplot(aes(x = ActualFemale, y = EstimatedFemale)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Female Deaths") +
+  ylab("Estimated Female Deaths") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+```
+
+Plot together.
+```{r}
+source("http://peterhaschke.com/Code/multiplot.R")
+mat = matrix(c(1, 2), nrow = 1, byrow = TRUE)
+A = A + ggtitle("A") + 
+  theme(plot.title=element_text(hjust=0))
+B = B + ggtitle("B") + 
+  theme(plot.title=element_text(hjust=0))
+multiplot(A, B, layout = mat)
+```
+
+```{r}
+cor.test(validation.df$EstimatedMale, validation.df$ActualMale)
+cor.test(validation.df$EstimatedFemale, validation.df$ActualFemale)
+cor.test(validation.df$EstimatedUnder17, validation.df$ActualUnder17)
+cor.test(validation.df$Estimated18to44, validation.df$Actual18to44)
+cor.test(validation.df$Estimated45to64, validation.df$Actual45to64)
+cor.test(validation.df$EstimatedOver65, validation.df$ActualOver65)
+```
+
+The tornadoes were chosen to create a wide range of possible fatality estimates. Of these tornadoes, the average number of deaths is 18.3 with a minimum of 2 and a maximum of 158. The Pearson correlation between observed and estimated male deaths is 0.99 and the correlation between observed and estimated female deaths is 0.99, both indicating a very strong relationship. The Pearson correlation between observed and estimated deaths for people under the age of 17 is 0.93 and the correlation between observed and estimated deaths for people 18 to 44, people 45 to 64, and people over 65 is 0.97, 0.99, and 0.99, respectively.
+
+### Discussion
+
+Having accurate estimates of socioeconomic and demographic variables at the tornado level allows us to infer aggregate demographics. For instance, using the ratio of the white population relative to total population, the number of white casualties per tornado can be estimated. Similarly, using the ratio of the black population relative to total population, the number of black casualties per tornado can be inferred.
+```{r}
+sfdf = TorSC.sfdf %>%
+  mutate(ratioW = WhitPpl/TotlPpl,
+         WhiteCas = cas * ratioW,
+         ratioB = BlckPpl/TotlPpl,
+         BlackCas = cas * ratioB) %>%
+  arrange(desc(BlackCas))
+
+sfdf2 = sfdf[1:10,]
+
+sfdf = sfdf %>%
+  arrange(desc(WhiteCas))
+
+sfdf3 = sfdf[1:10,]
+
+A = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf3) +
+  tm_bubbles("WhiteCas", col = "red", alpha = 0.3, sizes.legend = c(200, 400, 800, 1200), title.size="Estimated White Casualties", scale = 5/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+
+B = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf2) +
+  tm_bubbles("BlackCas", col = "blue", sizes.legend = c(200, 400, 800, 1200), alpha = 0.3, title.size="Estimated Black Casualties", scale = 4/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                    attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+
+A = A + tm_style_white(title="A")
+B = B + tm_style_white(title="B")
+
+tmap_arrange(A, B, ncol = 1)
+```
+
+The median number of white casualties for the set of 2,198 tornadoes is 1.96 people with an interquartile range of 0.97 and 5.67 people. In comparison, the median number of black casualties for the same set of tornadoes is 0.12 people with an interquartile range of 0.01 and 0.62. The average number of white casualties is 9.19 people and the average number of black casualties is 1.88 people. Of the top 10 tornadoes ranked by white casualties, three occurred in the state of Oklahoma, two in the state of Alabama, and one in Arkansas, Kentucky, Missouri, Georgia, and Texas. Of the top 10 tornadoes ranked by black casualties, only one (1997 Detroit, Michigan tornado) occurred in a state outside of the Southeast.
+
+Using the ratio of the young population (under 17) relative to total population, the number of young casualties per tornado can be estimated. Similarly, using the ratio of the elderly population (over 65) relative to total population, the number of elderly casualties per tornado can be estimated.
+```{r}
+sfdf = TorSC.sfdf %>%
+  mutate(ratioU = PplUn17/TotlPpl,
+         YoungCas = cas * ratioU,
+         ratioO = PplOv65/TotlPpl,
+         OldCas = cas * ratioO) %>%
+  arrange(desc(YoungCas))
+
+sfdf2 = sfdf[1:10,]
+
+sfdf = sfdf %>%
+  arrange(desc(OldCas))
+
+sfdf3 = sfdf[1:10,]
+
+A = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf2) +
+  tm_bubbles("YoungCas", col = "red", alpha = 0.3, sizes.legend = c(100, 200, 300, 400), title.size="Estimated Young Casualties", scale = 5/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+
+B = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf3) +
+  tm_bubbles("OldCas", col = "blue", sizes.legend = c(100, 200, 300, 400), alpha = 0.3, title.size="Estimated Elderly Casualties", scale = 4/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                    attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+
+A = A + tm_style_white(title="A")
+B = B + tm_style_white(title="B")
+
+tmap_arrange(A, B, ncol = 1)
+```
+
+The median number of young casualties for the set of 2,198 tornadoes is 0.64 people with an interquartile range of 0.28 and 1.77. In comparison, the median number of elderly casualties is 0.36 with an interquartile range of 0.17 and 0.97. The average number of young casualties is 2.93 and the average number of elderly casualties is 1.61. Of the top 10 tornadoes ranked by young and elderly casualties, only one (1998 Spencer, South Dakota tornado) occurred in a state outside the Great Plains or Southeast.
+
+Having tornado-level aggregated socioeconomic and demographic information, the next step toward understanding tornado casualties is to examine how these factors are related to the number of deaths and injuries. For example, the Pearson correlation between estimated socioeconomic and demographic variables and the number of deaths and injuries are seen below.
+```{r}
+cor(Torn.df$fat, Torn.df$TotalPeople); cor(Torn.df$inj, Torn.df$TotalPeople)
+cor(Torn.df$fat, Torn.df$popD2); cor(Torn.df$inj, Torn.df$popD2) 
+cor(Torn.df$fat, Torn.df$TotalMales); cor(Torn.df$inj, Torn.df$TotalMales)
+cor(Torn.df$fat, Torn.df$TotalFemales); cor(Torn.df$inj, Torn.df$TotalFemales)
+cor(Torn.df$fat, Torn.df$WhitePeople); cor(Torn.df$inj, Torn.df$WhitePeople)
+cor(Torn.df$fat, Torn.df$BlackPeople); cor(Torn.df$inj, Torn.df$BlackPeople)
+cor(Torn.df$fat, Torn.df$MedianIncome); cor(Torn.df$inj, Torn.df$MedianIncome)
+cor(Torn.df$fat, Torn.df$MobileHomes); cor(Torn.df$inj, Torn.df$MobileHomes)
+cor(Torn.df$fat, Torn.df$PeopleUnder17); cor(Torn.df$inj, Torn.df$PeopleUnder17)
+cor(Torn.df$fat, Torn.df$People18to44); cor(Torn.df$inj, Torn.df$People18to44)
+cor(Torn.df$fat, Torn.df$People45to64); cor(Torn.df$inj, Torn.df$People45to64)
+cor(Torn.df$fat, Torn.df$PeopleOver65); cor(Torn.df$inj, Torn.df$PeopleOver65)
+```
+
+The coefficients range between 0.02 and 0.44 for the number of deaths and between $-$0.01 and 0.44 for the number of injuries. A moderate correlation exists between the number of deaths and injuries for total population, number of males, number of females, white population, black population, and the number of mobile homes. While bi-variate correlations limit the ability to meaningfully interpret the effect a specific variable has on the number of deaths and injuries given the influence of omitted intervening variables, they do provide signals for which variables may play a role in statistically explaining the number of deaths and injuries. For example, the relatively high correlation with mobile homes is consistent with previous research, as is the relatively high correlation with race.
+
+How climate change will influence tornado activity, and in turn tornado casualties remains an open and challenging question. Statistically, given a tornado that produces at least one casualty, the casualty rate depends on the number of people in harm's way and on the power of the winds inside the vortex. Using a regression model, Fricker et al. (2017) find that casualties increase by 33\% ($\pm$ 3\%) with a doubling of the tornado energy and that casualties increase by 21\% ($\pm$ 3\%) with a doubling of the number of people affected, on average. Including an interaction term in the regression model provides an even better description of casualties given population and energy. But these findings are only the beginning of the story as socioeconomic and demographic variables likely impact the casualty rate. Having estimates of these variables at the individual tornado level provides an opportunity to build a model to estimate casualty rates from changes in socioeconomic and demographic variables controlling for population and energy.
+
