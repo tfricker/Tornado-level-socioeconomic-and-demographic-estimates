@@ -21,7 +21,7 @@ While previous studies have investigated the impact different factors have had o
 
 Set working directory and load packages.
 ```{r}
-setwd("~/Dropbox/Tyler")
+#setwd("~/Dropbox/Tyler")
 suppressPackageStartupMessages(library("ggplot2"))
 suppressPackageStartupMessages(library("ggmap"))
 suppressPackageStartupMessages(library("ggthemes"))
@@ -48,7 +48,7 @@ suppressPackageStartupMessages(library("raster"))
 suppressPackageStartupMessages(library("MASS"))
 suppressPackageStartupMessages(library("tmap"))
 suppressPackageStartupMessages(library("tmaptools"))
-load(file = "January10.RData")
+#load(file = "January10.RData")
 ```
 
 ### Data and Methods
@@ -57,6 +57,7 @@ Tornado data:
 
 Load the tornado data. Start year in 1995. Remove tornadoes from Hawaii, Alaska, and Puerto Rico. Keep only tornadoes with at least one casualty. Remove tornadoes over water.
 ```{r}
+unzip("tornado.zip")
 Tor.sfdf = sf::st_read(dsn = "torn", 
                       layer = "torn", 
                       stringsAsFactors = FALSE)
