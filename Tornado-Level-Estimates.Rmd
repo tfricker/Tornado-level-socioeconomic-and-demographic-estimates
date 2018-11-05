@@ -822,6 +822,8 @@ A = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_format_Europe(legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
+  tm_scale_bar(position = c("left", "bottom")) +
+  tm_compass(position = c("left", "bottom")) +
   tm_layout(frame = FALSE)
 
 B = tm_shape(us_geo, projection ="+init=epsg:2163") +
