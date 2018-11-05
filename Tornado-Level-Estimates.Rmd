@@ -1,5 +1,7 @@
 ---
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 Tornado-level estimates of socioeconomic and demographic variables: 1995--2016
@@ -588,10 +590,12 @@ tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_polygons(col = "black") +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
-  tm_format_Europe(legend.position = c("left", "bottom"),
+  tm_format('World', legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
-  tm_layout(frame = FALSE)
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
 ```
 
 Idealized model of the dasymetric procedure.
@@ -819,12 +823,13 @@ A = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_bubbles("WhiteCas", col = "red", alpha = 0.3, sizes.legend = c(200, 400, 800, 1200), title.size="Estimated White Casualties", scale = 5/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
-  tm_format_Europe(legend.position = c("left", "bottom"),
+  tm_style('white', title="A") +
+  tm_format('World', legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
-  tm_scale_bar(position = c("left", "bottom")) +
-  tm_compass(position = c("left", "bottom")) +
-  tm_layout(frame = FALSE)
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
 
 B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
@@ -832,13 +837,12 @@ B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_bubbles("BlackCas", col = "blue", sizes.legend = c(200, 400, 800, 1200), alpha = 0.3, title.size="Estimated Black Casualties", scale = 4/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
-  tm_format_Europe(legend.position = c("left", "bottom"),
+  tm_style('white', title="B") +
+  tm_format('World', legend.position = c("left", "bottom"),
                     attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
-  tm_layout(frame = FALSE)
-
-A = A + tm_style_white(title="A")
-B = B + tm_style_white(title="B")
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
 
 tmap_arrange(A, B, ncol = 1)
 ```
@@ -867,10 +871,13 @@ A = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_bubbles("YoungCas", col = "red", alpha = 0.3, sizes.legend = c(100, 200, 300, 400), title.size="Estimated Young Casualties", scale = 5/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
-  tm_format_Europe(legend.position = c("left", "bottom"),
+  tm_style('white', title="A") +
+  tm_format('World', legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
-  tm_layout(frame = FALSE)
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
 
 B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
@@ -878,13 +885,12 @@ B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_bubbles("OldCas", col = "blue", sizes.legend = c(100, 200, 300, 400), alpha = 0.3, title.size="Estimated Elderly Casualties", scale = 4/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
-  tm_format_Europe(legend.position = c("left", "bottom"),
+  tm_style('white', title="B") +
+  tm_format('World', legend.position = c("left", "bottom"),
                     attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
-  tm_layout(frame = FALSE)
-
-A = A + tm_style_white(title="A")
-B = B + tm_style_white(title="B")
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
 
 tmap_arrange(A, B, ncol = 1)
 ```
