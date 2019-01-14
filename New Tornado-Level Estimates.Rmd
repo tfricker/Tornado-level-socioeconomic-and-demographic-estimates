@@ -1,0 +1,123 @@
+---
+title: "Tornado-Level Estimates using Areal"
+author: "Tyler Fricker"
+date: "1/14/2019"
+output: html_document
+---
+
+Set working directory and load packages.
+```{r}
+library(tidyverse)
+library(lubridate)
+library(sf)
+library(tmap)
+library(USAboundaries)
+library(rgeos)
+```
+
+### Data and Methods
+
+Tornado data:
+
+Download the tornado data from the Storm Prediction Center (SPC) http://www.spc.noaa.gov/gis/svrgis/ and load the shapefile into R.
+```{r}
+download.file(url = "http://www.spc.noaa.gov/gis/svrgis/zipped/1950-2017-torn-aspath.zip",
+              destfile = "tornado2017.zip")
+unzip("tornado2017.zip")
+Torn.sf <- read_sf(dsn = "1950-2017-torn-aspath")
+```
+
+Remove tornadoes occurring in Hawaii, Alaska, and Puerto Rico and those occurring before 1994. That year marks the beginning of comprehensive WSR-88D radar coverage. For missing EF ratings use the modification rules (if/else) defined here: https://www.spc.noaa.gov/wcm/OneTor_F-scale-modifications.pdf
+```{r}
+Torn.sf <- Torn.sf %>%
+  filter(yr >= 1995,
+         !st %in% c("AK", "PR", "HI")) %>%
+  mutate(mag = ifelse(mag == -9 & len <= 5, 0, mag),
+         mag = ifelse(mag == -9 & len > 5, 1, mag))
+```
+
+Add a data/time column also add columns for path length, width, and area in metric units. Leave the time zone as native CDT.
+```{r}
+Torn.sf <- Torn.sf %>%
+  mutate(dy = format(as.Date(date, format="%Y-%m-%d"), "%d"),
+         DateTime = as.POSIXct(paste(yr, mo, dy, time), format = "%Y%m%d%H:%M:%S"),
+         Hour = hour(DateTime),
+         Year = year(DateTime),
+         Length = len * 1609.34,
+         Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
+         Width = wid * .9144,
+         Width = ifelse(Width == 0, min(Width[Width > 0]), Width), #takes care of zero width
+         Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
+         cas = inj + fat,
+         AreaPath = Length * Width,
+         Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
+         filter(cas > 0) %>%
+  sf::st_sf()
+max(Torn.sf$yr)
+```
+
+Add energy dissipation per tornado.
+```{r}
+perc <- c(1, 0, 0, 0, 0, 0, 
+          .772, .228, 0, 0, 0, 0,
+          .616, .268, .115, 0, 0, 0,
+          .529, .271, .133, .067, 0, 0,
+          .543, .238, .131, .056, .032, 0,
+          .538, .223, .119, .07, .033, .017)
+percM <- matrix(perc, ncol = 6, byrow = TRUE)
+threshW <- c(29.06, 38.45, 49.62, 60.8, 74.21, 89.41)
+midptW <- c(diff(threshW)/2 + threshW[-length(threshW)], threshW[length(threshW)] + 7.5)
+ef <- Torn.sf$mag + 1
+EW3 <- numeric()
+for(i in 1:length(ef)) EW3[i] = midptW^3 %*% percM[ef[i], ]
+Torn.sf <- Torn.sf %>%
+  mutate(ED = EW3 * AreaPath)
+```
+
+Add tornado paths by buffering tornado tracks by associated widths. Need to account for tornadoes without a path (same latitude and longitude).
+
+```{r}
+line <- Torn.sf %>%
+  st_as_sf(coords = c("slon", "elon", "slat", "elat"), crs = 4326) %>%
+  summarise(geometry = st_combine(geometry)) %>%
+  st_cast("LINESTRING")
+```
+
+```{r}
+
+TornL = as(Torn.sf, "Spatial")
+TornP = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "FLAT")
+```
+
+
+
+Plot casualty-producing tornadoes.
+```{r}
+sts <- state.name[!state.name %in% c("Alaska", "Hawaii")]
+stateBorders <- us_states(states = sts)
+
+tm_shape(stateBorders, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_fill(col = "grey94") +
+  tm_shape(Torn.sf$geometry) +
+  tm_polygons(col = "black")
+  tm_bubbles("Diff", col = "#fd8d3c", sizes.legend = c(50, 100, 500, 1000, 1500), alpha = 0.9, title.size="Underprediction", scale = 2.5) + 
+  tm_shape(stateBorders) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format('World', legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                  legend.frame = FALSE) +
+  #tm_format_Europe(legend.position = c("left", "bottom"),
+  #                 attr.position = c("left", "bottom"),
+  #                 legend.frame = TRUE) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  #tm_compass(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+```
+
+
+
+
+
+
+
