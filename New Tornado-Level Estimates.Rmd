@@ -3,6 +3,8 @@ title: "Tornado-Level Estimates using Areal"
 author: "Tyler Fricker"
 date: "1/14/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 Set working directory and load packages.
@@ -24,7 +26,8 @@ Download the tornado data from the Storm Prediction Center (SPC) http://www.spc.
 download.file(url = "http://www.spc.noaa.gov/gis/svrgis/zipped/1950-2017-torn-aspath.zip",
               destfile = "tornado2017.zip")
 unzip("tornado2017.zip")
-Torn.sf <- read_sf(dsn = "1950-2017-torn-aspath")
+Torn.sf <- read_sf(dsn = "1950-2017-torn-aspath",
+                   stringsAsFactors = FALSE)
 ```
 
 Remove tornadoes occurring in Hawaii, Alaska, and Puerto Rico and those occurring before 1994. That year marks the beginning of comprehensive WSR-88D radar coverage. For missing EF ratings use the modification rules (if/else) defined here: https://www.spc.noaa.gov/wcm/OneTor_F-scale-modifications.pdf
@@ -75,21 +78,26 @@ Torn.sf <- Torn.sf %>%
 ```
 
 Add tornado paths by buffering tornado tracks by associated widths. Need to account for tornadoes without a path (same latitude and longitude).
-
 ```{r}
-line <- Torn.sf %>%
-  st_as_sf(coords = c("slon", "elon", "slat", "elat"), crs = 4326) %>%
-  summarise(geometry = st_combine(geometry)) %>%
-  st_cast("LINESTRING")
+begin.coord <- data.frame(lon=Torn.sf$slon, lat=Torn.sf$slat)
+end.coord <- data.frame(lon=Torn.sf$elon, lat=Torn.sf$elat)
+
+l_sf <- vector("list", nrow(Torn.sf))
+for (i in seq_along(l_sf)){
+  l_sf[[i]] <- st_linestring(as.matrix(rbind(begin.coord[i, ], end.coord[i,])))
+}
+# Create simple feature geometry list column
+l_sfc <- st_sfc(l_sf, crs = "+proj=longlat +datum=WGS84")
+# Put new bounding boxes into the geometry column in the sf database and transform the simple features to new projection
+Torn.sf$geometry <- l_sfc
+st_transform(Torn.sf, crs = "+proj=longlat +datum=WGS84")
 ```
 
 ```{r}
-
 TornL = as(Torn.sf, "Spatial")
+TornL = spTransform(TornL, CRS("+init=epsg:2163"))
 TornP = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "FLAT")
 ```
-
-
 
 Plot casualty-producing tornadoes.
 ```{r}
@@ -99,11 +107,8 @@ stateBorders <- us_states(states = sts)
 tm_shape(stateBorders, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_fill(col = "grey94") +
-  tm_shape(Torn.sf$geometry) +
-  tm_polygons(col = "black")
-  tm_bubbles("Diff", col = "#fd8d3c", sizes.legend = c(50, 100, 500, 1000, 1500), alpha = 0.9, title.size="Underprediction", scale = 2.5) + 
-  tm_shape(stateBorders) + 
-  tm_borders(col = "grey", alpha = 0.3) +
+  tm_shape(TornP) +
+  tm_polygons(col = "black") +
   tm_format('World', legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                   legend.frame = FALSE) +
@@ -114,9 +119,6 @@ tm_shape(stateBorders, projection ="+init=epsg:2163") +
   #tm_compass(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 ```
-
-
-
 
 
 
