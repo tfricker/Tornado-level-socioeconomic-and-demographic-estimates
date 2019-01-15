@@ -100,7 +100,7 @@ Torn.sf <- Torn.sf %>%
 Add tornado paths by buffering tornado tracks by associated widths.
 ```{r}
 st_transform(Torn.sf, crs = "+init=epsg:2163")
-x <- st_buffer(Torn.sf, Torn.sf$Width/2, 4)
+x <- st_polygonize(Torn.sf)
 ```
 
 
