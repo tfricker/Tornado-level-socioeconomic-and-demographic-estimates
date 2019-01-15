@@ -43,10 +43,11 @@ any(is.na(st_dimension(TornL.sf)))
 any(is.na(st_dimension(TornP.sf)))
 ```
 
-Try merging the two data sets
+Try merging the two data sets.
 ```{r}
-#Torn.sf <-cbind(TornL.sf, TornP.sf$geometry)
 Torn.sf <- TornL.sf
+eg <- which(st_is_empty(Torn.sf))
+Torn.sf$geometry[eg] <- TornP.sf$geometry[eg]
 ```
 
 Remove tornadoes occurring in Hawaii, Alaska, and Puerto Rico and those occurring before 1994. That year marks the beginning of comprehensive WSR-88D radar coverage. For missing EF ratings use the modification rules (if/else) defined here: https://www.spc.noaa.gov/wcm/OneTor_F-scale-modifications.pdf
@@ -95,6 +96,15 @@ for(i in 1:length(ef)) EW3[i] = midptW^3 %*% percM[ef[i], ]
 Torn.sf <- Torn.sf %>%
   mutate(ED = EW3 * AreaPath)
 ```
+
+Add tornado paths by buffering tornado tracks by associated widths.
+```{r}
+st_transform(Torn.sf, crs = "+init=epsg:2163")
+x <- st_buffer(Torn.sf, Torn.sf$Width/2, 4)
+```
+
+
+
 
 Add tornado paths by buffering tornado tracks by associated widths. Need to account for tornadoes without a path (same latitude and longitude).
 ```{r}
