@@ -15,6 +15,7 @@ library(sf)
 library(tmap)
 library(USAboundaries)
 library(rgeos)
+library(rgdal)
 library(areal)
 library(tidycensus)
 ```
@@ -108,15 +109,22 @@ for (i in seq_along(l_sf)){
 l_sfc <- st_sfc(l_sf, crs = "+proj=longlat +datum=WGS84")
 # Put new bounding boxes into the geometry column in the sf database and transform the simple features to new projection
 Torn.sf$geometry <- l_sfc
-st_transform(Torn.sf, crs = "+proj=longlat +datum=WGS84")
+st_transform(Torn.sf, crs = "+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0")
 ```
 
 ```{r}
-TornL = as(Torn.sf, "Spatial")
-TornL = spTransform(TornL, CRS("+init=epsg:2163"))
-TornPo = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "FLAT")
-TornPo.sf <- st_as_sf(TornPo)
+TornSLine = as(Torn.sf, "Spatial")
+TornSLine = spTransform(TornSLine, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"))
+TornSPoly = gBuffer(TornSLine, byid = TRUE, width = TornSLine$Width/2, capStyle = "SQUARE")
+TornSPoly.sf <- st_as_sf(TornSPoly)
 ```
+
+Calculate the error in area between the estimated paths (AreaPath variable) and the buffered tornado tracks (tornado paths).
+```{r}
+((sum(Torn.sf$AreaPath) - gArea(TornSPoly))/sum(Torn.sf$AreaPath)) * 100
+```
+
+The error is less than 1/10 a percent. The buffer method works.
 
 Plot casualty-producing tornadoes.
 ```{r}
@@ -126,7 +134,7 @@ stateBorders <- us_states(states = sts)
 tm_shape(stateBorders, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_fill(col = "grey94") +
-  tm_shape(TornPo) +
+  tm_shape(TornSPoly) +
   tm_polygons(col = "black") +
   tm_format('World', legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
