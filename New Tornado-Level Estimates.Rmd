@@ -98,13 +98,94 @@ Torn.sf <- Torn.sf %>%
 ```
 
 Add tornado paths by buffering tornado tracks by associated widths.
+
+To perform geocomputions we need to set coordinate reference system. Here it is geographic. We transform the geographic coordinate reference system to a specific Lambert conic conformal projection.
 ```{r}
-st_transform(Torn.sf, crs = "+init=epsg:2163")
-x <- st_polygonize(Torn.sf)
+Torn.sf <- st_transform(Torn.sf, 
+                     crs = "+proj=lcc +lat_1=60 +lat_2=30 +lon_0=-90 +units=m")
 ```
 
+Buffer the geometries.
+```{r}
+TornB.sf <- st_buffer(Torn.sf, 
+                   dist = Torn.sf$Width/2,
+                   endCapStyle = 'SQUARE')
+```
 
+Calculate the error in area between the estimated paths (AreaPath variable) and the buffered tornado tracks (tornado paths).
+```{r}
+((sum(TornB.sf$AreaPath) - sum(as.vector(st_area(TornB.sf))))/sum(Torn.sf$AreaPath)) * 100
+```
 
+Percent error is between 1.8% (square end caps) and 2.3% (round end caps).
+
+Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
+
+Subset all Ohio tornadoes
+```{r}
+TornOH.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(st == "OH")
+```
+
+Socioeconomic/Demographic data:
+
+Load API and variables from ACS. Here we use the 2000 Census summary file 3, and 2010 ACS 5-year estimates.
+```{r}
+census_api_key("2814de123d5d0461a3347a42849d25106688daa8", install = TRUE, overwrite = TRUE)
+v00 = load_variables(2000, "sf3", cache = FALSE)
+v10 = load_variables(2010, "acs5", cache = FALSE)
+v15 = load_variables(2015, "acs5", cache = FALSE)
+```
+
+```{r}
+OH2010.sf <- get_acs(state = "OH",
+          geography = "tract", 
+          variables = "B01001_001E",
+          year = 2012,
+          output = "wide",
+          geometry = TRUE)
+
+OH2010.sf <- st_transform(OH2010.sf, crs = st_crs(TornB.sf))
+```
+
+Try areal weighted interpolation
+
+The cookie cutters are the simple feature _polygons_ defining the boundaries we want values interpolated to. This is defined as the target object and it is the first argument in the `aw_interpolate()` function. We need to identify each cookie cutter with a unique target id (`tid`).
+
+The dough is the underlying simple feature _variable_ that we want interpolated. It is defined in a source simple feature data frame (`source =`). Each feature must have a unique id (`sid`). The variable is specified in the `extensive =` argument.
+
+Here the cookie cutters are the damage path POLYGONS and the county-level population estimate is the dough.
+```{r}
+out <- aw_interpolate(TornOH.sf, 
+               tid = "om", 
+               source = OH2010.sf, 
+               sid = "GEOID", 
+               extensive = "B01001_001E",
+               weight = "total", 
+               output = "sf")
+```
+
+Compare this estimate to our previous estimates
+
+Import `SocialCorrelates.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
+```{r}
+unzip("SocialCorrelates.zip")
+TornSC.sf <- st_read(dsn = "SocialCorrelates", 
+                    layer = "SocialCorrelates", 
+                    stringsAsFactors = FALSE) %>%
+  mutate(Date = as.Date(date),
+         hr = hour(DateTim))
+
+TornSCOH.sf <- TornSC.sf %>%
+  filter(st == "OH")
+
+((sum(TornSCOH.sf$TotlPpl) - sum(out$B01001_001E[-c(2,31,32)]))/sum(TornSCOH.sf$TotlPpl)) * 100
+
+cor.test(TornSCOH.sf$TotlPpl,out$B01001_001E[-c(2,31,32)])
+```
+
+### OLD CODE
 
 Add tornado paths by buffering tornado tracks by associated widths. Need to account for tornadoes without a path (same latitude and longitude).
 ```{r}
@@ -155,44 +236,6 @@ tm_shape(stateBorders, projection ="+init=epsg:2163") +
   tm_scale_bar(position = c("right", "bottom")) +
   #tm_compass(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
-```
-
-Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
-
-Subset all Ohio tornadoes
-```{r}
-TornOH.sf <- TornPo.sf %>%
-  filter(st == "OH")
-TornOH.sf$TotalPop = NA
-TornOH.sf$ID = 1:nrow(TornOH.sf)
-```
-
-Socioeconomic/Demographic data:
-
-Load API and variables from ACS. Here we use the 2000 Census summary file 3, and 2010 ACS 5-year estimates.
-```{r}
-census_api_key("2814de123d5d0461a3347a42849d25106688daa8", install = TRUE, overwrite = TRUE)
-v00 = load_variables(2000, "sf3", cache = FALSE)
-v10 = load_variables(2010, "acs5", cache = FALSE)
-v15 = load_variables(2015, "acs5", cache = FALSE)
-```
-
-```{r}
-OH2010.sfdf <- get_acs(state = "OH",
-          geography = "tract", 
-          variables = "B01003_001E",
-          year = 2012,
-          output = "wide",
-          geometry = TRUE)
-
-st_transform(OH2010.sfdf, crs = proj4string(TornL))
-```
-
-Try areal weighted interpolation
-```{r}
-ar_validate(OH2010.sfdf, TornOH.sf, varList = "B01003_001E", method = "aw", verbose = FALSE)
-
-aw_interpolate(TornOH.sf, tid = ID, source = OH2010.sfdf, sid = GEOID, weight = "sum", output = "sf", extensive = "B01003_001E")
 ```
 
 Plot casualty-producing tornadoes in Ohio over census tracts.
