@@ -43,7 +43,7 @@ any(is.na(st_dimension(TornL.sf)))
 any(is.na(st_dimension(TornP.sf)))
 ```
 
-Try merging the two data sets.
+Merge the two data sets. Insert point geometries where there are missing linestring geometries.
 ```{r}
 Torn.sf <- TornL.sf
 eg <- which(st_is_empty(Torn.sf))
