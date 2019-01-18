@@ -185,6 +185,60 @@ TornSCOH.sf <- TornSC.sf %>%
 cor.test(TornSCOH.sf$TotlPpl,out$B01001_001E[-c(2,31,32)])
 ```
 
+Subset all 2016 tornadoes.
+```{r}
+Torn2016.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2016)
+```
+
+Get Census tracts for all contiguous U.S. states
+```{r}
+us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+us2016.sf = reduce(map(us, function(x) {
+  get_acs(state = x,
+          geography = "tract", 
+          variables = ("B01001_001E"),
+          endyear = 2016,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2016.sf <- st_transform(us2016.sf, crs = st_crs(Torn2016.sf))
+```
+
+```{r}
+out <- aw_interpolate(Torn2016.sf, 
+               tid = "om", 
+               source = us2016.sf, 
+               sid = "GEOID", 
+               extensive = "B01001_001E",
+               weight = "total", 
+               output = "sf")
+```
+
+Compare with previous estimates
+```{r}
+TornSC2016.sf <- TornSC.sf %>%
+  filter(Year == 2016)
+
+# Percent error
+((sum(TornSC2016.sf$TotlPpl) - sum(out$B01001_001E))/sum(TornSC2016.sf$TotlPpl)) * 100
+
+#Pearson Correlation
+cor.test(TornSC2016.sf$TotlPpl, out$B01001_001E)
+
+# RMSE
+Diffpop = sum(TornSC2016.sf$TotlPpl) - sum(out$B01001_001E)
+RMSEpop = sqrt((abs(Diffpop)^2)/58)
+```
+
+
+
+
 ### OLD CODE
 
 Add tornado paths by buffering tornado tracks by associated widths. Need to account for tornadoes without a path (same latitude and longitude).
