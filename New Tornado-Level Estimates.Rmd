@@ -189,7 +189,7 @@ Subset all 2016 tornadoes.
 ```{r}
 Torn2016.sf <- TornB.sf %>%
   mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year == 2016)
+  filter(Year >= 1995 & Year <= 2016)
 ```
 
 Get Census tracts for all contiguous U.S. states
@@ -200,7 +200,7 @@ us2016.sf = reduce(map(us, function(x) {
   get_acs(state = x,
           geography = "tract", 
           variables = ("B01001_001E"),
-          endyear = 2016,
+          year = 2012,
           output = "wide",
           geometry = TRUE)
 }),
@@ -212,7 +212,7 @@ us2016.sf <- st_transform(us2016.sf, crs = st_crs(Torn2016.sf))
 
 ```{r}
 out <- aw_interpolate(Torn2016.sf, 
-               tid = "om", 
+               tid = "ID", 
                source = us2016.sf, 
                sid = "GEOID", 
                extensive = "B01001_001E",
@@ -222,14 +222,14 @@ out <- aw_interpolate(Torn2016.sf,
 
 Compare with previous estimates
 ```{r}
-TornSC2016.sf <- TornSC.sf %>%
-  filter(Year == 2016)
+#TornSC2016.sf <- TornSC.sf %>%
+#  filter(Year == 2016)
 
 # Percent error
-((sum(TornSC2016.sf$TotlPpl) - sum(out$B01001_001E))/sum(TornSC2016.sf$TotlPpl)) * 100
+((sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(189, 293, 465, 474, 1169, 2005, 2187, 2188, 2205, 2206, 2208)]))/sum(TornSC.sf$TotlPpl)) * 100
 
 #Pearson Correlation
-cor.test(TornSC2016.sf$TotlPpl, out$B01001_001E)
+cor.test(TornSC.sf$TotlPpl, out$B01001_001E[-c(189, 293, 465, 474, 1169, 2005, 2187, 2188, 2205, 2206, 2208)])
 
 # RMSE
 Diffpop = sum(TornSC2016.sf$TotlPpl) - sum(out$B01001_001E)
