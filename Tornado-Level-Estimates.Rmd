@@ -68,8 +68,10 @@ Tor.sfdf = Tor.sfdf %>%
          DateTime = as.POSIXct(paste(date, time), format = "%Y-%m-%d %H:%M:%S"),
          Year = yr,
          Length = len * 1609.34,
+         #Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
          Width = wid * .9144,
          Width = ifelse(Width == 0, min(Width[Width > 0]), Width), #takes care of zero width tornadoes
+        #Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
          cas = inj + fat,
          AreaPath = Length * Width,
          AreaVortex = pi * (Width/2)^2,

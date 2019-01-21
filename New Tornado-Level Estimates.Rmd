@@ -67,10 +67,10 @@ Torn.sf <- Torn.sf %>%
          Hour = hour(DateTime),
          Year = year(DateTime),
          Length = len * 1609.34,
-         Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
+         #Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
          Width = wid * .9144,
          Width = ifelse(Width == 0, min(Width[Width > 0]), Width), #takes care of zero width
-         Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
+         #Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
          cas = inj + fat,
          AreaPath = Length * Width,
          Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
@@ -109,7 +109,7 @@ Buffer the geometries.
 ```{r}
 TornB.sf <- st_buffer(Torn.sf, 
                    dist = Torn.sf$Width/2,
-                   endCapStyle = 'SQUARE')
+                   endCapStyle = 'ROUND')
 ```
 
 Calculate the error in area between the estimated paths (AreaPath variable) and the buffered tornado tracks (tornado paths).
@@ -170,9 +170,9 @@ Compare this estimate to our previous estimates
 
 Import `SocialCorrelates.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
 ```{r}
-unzip("SocialCorrelates.zip")
-TornSC.sf <- st_read(dsn = "SocialCorrelates", 
-                    layer = "SocialCorrelates", 
+#unzip("SocialCorrelates.zip")
+TornSC.sf <- st_read(dsn = "SocialCorrelatesRound", 
+                    layer = "SocialCorrelatesRound", 
                     stringsAsFactors = FALSE) %>%
   mutate(Date = as.Date(date),
          hr = hour(DateTim)) %>%
@@ -186,7 +186,7 @@ TornSCOH.sf <- TornSC.sf %>%
 cor.test(TornSCOH.sf$TotlPpl,out$B01001_001E[-c(2,31,32)])
 ```
 
-Subset all 2016 tornadoes.
+Subset all 2010--2016 tornadoes.
 ```{r}
 Torn2016.sf <- TornB.sf %>%
   mutate(ID = 1:nrow(TornB.sf)) %>%
@@ -201,7 +201,7 @@ us2016.sf = reduce(map(us, function(x) {
   get_acs(state = x,
           geography = "tract", 
           variables = ("B01001_001E"),
-          year = 2012,
+          year = 2010,
           output = "wide",
           geometry = TRUE)
 }),
