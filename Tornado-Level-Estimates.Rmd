@@ -116,6 +116,7 @@ Population data are obtained from the Gridded Population of the World, version f
 
 Load the population raster(s) and crop to defined extent. Use the `extract` function to obtain the population density. The `projectRaster` and `extract` functions take about 10 minutes per raster. Group years by mid-year of the census year. Assign the population density using the first decennial estimate then successively replace with later estimates by grouped years.
 ```{r}
+#TornP = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "ROUND")
 TornP = gBuffer(TornL, byid = TRUE, width = TornL$Width/2, capStyle = "FLAT")
 PopD2000 = raster("gpw-v4-population-density_2000.tif")
 PopD2010 = raster("gpw-v4-population-density_2010.tif")
@@ -224,7 +225,7 @@ Areas2000.df$Tract = ids[, 2]
 Areas2000.df$Torn = ids[, 1]
 ```
 
-There are 2,199 tornadoes in Areas200.df. This is down from 2,208 tornadoes, which means that 9 of the tornadoes do not intersect with Census tracts. This is because of boundary issues. For example, a tornado is geolocated in the dataset as occurring over water.
+There are 2,199 tornadoes in Areas2000.df. This is down from 2,208 tornadoes, which means that 9 of the tornadoes do not intersect with Census tracts. This is because of boundary issues. For example, a tornado is geolocated in the dataset as occurring over water.
 
 Add tract and torndo area to the dataframe, as well as the GEOID, total number of people in each tract, total number of males and females in each tract, total number of people in each age group in each tract, and total number of black and white people in each tract.
 ```{r}
