@@ -67,10 +67,10 @@ Torn.sf <- Torn.sf %>%
          Hour = hour(DateTime),
          Year = year(DateTime),
          Length = len * 1609.34,
-         #Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
+         Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
          Width = wid * .9144,
          Width = ifelse(Width == 0, min(Width[Width > 0]), Width), #takes care of zero width
-         #Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
+         Width = ifelse(Year >= 1995, Width * pi/4, Width), #takes care of change: avg to max
          cas = inj + fat,
          AreaPath = Length * Width,
          Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
@@ -121,11 +121,18 @@ Percent error is between 1.8% (square end caps) and 2.3% (round end caps).
 
 Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
 
-Subset all Ohio tornadoes
+Subset all 2010--2016 tornadoes.
 ```{r}
-TornOH.sf <- TornB.sf %>%
+Torn2016.sf <- TornB.sf %>%
   mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(st == "OH")
+  filter(Year >= 2010 & Year <= 2016)
+```
+
+Subset only 2010 tornadoes.
+```{r}
+Torn2010.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2010)
 ```
 
 Socioeconomic/Demographic data:
@@ -134,19 +141,59 @@ Load API and variables from ACS. Here we use the 2000 Census summary file 3, and
 ```{r}
 census_api_key("2814de123d5d0461a3347a42849d25106688daa8", install = TRUE, overwrite = TRUE)
 v00 = load_variables(2000, "sf3", cache = FALSE)
-v10 = load_variables(2010, "acs5", cache = FALSE)
-v15 = load_variables(2015, "acs5", cache = FALSE)
+v10 = load_variables(2015, "acs5", cache = FALSE)
+v90 = load_variables(1990, "sf3", cache = FALSE)
 ```
 
+Get Census tracts for all contiguous U.S. states. Begin with 2010 tract-level data.
 ```{r}
-OH2010.sf <- get_acs(state = "OH",
+us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+us2010.sf = reduce(map(us, function(x) {
+  get_acs(state = x,
           geography = "tract", 
-          variables = "B01001_001E",
+          variables = ("B01001_001E"),
           year = 2012,
           output = "wide",
-          geometry = TRUE)
+          geometry = TRUE,
+          key = "2814de123d5d0461a3347a42849d25106688daa8")
+}),
+rbind
+)
 
-OH2010.sf <- st_transform(OH2010.sf, crs = st_crs(TornB.sf))
+us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
+```
+
+Then collect 2000 Census tract-level data.
+```{r}
+us2000.sf = reduce(map(us, function(x) {
+  get_decennial(state = x,
+          geography = "tract", 
+          variables = ("P001001"),
+          year = 2000,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2000.sf <- st_transform(us2000.sf, crs = st_crs(Torn2010.sf))
+```
+
+Then collect 1990 Census tract-level data.
+```{r}
+us1990.sf = reduce(map(us, function(x) {
+  get_decennial(state = x,
+          geography = "county", 
+          variables = ("P0010001"),
+          year = 1990,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us1990.sf <- st_transform(us1990.sf, crs = st_crs(Torn2010.sf))
 ```
 
 Try areal weighted interpolation
@@ -157,9 +204,9 @@ The dough is the underlying simple feature _variable_ that we want interpolated.
 
 Here the cookie cutters are the damage path POLYGONS and the county-level population estimate is the dough.
 ```{r}
-out <- aw_interpolate(TornOH.sf, 
-               tid = "om", 
-               source = OH2010.sf, 
+out <- aw_interpolate(Torn2016.sf, 
+               tid = "ID", 
+               source = us2010.sf, 
                sid = "GEOID", 
                extensive = "B01001_001E",
                weight = "total", 
@@ -177,48 +224,6 @@ TornSC.sf <- st_read(dsn = "SocialCorrelatesRound",
   mutate(Date = as.Date(date),
          hr = hour(DateTim)) %>%
   filter(Year >= 2010)
-
-TornSCOH.sf <- TornSC.sf %>%
-  filter(st == "OH")
-
-((sum(TornSCOH.sf$TotlPpl) - sum(out$B01001_001E[-c(2,31,32)]))/sum(TornSCOH.sf$TotlPpl)) * 100
-
-cor.test(TornSCOH.sf$TotlPpl,out$B01001_001E[-c(2,31,32)])
-```
-
-Subset all 2010--2016 tornadoes.
-```{r}
-Torn2016.sf <- TornB.sf %>%
-  mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year >= 2010 & Year <= 2016)
-```
-
-Get Census tracts for all contiguous U.S. states
-```{r}
-us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
-
-us2016.sf = reduce(map(us, function(x) {
-  get_acs(state = x,
-          geography = "tract", 
-          variables = ("B01001_001E"),
-          year = 2010,
-          output = "wide",
-          geometry = TRUE)
-}),
-rbind
-)
-
-us2016.sf <- st_transform(us2016.sf, crs = st_crs(Torn2016.sf))
-```
-
-```{r}
-out <- aw_interpolate(Torn2016.sf, 
-               tid = "ID", 
-               source = us2016.sf, 
-               sid = "GEOID", 
-               extensive = "B01001_001E",
-               weight = "total", 
-               output = "sf")
 ```
 
 Compare with previous estimates
@@ -239,6 +244,15 @@ cor.test(TornSC.sf$TotlPpl, out$B01001_001E[-c(403)])
 Diffpop = sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)])
 RMSEpop = sqrt((abs(Diffpop)^2)/605)
 ```
+
+Find percent error for different years.
+```{r}
+
+```
+
+
+
+
 
 
 
