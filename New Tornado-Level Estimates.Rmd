@@ -141,7 +141,7 @@ Load API and variables from ACS. Here we use the 2000 Census summary file 3, and
 ```{r}
 census_api_key("2814de123d5d0461a3347a42849d25106688daa8", install = TRUE, overwrite = TRUE)
 v00 = load_variables(2000, "sf3", cache = FALSE)
-v10 = load_variables(2015, "acs5", cache = FALSE)
+v15 <- load_variables(2015, "acs5", cache = FALSE)
 v90 = load_variables(1990, "sf3", cache = FALSE)
 ```
 
@@ -153,7 +153,6 @@ counties = fips_codes %>%
 
 us2010.sf = reduce(map(us, function(x) {
   get_acs(state = x,
-          #county = counties$county_code,
           geography = "tract", 
           variables = ("B01001_001E"),
           year = 2012,
