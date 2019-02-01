@@ -153,9 +153,9 @@ counties = fips_codes %>%
 
 us2010.sf = reduce(map(us, function(x) {
   get_acs(state = x,
-          geography = "county", 
+          geography = "tract", 
           variables = ("B01001_001E"),
-          year = 2012,
+          year = 2016,
           output = "wide",
           geometry = TRUE)
 }),
