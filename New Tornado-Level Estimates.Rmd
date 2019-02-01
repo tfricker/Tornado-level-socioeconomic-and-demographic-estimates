@@ -153,12 +153,11 @@ counties = fips_codes %>%
 
 us2010.sf = reduce(map(us, function(x) {
   get_acs(state = x,
-          geography = "tract", 
+          geography = "county", 
           variables = ("B01001_001E"),
           year = 2012,
           output = "wide",
-          geometry = TRUE,
-          key = "2814de123d5d0461a3347a42849d25106688daa8")
+          geometry = TRUE)
 }),
 rbind
 )
@@ -186,8 +185,7 @@ Then collect 1990 Census tract-level data.
 ```{r}
 us1990.sf = reduce(map(us, function(x) {
   get_decennial(state = x,
-          geography = "tract",
-          county = counties$county_code,
+          geography = "county",
           variables = ("P0010001"),
           year = 1990,
           output = "wide",
