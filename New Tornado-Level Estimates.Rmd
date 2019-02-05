@@ -135,6 +135,18 @@ Torn2010.sf <- TornB.sf %>%
   filter(Year == 2010)
 ```
 
+Because 2010 ACS data is not working with tidycensus. Try 2015 tornadoes instead.
+```{r}
+Torn2015.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2015)
+
+Torn2013.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2013)
+```
+
+
 Socioeconomic/Demographic data:
 
 Load API and variables from ACS. Here we use the 2000 Census summary file 3, and 2010 ACS 5-year estimates.
@@ -184,7 +196,7 @@ rbind
 us2000.sf <- st_transform(us2000.sf, crs = st_crs(Torn2010.sf))
 ```
 
-Then collect 1990 Census tract-level data.
+Then collect 1990 Census tract-level data. There is a bug in the tidycensus package related to changes in tract and county differences. For now, use county level data.
 ```{r}
 us1990.sf = reduce(map(us, function(x) {
   get_decennial(state = x,
@@ -249,11 +261,78 @@ Diffpop = sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)])
 RMSEpop = sqrt((abs(Diffpop)^2)/605)
 ```
 
-Find percent error for different years.
+Find percent error for different years. Begin by interpolating estimates across the 2015 ACS, 2000 Census, and 1990 Census.
 ```{r}
+# 2015
+out2015 <- aw_interpolate(Torn2016.sf, 
+               tid = "ID", 
+               source = us2010.sf, 
+               sid = "GEOID", 
+               extensive = "B01001_001E",
+               weight = "total", 
+               output = "sf")
 
+# 2000
+out2000 <- aw_interpolate(Torn2016.sf, 
+               tid = "ID", 
+               source = us2000.sf, 
+               sid = "GEOID", 
+               extensive = "P001001",
+               weight = "total", 
+               output = "sf")
+
+# 1990
+out1990 <- aw_interpolate(Torn2016.sf, 
+               tid = "ID", 
+               source = us1990.sf, 
+               sid = "GEOID", 
+               extensive = "P0010001",
+               weight = "total", 
+               output = "sf")
 ```
 
+```{r}
+# 2014 tornado paths
+df <-  data.frame(x = c(2015, 2000, 1990), 
+                y = c((abs(sum(out2015$B01001_001E) - sum(out2015$B01001_001E))/ sum(out2015$B01001_001E)),  (abs(sum(out2000$P001001) - sum(out2015$B01001_001E))/ sum(out2000$P001001)), (abs(sum(out1990$P0010001) - sum(out2015$B01001_001E))/ sum(out1990$P0010001))))
+
+df$y <- df$y * 100
+
+# 2013 tornado paths (rerun code)
+df2 <-  data.frame(x = c(2015, 2000, 1990), 
+                y = c((abs(sum(out2015$B01001_001E[-57]) - sum(out2015$B01001_001E[-57]))/ sum(out2015$B01001_001E[-57])),  (abs(sum(out2000$P001001[-57]) - sum(out2015$B01001_001E[-57]))/ sum(out2000$P001001[-57])), (abs(sum(out1990$P0010001[-57]) - sum(out2015$B01001_001E[-57]))/ sum(out1990$P0010001[-57]))))
+
+df2$y <- df2$y * 100
+
+# 2012 tornado paths (rerun code)
+
+df3 <-  data.frame(x = c(2015, 2000, 1990), 
+                y = c((abs(sum(out2015$B01001_001E) - sum(out2015$B01001_001E))/ sum(out2015$B01001_001E)),  (abs(sum(out2000$P001001) - sum(out2015$B01001_001E))/ sum(out2000$P001001)), (abs(sum(out1990$P0010001) - sum(out2015$B01001_001E))/ sum(out1990$P0010001))))
+
+df3$y <- df3$y * 100
+
+# 2016 tornado paths (rerun code)
+
+df4 <-  data.frame(x = c(2015, 2000, 1990), 
+                y = c((abs(sum(out2015$B01001_001E) - sum(out2015$B01001_001E))/ sum(out2015$B01001_001E)),  (abs(sum(out2000$P001001) - sum(out2015$B01001_001E))/ sum(out2000$P001001)), (abs(sum(out1990$P0010001) - sum(out2015$B01001_001E))/ sum(out1990$P0010001))))
+
+df4$y <- df4$y * 100
+
+# Plot
+ggplot() +
+  geom_point(data = df2, aes(x = x, y = y, colour = "red")) +
+  geom_point(data = df3, aes(x = x, y = y, colour = "blue")) +
+  geom_point(data = df4, aes(x = x, y = y, colour = "green")) + 
+  geom_point(data = df, aes(x = x, y = y)) +
+  ylab("Percent Error") + xlab("Year of Data") + 
+  theme_minimal() +
+  theme(legend.position="none")
+
+                
+sum(out2015$B01001_001E)
+sum(out2000$P001001)
+sum(out1990$P0010001)
+```
 
 
 
