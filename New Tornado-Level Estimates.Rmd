@@ -188,7 +188,7 @@ Then collect 1990 Census tract-level data.
 ```{r}
 us1990.sf = reduce(map(us, function(x) {
   get_decennial(state = x,
-          geography = "county",
+          geography = "tract",
           variables = ("P0010001"),
           year = 1990,
           output = "wide",
