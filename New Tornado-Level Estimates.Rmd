@@ -159,9 +159,9 @@ v90 = load_variables(1990, "sf3", cache = FALSE)
 
 Get Census tracts for all contiguous U.S. states. Begin with 2017 tract-level data.
 ```{r}
-us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+us <- unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
 
-counties = fips_codes %>%
+counties <- fips_codes %>%
   filter(state %in% us)
 
 options(tigris_use_cache = TRUE)
@@ -182,11 +182,12 @@ us2017.sf <- st_transform(us2017.sf, crs = st_crs(Torn2010.sf))
 
 Then collect 2010 ACS tract-level data. Current bug with 2010--2014 ACS 5-years estimates.
 ```{r}
-us2010.sf = reduce(map(us, function(x) {
+us2010.sf <- reduce(map(us, function(x) {
   get_acs(state = x,
+          county = county_state$COUNTYFP,
           geography = "tract", 
           variables = ("B01001_001E"),
-          year = 2010,
+          year = 2011,
           output = "wide",
           geometry = TRUE)
 }),
@@ -195,6 +196,61 @@ rbind
 
 us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
 ```
+
+Try a work-around
+```{r}
+county_state <- tigris::counties(
+  state = us,
+  cb = TRUE,
+  resolution = "20m",
+  year = "2010",
+  class = "sf"
+)
+
+us2010.sf <- reduce(
+    map2(
+    .x = county_state$STATEFP,
+    .y = county_state$COUNTYFP,
+    ~ get_acs(
+        state = .x,
+        county = .y,
+        geography = "tract", 
+        variables = ("B01001_001E"),
+        year = 2010,
+        output = "wide",
+        geometry = TRUE
+        )
+      ),
+    rbind
+   )
+```
+
+```{r}
+get_state_demographic_data <- function(the_state, the_year) {
+  
+  options(tigris_use_cache = TRUE) #keep chached version of data
+  
+  # get all counties in given state
+  counties <- tidycensus::fips_codes %>%
+    dplyr::filter(state == the_state)
+  
+  # loop over counties and get tracts for each county
+  purrr::map(counties$county_code, 
+       ~ get_acs(
+         geography = 'tract',
+         table = c("B19301"),
+         state = the_state,
+         county = .x,
+         year = the_year,
+         survey = 'acs5',
+         geometry = TRUE)
+       ) %>% 
+    purrr::reduce(rbind)  # bind rows of all counties
+}
+
+get_state_demographic_data(us, 2010)
+```
+
 
 Then collect 2000 Census tract-level data.
 ```{r}
