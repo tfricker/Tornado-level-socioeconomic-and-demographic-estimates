@@ -200,10 +200,10 @@ us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
 Try a work-around
 ```{r}
 county_state <- tigris::counties(
-  state = us,
-  cb = TRUE,
+  state = c("AL", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "ID", "IL", "IN", "IA", "KS"),
+#"KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"),
   resolution = "20m",
-  year = "2010",
+  year = "2011",
   class = "sf"
 )
 
