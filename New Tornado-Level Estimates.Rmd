@@ -239,7 +239,7 @@ county_state <- tigris::counties(
 )
 
 tract_state <- tigris::tracts(
-  state = my_states,
+  state = c("Al", "AZ"),
   county = county_state$COUNTYFP,
   cb = TRUE,
   year = "2010",
