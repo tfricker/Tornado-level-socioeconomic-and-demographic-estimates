@@ -226,23 +226,55 @@ Housing Units (/B25024_001)
 Mobile Homes (H030010/B25024_010E)
 -----------------------------------------
 
-Start with the first 9 states.
+Try downloading shapefile for Census tracts from IPUMS
 ```{r}
-my_states <- unique(fips_codes$state)[c(1, 3:8, 10:11)]
 
-county_state <- tigris::counties(
-  state = my_states[-3],
+```
+
+
+Create a function to get data by state.
+```{r}
+get_state_demographic_data <- function(the_state, the_year) {
+
+# get all counties in given state
+  county_state <- tigris::counties(
+  state = the_state,
   cb = TRUE,
   resolution = "20m",
   year = "2010",
   class = "sf",
   refresh=TRUE
 )
+  
+# Execute the code
+  us2010A.sf <- reduce(
+    map2(
+    .x = county_state$STATEFP,
+    .y = county_state$COUNTYFP,
+    ~ get_acs(
+        state = .x,
+        county = .y,
+        geography = "tract", 
+        variables = c("B01001_001", "B01001_002", "B01001_003", "B01001_004", "B01001_005", "B01001_006", "B01001_007", "B01001_008", "B01001_009", "B01001_010", "B01001_011", "B01001_012", "B01001_013", "B01001_014", "B01001_015", "B01001_016", "B01001_017", "B01001_018", "B01001_019", "B01001_020", "B01001_021", "B01001_022", "B01001_023", "B01001_024", "B01001_025", "B01001_026", "B01001_027", "B01001_028", "B01001_029", "B01001_030", "B01001_031", "B01001_032", "B01001_033", "B01001_034", "B01001_035", "B01001_036", "B01001_037", "B01001_038", "B01001_039", "B01001_040", "B01001_041", "B01001_042", "B01001_043", "B01001_044", "B01001_045", "B01001_046", "B01001_047", "B01001_048", "B01001_049", "B02001_002", "B02001_003", "B19013_001", "B25024_001", "B25024_010"),
+        year = 2010,
+        output = "wide",
+        geometry = TRUE
+        )
+      ),
+    rbind
+   )
+}
+  
+AL.df = get_state_demographic_data("AL", 2010)  
 
-tract_state <- tigris::tracts(
+my_states <- unique(fips_codes$state)[c(1)]
+#, 3:4)]
+                                        # :8, 10:11)]
+
+county_state <- tigris::counties(
   state = my_states,
-  county = county_state$COUNTYFP,
   cb = TRUE,
+  resolution = "20m",
   year = "2010",
   class = "sf",
   refresh=TRUE
