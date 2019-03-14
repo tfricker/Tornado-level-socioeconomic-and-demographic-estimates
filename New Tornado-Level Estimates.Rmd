@@ -197,17 +197,21 @@ rbind
 us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
 ```
 
-Try a work-around
+Try a work-around. This takes a long time. Split the census tracts into multiple sfdf (otherwise Census API will time out).
+
+Start with the first 9 states.
 ```{r}
+my_states <- unique(fips_codes$state)[c(1, 3:8, 10:11)]
+
 county_state <- tigris::counties(
-  state = c("AL", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "ID", "IL", "IN","IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE"),
-#, "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"),
+  state = my_states,
+  cb = TRUE,
   resolution = "20m",
-  year = "2011",
+  year = "2010",
   class = "sf"
 )
 
-us2010.sf <- reduce(
+us2010A.sf <- reduce(
     map2(
     .x = county_state$STATEFP,
     .y = county_state$COUNTYFP,
@@ -224,6 +228,76 @@ us2010.sf <- reduce(
     rbind
    )
 ```
+
+Then add in the next 20 states.
+```{r}
+my_states <- unique(fips_codes$state)[c(13:33)]
+
+county_state <- tigris::counties(
+  state = my_states,
+  cb = TRUE,
+  resolution = "20m",
+  year = "2010",
+  class = "sf"
+)
+
+us2010B.sf <- reduce(
+    map2(
+    .x = county_state$STATEFP,
+    .y = county_state$COUNTYFP,
+    ~ get_acs(
+        state = .x,
+        county = .y,
+        geography = "tract", 
+        variables = ("B01001_001E"),
+        year = 2010,
+        output = "wide",
+        geometry = TRUE
+        )
+      ),
+    rbind
+   )
+```
+
+Then add the last 20 states
+```{r}
+my_states <- unique(fips_codes$state)[c(34:51)]
+
+county_state <- tigris::counties(
+  state = my_states,
+  cb = TRUE,
+  resolution = "20m",
+  year = "2010",
+  class = "sf"
+)
+
+us2010C.sf <- reduce(
+    map2(
+    .x = county_state$STATEFP,
+    .y = county_state$COUNTYFP,
+    ~ get_acs(
+        state = .x,
+        county = .y,
+        geography = "tract", 
+        variables = ("B01001_001E"),
+        year = 2010,
+        output = "wide",
+        geometry = TRUE
+        )
+      ),
+    rbind
+   )
+```
+
+Combine the simple features dataframes.
+```{r}
+x <-  rbind(us2010.sf, us2010B.sf)
+us2010.sf <-  rbind(x, us2010C.sf)
+
+us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
+```
+
+
 
 ```{r}
 get_state_demographic_data <- function(the_state, the_year) {
