@@ -231,7 +231,7 @@ Start with the first 9 states.
 my_states <- unique(fips_codes$state)[c(1, 3:8, 10:11)]
 
 county_state <- tigris::counties(
-  state = my_states,
+  state = my_states[-3],
   cb = TRUE,
   resolution = "20m",
   year = "2010",
@@ -239,7 +239,7 @@ county_state <- tigris::counties(
 )
 
 tract_state <- tigris::tracts(
-  state = "AR",
+  state = my_states,
   county = county_state$COUNTYFP,
   cb = TRUE,
   year = "2010",
