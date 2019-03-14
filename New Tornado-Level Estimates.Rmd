@@ -226,11 +226,37 @@ Housing Units (/B25024_001)
 Mobile Homes (H030010/B25024_010E)
 -----------------------------------------
 
-Try downloading shapefile for Census tracts from IPUMS
+Try downloading shapefile for Census tracts from IPUMS GIS.
 ```{r}
-
+Tracts.sf <- read_sf(dsn = "2012_Tracts",
+                   stringsAsFactors = FALSE)
 ```
 
+Import IPUMS data
+```{r}
+us2010 <- read.csv("2012ACS.csv", header = TRUE)
+```
+
+Merge the two data sets and remove data from states outside of the contiguous U.S.
+```{r}
+US2010.sf <- us2010 %>%
+  mutate(ID2 = 1:nrow(us2010),
+    geometry = Tracts.sf$geometry[US2010.sf$GISJOIN]) %>%
+  st_as_sf()
+
+#US2010.sf$ID2 = 1:nrow(US2010.sf)
+#US2010.sf = st_as_sf(US2010.sf)
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(Torn2016.sf))
+```
+
+** This fixes the problem with tidycensus for 2010 ** 
 
 Create a function to get data by state.
 ```{r}
@@ -267,9 +293,7 @@ get_state_demographic_data <- function(the_state, the_year) {
   
 AL.df = get_state_demographic_data("AL", 2010)  
 
-my_states <- unique(fips_codes$state)[c(1)]
-#, 3:4)]
-                                        # :8, 10:11)]
+my_states <- unique(fips_codes$state)[c(1, 3:8, 10:11)]
 
 county_state <- tigris::counties(
   state = my_states,
@@ -409,9 +433,9 @@ Here the cookie cutters are the damage path POLYGONS and the county-level popula
 ```{r}
 out <- aw_interpolate(Torn2016.sf, 
                tid = "ID", 
-               source = us2010.sf, 
-               sid = "GEOID", 
-               extensive = "B01001_001E",
+               source = US2010.sf, 
+               sid = "ID2", 
+               extensive = "QSEE001",
                weight = "total", 
                output = "sf")
 ```
