@@ -235,15 +235,17 @@ county_state <- tigris::counties(
   cb = TRUE,
   resolution = "20m",
   year = "2010",
-  class = "sf"
+  class = "sf",
+  refresh=TRUE
 )
 
 tract_state <- tigris::tracts(
-  state = c("Al", "AZ"),
+  state = my_states,
   county = county_state$COUNTYFP,
   cb = TRUE,
   year = "2010",
-  class = "sf"
+  class = "sf",
+  refresh=TRUE
 )
 
 us2010A.sf <- reduce(
