@@ -119,6 +119,13 @@ Calculate the error in area between the estimated paths (AreaPath variable) and 
 
 Percent error is between 1.8% (square end caps) and 2.3% (round end caps).
 
+Subset tornadoes from 1995--2016
+```{r}
+TornB.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year <= 2016)
+```
+
 Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
 
 Subset all 2010--2016 tornadoes.
@@ -258,19 +265,18 @@ US2010.sf <- st_transform(US2010.sf, crs = st_crs(Torn2016.sf))
 
 Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
 
-
 Now focus on cleaning up the sf object (combine ages and margins of error)
 ```{r}
 US2010.sf = US2010.sf %>%
   mutate(MaleUnder18 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
-         Male18to44 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34 
-         + Male35.39 + Male40.44,
+         Male18to44 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 
+         + Male30.34 + Male35.39 + Male40.44,
          Male45to64 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
          MaleOver65 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
          + MaleOver85,
          FemaleUnder18 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
-         Female18to44 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29 
-         + Female30.34 + Female35.39 + Female40.44,
+         Female18to44 = Female18.19 + Female20 + Female21 + Female22.24 
+         + Female25.29 + Female30.34 + Female35.39 + Female40.44,
          Female45to64 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
          + Female62.64,
          FemaleOver65 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
@@ -291,10 +297,11 @@ out <- aw_interpolate(Torn2016.sf,
                tid = "ID", 
                source = US2010.sf, 
                sid = "ID2",
-               extensive = c("TotalPop", "TotalMale", "MaleUnder18", "Male18to44",
-                             "Male45to64", "MaleOver65", "TotalFemale", "FemaleUnder18",
-                             "Female18to44", "Female45to64", "FemaleOver65", "White",
-                             "Black", "TotalHousingUnits", "MobileHomes"),
+               extensive = c("TotalPop", "TotalMale", "MaleUnder18",
+                             "Male18to44", "Male45to64", "MaleOver65",
+                             "TotalFemale", "FemaleUnder18", "Female18to44",
+                             "Female45to64", "FemaleOver65", "White", "Black",
+                             "TotalHousingUnits", "MobileHomes"),
                intensive = c("MedianIncome"),
                weight = "total", 
                output = "sf")
