@@ -197,8 +197,6 @@ rbind
 us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
 ```
 
-Try a work-around. This takes a long time. Split the census tracts into multiple sfdf (otherwise Census API will time out).
-
 Create dataframes of all Tracts. The variables for the Census (2000) and ACS (2010) include:
 ----------------------------------------------------------------------------------
 
@@ -241,7 +239,7 @@ Merge the two data sets and remove data from states outside of the contiguous U.
 ```{r}
 US2010.sf <- us2010 %>%
   mutate(ID2 = 1:nrow(us2010),
-    geometry = Tracts.sf$geometry[US2010.sf$GISJOIN]) %>%
+    geometry = Tracts.sf$geometry[us2010$GISJOIN]) %>%
   st_as_sf()
 
 #US2010.sf$ID2 = 1:nrow(US2010.sf)
@@ -258,11 +256,91 @@ US2010.sf <- st_transform(US2010.sf, crs = st_crs(Torn2016.sf))
 
 ** This fixes the problem with tidycensus for 2010 ** 
 
-Now focus on renaming the columns of interest
+Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
+
+
+Now focus on cleaning up the sf object (combine ages and margins of error)
 ```{r}
+US2010.sf = US2010.sf %>%
+  mutate(MaleUnder18 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
+         Male18to44 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34 
+         + Male35.39 + Male40.44,
+         Male45to64 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
+         MaleOver65 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
+         + MaleOver85,
+         FemaleUnder18 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
+         Female18to44 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29 
+         + Female30.34 + Female35.39 + Female40.44,
+         Female45to64 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
+         + Female62.64,
+         FemaleOver65 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
+         + Female80.84 + FemaleOver85,
+         MedianIncome = MedianIncome * 1.032,
+         MedianIncomeM = MedianIncomeM * 1.032)
+```
+
+Try areal weighted interpolation
+
+The cookie cutters are the simple feature _polygons_ defining the boundaries we want values interpolated to. This is defined as the target object and it is the first argument in the `aw_interpolate()` function. We need to identify each cookie cutter with a unique target id (`tid`).
+
+The dough is the underlying simple feature _variable_ that we want interpolated. It is defined in a source simple feature data frame (`source =`). Each feature must have a unique id (`sid`). The variable is specified in the `extensive =` argument.
+
+Here the cookie cutters are the damage path POLYGONS and the county-level population estimate is the dough.
+```{r}
+out <- aw_interpolate(Torn2016.sf, 
+               tid = "ID", 
+               source = US2010.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop", "TotalMale", "MaleUnder18", "Male18to44",
+                             "Male45to64", "MaleOver65", "TotalFemale", "FemaleUnder18",
+                             "Female18to44", "Female45to64", "FemaleOver65", "White",
+                             "Black", "TotalHousingUnits", "MobileHomes"),
+               intensive = c("MedianIncome"),
+               weight = "total", 
+               output = "sf")
+
+# Play with MOE
+#out$error = out$QSEE001/out$QSEM001
+
 
 ```
 
+Compare this estimate to our previous estimates
+
+Import `SocialCorrelates.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
+```{r}
+#unzip("SocialCorrelates.zip")
+TornSC.sf <- st_read(dsn = "SocialCorrelatesRound", 
+                    layer = "SocialCorrelatesRound", 
+                    stringsAsFactors = FALSE) %>%
+  mutate(Date = as.Date(date),
+         hr = hour(DateTim)) %>%
+  filter(Year >= 2010)
+```
+
+Compare with previous estimates
+```{r}
+# Find the missing tornadoes
+which(!as.character(out$DateTime) %in% as.character(TornSC.sf$DateTim))
+
+# Compare areas
+((sum(as.vector(st_area(TornSC.sf))) - sum(as.vector(st_area(out[-403,]))))/ sum(as.vector(st_area(TornSC.sf)))) * 100 
+
+# Percent error
+((sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)]))/sum(TornSC.sf$TotlPpl)) * 100
+
+#Pearson Correlation
+cor.test(TornSC.sf$TotlPpl, out$B01001_001E[-c(403)])
+
+# RMSE
+Diffpop = sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)])
+RMSEpop = sqrt((abs(Diffpop)^2)/605)
+```
+
+
+
+
+Try a work-around. This takes a long time. Split the census tracts into multiple sfdf (otherwise Census API will time out).
 
 Create a function to get data by state.
 ```{r}
@@ -430,58 +508,6 @@ rbind
 )
 
 us1990.sf <- st_transform(us1990.sf, crs = st_crs(Torn2010.sf))
-```
-
-Try areal weighted interpolation
-
-The cookie cutters are the simple feature _polygons_ defining the boundaries we want values interpolated to. This is defined as the target object and it is the first argument in the `aw_interpolate()` function. We need to identify each cookie cutter with a unique target id (`tid`).
-
-The dough is the underlying simple feature _variable_ that we want interpolated. It is defined in a source simple feature data frame (`source =`). Each feature must have a unique id (`sid`). The variable is specified in the `extensive =` argument.
-
-Here the cookie cutters are the damage path POLYGONS and the county-level population estimate is the dough.
-```{r}
-out <- aw_interpolate(Torn2016.sf, 
-               tid = "ID", 
-               source = US2010.sf, 
-               sid = "ID2", 
-               extensive = c("QSEE001", "QSEM001"),
-               weight = "total", 
-               output = "sf")
-
-# Play with MOE
-out$error = out$QSEE001/out$QSEM001
-```
-
-Compare this estimate to our previous estimates
-
-Import `SocialCorrelates.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
-```{r}
-#unzip("SocialCorrelates.zip")
-TornSC.sf <- st_read(dsn = "SocialCorrelatesRound", 
-                    layer = "SocialCorrelatesRound", 
-                    stringsAsFactors = FALSE) %>%
-  mutate(Date = as.Date(date),
-         hr = hour(DateTim)) %>%
-  filter(Year >= 2010)
-```
-
-Compare with previous estimates
-```{r}
-# Find the missing tornadoes
-which(!as.character(out$DateTime) %in% as.character(TornSC.sf$DateTim))
-
-# Compare areas
-((sum(as.vector(st_area(TornSC.sf))) - sum(as.vector(st_area(out[-403,]))))/ sum(as.vector(st_area(TornSC.sf)))) * 100 
-
-# Percent error
-((sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)]))/sum(TornSC.sf$TotlPpl)) * 100
-
-#Pearson Correlation
-cor.test(TornSC.sf$TotlPpl, out$B01001_001E[-c(403)])
-
-# RMSE
-Diffpop = sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)])
-RMSEpop = sqrt((abs(Diffpop)^2)/605)
 ```
 
 Find percent error for different years. Begin by interpolating estimates across the 2015 ACS, 2000 Census, and 1990 Census.
