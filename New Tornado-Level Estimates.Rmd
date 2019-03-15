@@ -258,6 +258,12 @@ US2010.sf <- st_transform(US2010.sf, crs = st_crs(Torn2016.sf))
 
 ** This fixes the problem with tidycensus for 2010 ** 
 
+Now focus on renaming the columns of interest
+```{r}
+
+```
+
+
 Create a function to get data by state.
 ```{r}
 get_state_demographic_data <- function(the_state, the_year) {
