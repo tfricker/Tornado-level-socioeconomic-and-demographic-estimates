@@ -109,8 +109,7 @@ Buffer the geometries.
 ```{r}
 TornB.sf <- st_buffer(Torn.sf, 
                    dist = Torn.sf$Width/2,
-                   endCapStyle = 'ROUND') %>%
-  mutate(ID = 1:nrow(.))
+                   endCapStyle = 'ROUND')
 ```
 
 Calculate the error in area between the estimated paths (AreaPath variable) and the buffered tornado tracks (tornado paths).
