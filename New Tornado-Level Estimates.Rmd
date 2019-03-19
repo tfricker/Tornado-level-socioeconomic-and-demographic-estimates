@@ -74,7 +74,7 @@ Torn.sf <- Torn.sf %>%
          cas = inj + fat,
          AreaPath = Length * Width,
          Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
-         filter(cas > 0) %>%
+         filter(cas > 0 & Year <= 2016) %>%
   sf::st_sf()
 max(Torn.sf$yr)
 ```
@@ -109,7 +109,8 @@ Buffer the geometries.
 ```{r}
 TornB.sf <- st_buffer(Torn.sf, 
                    dist = Torn.sf$Width/2,
-                   endCapStyle = 'ROUND')
+                   endCapStyle = 'ROUND') %>%
+  mutate(ID = 1:nrow(.))
 ```
 
 Calculate the error in area between the estimated paths (AreaPath variable) and the buffered tornado tracks (tornado paths).
@@ -121,31 +122,6 @@ Percent error is between 1.8% (square end caps) and 2.3% (round end caps).
 
 Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
 
-Subset all 2010--2016 tornadoes.
-```{r}
-Torn2016.sf <- TornB.sf %>%
-  mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year >= 2010 & Year <= 2016)
-```
-
-Subset only 2010 tornadoes.
-```{r}
-Torn2010.sf <- TornB.sf %>%
-  mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year == 2010)
-```
-
-Because 2010 ACS data is not working with tidycensus. Try 2015 tornadoes instead.
-```{r}
-Torn2015.sf <- TornB.sf %>%
-  mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year == 2015)
-
-Torn2013.sf <- TornB.sf %>%
-  mutate(ID = 1:nrow(TornB.sf)) %>%
-  filter(Year == 2013)
-```
-
 Socioeconomic/Demographic data:
 
 Load API and variables from ACS. Here we use the 2000 Census summary file 3, and 2010 ACS 5-year estimates.
@@ -155,46 +131,6 @@ v90 = load_variables(1990, "sf3", cache = FALSE)
 v00 = load_variables(2000, "sf3", cache = FALSE)
 v10 <- load_variables(2010, "acs5", cache = FALSE)
 v15 <- load_variables(2015, "acs5", cache = FALSE)
-```
-
-Get Census tracts for all contiguous U.S. states. Begin with 2017 tract-level data.
-```{r}
-us <- unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
-
-counties <- fips_codes %>%
-  filter(state %in% us)
-
-options(tigris_use_cache = TRUE)
-
-us2017.sf = reduce(map(us, function(x) {
-  get_acs(state = x,
-          geography = "tract", 
-          variables = ("B01001_001E"),
-          year = 2017,
-          output = "wide",
-          geometry = TRUE)
-}),
-rbind
-)
-
-us2017.sf <- st_transform(us2017.sf, crs = st_crs(Torn2010.sf))
-```
-
-Then collect 2010 ACS tract-level data. Current bug with 2010--2014 ACS 5-years estimates.
-```{r}
-us2010.sf <- reduce(map(us, function(x) {
-  get_acs(state = x,
-          county = county_state$COUNTYFP,
-          geography = "tract", 
-          variables = ("B01001_001E"),
-          year = 2011,
-          output = "wide",
-          geometry = TRUE)
-}),
-rbind
-)
-
-us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
 ```
 
 Create dataframes of all Tracts. The variables for the Census (2000) and ACS (2010) include:
@@ -251,7 +187,7 @@ us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
 
 US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
 
-US2010.sf <- st_transform(US2010.sf, crs = st_crs(Torn2016.sf))
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornB.sf))
 ```
 
 ** This fixes the problem with tidycensus for 2010 ** 
@@ -262,21 +198,28 @@ Removing states outside of the contiguous US changes the number of tracts from 7
 Now focus on cleaning up the sf object (combine ages and margins of error)
 ```{r}
 US2010.sf = US2010.sf %>%
-  mutate(MaleUnder18 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
-         Male18to44 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34 
+  mutate(TotalPop_2010 = TotalPop,
+         TotalMale_2010 = TotalMale,
+         MaleUnder18_2010 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
+         Male18to44_2010 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34 
          + Male35.39 + Male40.44,
-         Male45to64 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
-         MaleOver65 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
+         Male45to64_2010 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
+         MaleOver65_2010 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
          + MaleOver85,
-         FemaleUnder18 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
-         Female18to44 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29 
+         TotalFemale_2010 = TotalFemale,
+         FemaleUnder18_2010 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
+         Female18to44_2010 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29 
          + Female30.34 + Female35.39 + Female40.44,
-         Female45to64 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
+         Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
          + Female62.64,
-         FemaleOver65 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
+         FemaleOver65_2010 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
          + Female80.84 + FemaleOver85,
-         MedianIncome = MedianIncome * 1.032,
-         MedianIncomeM = MedianIncomeM * 1.032)
+         White_2010 = White,
+         Black_2010 = Black,
+         TotalHousingUnits_2010 = TotalHousingUnits,
+         MobileHomes_2010 = MobileHomes,
+         MedianIncome_2010 = MedianIncome * 1.032,
+         MedianIncomeM_2010 = MedianIncomeM * 1.032)
 ```
 
 Try areal weighted interpolation
@@ -287,23 +230,103 @@ The dough is the underlying simple feature _variable_ that we want interpolated.
 
 Here the cookie cutters are the damage path POLYGONS and the county-level population estimate is the dough.
 ```{r}
-out <- aw_interpolate(Torn2016.sf, 
+out2010.sf <- aw_interpolate(TornB.sf, 
                tid = "ID", 
                source = US2010.sf, 
                sid = "ID2",
-               extensive = c("TotalPop", "TotalMale", "MaleUnder18", "Male18to44",
-                             "Male45to64", "MaleOver65", "TotalFemale", "FemaleUnder18",
-                             "Female18to44", "Female45to64", "FemaleOver65", "White",
-                             "Black", "TotalHousingUnits", "MobileHomes"),
-               intensive = c("MedianIncome"),
+               extensive = c("TotalPop_2010", "TotalMale_2010", "MaleUnder18_2010",
+                             "Male18to44_2010", "Male45to64_2010", "MaleOver65_2010",
+                             "TotalFemale_2010", "FemaleUnder18_2010",
+                             "Female18to44_2010", "Female45to64_2010",
+                             "FemaleOver65_2010", "White_2010",
+                             "Black_2010", "TotalHousingUnits_2010", "MobileHomes_2010"),
+               intensive = c("MedianIncome_2010"),
                weight = "total", 
                output = "sf")
 
-# Play with MOE
-#out$error = out$QSEE001/out$QSEM001
-
-
 ```
+
+Collect 2000 Census Tract information
+```{r}
+us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+us2000.sf = reduce(map(us, function(x) {
+  get_decennial(state = x,
+          geography = "tract", 
+          variables = c("P001001", "P008002", "P008003", "P008004", "P008005", "P008006", "P008007", "P008008", "P008009", "P008010", "P008011", "P008012", "P008013", "P008014", "P008015", "P008016", "P008017", "P008018", "P008019", "P008020", "P008021", "P008022", "P008023", "P008024", "P008025", "P008026", "P008027", "P008028", "P008029", "P008030", "P008031", "P008032", "P008033", "P008034", "P008035", "P008036", "P008037", "P008038", "P008039", "P008040", "P008041", "P008042", "P008043", "P008044", "P008045", "P008046", "P008047", "P008048", "P008049", "P008050", "P008051", "P008052", "P008053", "P008054", "P008055", "P008056", "P008057", "P008058", "P008059", "P008060", "P008061", "P008062", "P008063", "P008064", "P008065", "P008066", "P008067", "P008068", "P008069", "P008070", "P008071", "P008072", "P008073", "P008074", "P008075", "P008076", "P008077", "P008078", "P008079", "P006002", "P006003",  "P053001", "H030001","H030010"),
+          year = 2000,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+```
+
+Clean up sf object
+```{r}
+US2000.sf = us2000.sf %>%
+  mutate(TotalPop_2000 = P001001,
+         TotalMale_2000 = P008002,
+         MaleUnder18_2000 = P008003 + P008004 + P008005 + P008006 + P008007 + P008008 
+         + P008009 + P008010 + P008011 + P008012 + P008013 + P008014 + P008015 + P008016 
+         + P008017 + P008018 + P008019 + P008020,
+         Male18to44_2000 = P008021 + P008022 + P008023 + P008024 + P008025 
+         + P008026 + P008027 + P008028 + P008029,
+         Male45to64_2000 = P008030 + P008031 + P008032 + P008033 + P008034,
+         MaleOver65_2000 = P008035 + P008036 + P008037 + P008038 + P008039 
+         + P008040,
+         TotalFemale_2000 = P008041,
+         FemaleUnder18_2000 = P008042 + P008043 + P008044 + P008045 + P008046 + P008047 
+         + P008048 + P008049 + P008050 + P008051 + P008052 + P008053 + P008054 + P008055 
+         + P008056 + P008057 + P008058 + P008059,
+         Female18to44_2000 = P008060 + P008061 + P008062 + P008063 + P008064 + P008065 
+         + P008066 + P008067 + P008068,
+         Female45to64_2000 = P008069+ P008070 + P008071 + P008072 + P008073,
+         FemaleOver65_2000 = P008074 + P008075 + P008076 + P008077 + P008078 + P008079,
+         White_2000 = P006002,
+         Black_2000 = P006003,
+         TotalHousingUnits_2000 = H030001,
+         MobileHomes_2000 = H030010,
+         MedianIncome_2000 = P053001 * 1.423)
+
+US2000.sf = US2000.sf %>%
+  mutate(ID2 = 1:nrow(us2000.sf))
+
+US2000.sf <- st_transform(US2000.sf, crs = st_crs(TornB.sf))
+```
+
+```{r}
+out2000.sf <- aw_interpolate(TornB.sf, 
+               tid = "ID", 
+               source = US2000.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_2000", "TotalMale_2000", "MaleUnder18_2000",
+                             "Male18to44_2000", "Male45to64_2000", "MaleOver65_2000",
+                             "TotalFemale_2000", "FemaleUnder18_2000",
+                             "Female18to44_2000", "Female45to64_2000",
+                             "FemaleOver65_2000", "White_2000","Black_2000",
+                             "TotalHousingUnits_2000", "MobileHomes_2000"),
+               intensive = c("MedianIncome_2000"),
+               weight = "total", 
+               output = "sf")
+```
+
+Collect 1990 Census Tract information
+```{r}
+us = unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+us1990.sf = reduce(map(us, function(x) {
+  get_decennial(state = x,
+          geography = "tract", 
+          variables = c("P001001", "P008002", "P008003", "P008004", "P008005", "P008006", "P008007", "P008008", "P008009", "P008010", "P008011", "P008012", "P008013", "P008014", "P008015", "P008016", "P008017", "P008018", "P008019", "P008020", "P008021", "P008022", "P008023", "P008024", "P008025", "P008026", "P008027", "P008028", "P008029", "P008030", "P008031", "P008032", "P008033", "P008034", "P008035", "P008036", "P008037", "P008038", "P008039", "P008040", "P008041", "P008042", "P008043", "P008044", "P008045", "P008046", "P008047", "P008048", "P008049", "P008050", "P008051", "P008052", "P008053", "P008054", "P008055", "P008056", "P008057", "P008058", "P008059", "P008060", "P008061", "P008062", "P008063", "P008064", "P008065", "P008066", "P008067", "P008068", "P008069", "P008070", "P008071", "P008072", "P008073", "P008074", "P008075", "P008076", "P008077", "P008078", "P008079", "P006002", "P006003",  "P053001", "H030001","H030010"),
+          year = 1990,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+```
+
 
 Compare this estimate to our previous estimates
 
@@ -337,8 +360,70 @@ Diffpop = sum(TornSC.sf$TotlPpl) - sum(out$B01001_001E[-c(403)])
 RMSEpop = sqrt((abs(Diffpop)^2)/605)
 ```
 
+Subset all 2010--2016 tornadoes.
+```{r}
+Torn2016.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year >= 2010 & Year <= 2016)
+```
 
+Subset only 2010 tornadoes.
+```{r}
+Torn2010.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2010)
+```
 
+Because 2010 ACS data is not working with tidycensus. Try 2015 tornadoes instead.
+```{r}
+Torn2015.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2015)
+
+Torn2013.sf <- TornB.sf %>%
+  mutate(ID = 1:nrow(TornB.sf)) %>%
+  filter(Year == 2013)
+```
+
+Get Census tracts for all contiguous U.S. states. Begin with 2017 tract-level data.
+```{r}
+us <- unique(fips_codes$state)[c(1, 3:8, 10:11, 13:51)]
+
+counties <- fips_codes %>%
+  filter(state %in% us)
+
+options(tigris_use_cache = TRUE)
+
+us2017.sf = reduce(map(us, function(x) {
+  get_acs(state = x,
+          geography = "tract", 
+          variables = ("B01001_001E"),
+          year = 2017,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2017.sf <- st_transform(us2017.sf, crs = st_crs(Torn2010.sf))
+```
+
+Then collect 2010 ACS tract-level data. Current bug with 2010--2014 ACS 5-years estimates.
+```{r}
+us2010.sf <- reduce(map(us, function(x) {
+  get_acs(state = x,
+          county = county_state$COUNTYFP,
+          geography = "tract", 
+          variables = ("B01001_001E"),
+          year = 2011,
+          output = "wide",
+          geometry = TRUE)
+}),
+rbind
+)
+
+us2010.sf <- st_transform(us2010.sf, crs = st_crs(Torn2010.sf))
+```
 
 Try a work-around. This takes a long time. Split the census tracts into multiple sfdf (otherwise Census API will time out).
 
