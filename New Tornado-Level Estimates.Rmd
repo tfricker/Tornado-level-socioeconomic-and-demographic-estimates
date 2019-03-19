@@ -74,7 +74,7 @@ Torn.sf <- Torn.sf %>%
          cas = inj + fat,
          AreaPath = Length * Width,
          Ma = factor(month.abb[mo], levels = month.abb[1:12])) %>%
-         filter(cas > 0 & Year <= 2016) %>%
+         filter(cas > 0) %>%
   sf::st_sf()
 max(Torn.sf$yr)
 ```
