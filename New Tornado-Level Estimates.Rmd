@@ -162,7 +162,7 @@ Black or African-American alone (P006003/B02001_003E)
 -----------------------------------------
 Household Median Income (P053001/B19013_001E)
 -----------------------------------------
-Housing Units (/B25024_001)
+Housing Units (H030001/B25024_001)
 Mobile Homes (H030010/B25024_010E)
 -----------------------------------------
 
@@ -317,7 +317,6 @@ Collect 1990 Census Tract information. Use IPUMS again, because it is cleaner th
 ```{r}
 
 ```
-
 
 Compare this estimate to our previous estimates
 
