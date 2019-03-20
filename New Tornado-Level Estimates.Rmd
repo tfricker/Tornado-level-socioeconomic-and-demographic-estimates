@@ -168,7 +168,7 @@ Mobile Homes (H030010/B25024_010E)
 
 Try downloading shapefile for Census tracts from IPUMS GIS.
 ```{r}
-Tracts.sf <- read_sf(dsn = "2012_Tracts",
+Tracts_2010.sf <- read_sf(dsn = "2012_Tracts",
                    stringsAsFactors = FALSE)
 ```
 
@@ -181,7 +181,7 @@ Merge the two data sets and remove data from states outside of the contiguous U.
 ```{r}
 US2010.sf <- us2010 %>%
   mutate(ID2 = 1:nrow(us2010),
-    geometry = Tracts.sf$geometry[us2010$GISJOIN]) %>%
+    geometry = Tracts_2010.sf$geometry[us2010$GISJOIN]) %>%
   st_as_sf()
 
 #US2010.sf$ID2 = 1:nrow(US2010.sf)
@@ -216,6 +216,8 @@ US2010.sf = US2010.sf %>%
          Female18to44_2010 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29
          + Female30.34 + Female35.39 + Female40.44,
          Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61,
+         FemaleOver65_2010 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
+         + Female80.84 + FemaleOver85,
          White_2010 = White,
          Black_2010 = Black,
          TotalHousingUnits_2010 = TotalHousingUnits,
@@ -315,8 +317,72 @@ out2000.sf <- aw_interpolate(TornB.sf,
 
 Collect 1990 Census Tract information. Use IPUMS again, because it is cleaner than tidycensus.
 ```{r}
+Tracts_1990.sf <- read_sf(dsn = "1990_Tracts",
+                   stringsAsFactors = FALSE)
 
+us1990 <- read.csv("1990Census_1.csv", header = TRUE)
+
+US1990.sf <- us1990 %>%
+  mutate(ID2 = 1:nrow(us1990),
+    geometry = Tracts_1990.sf$geometry[us1990$GISJOIN]) %>%
+  st_as_sf()
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US1990.sf <- US1990.sf[US1990.sf$STATEA %in% us,]
+
+US1990.sf <- st_transform(US1990.sf, crs = st_crs(TornB.sf))
 ```
+
+Now focus on cleaning up the sf object
+```{r}
+US1990.sf = US1990.sf %>%
+  mutate(TotalPop_1990 = TotalPop,
+         TotalMale_1990 = TotalMale,
+         MaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .487),
+         Male18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .487),
+         Male45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
+         * .487),
+         MaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85) 
+         * .487),
+         TotalFemale_1990 = TotalFemale,
+         FemaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .513),
+         Female18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .513),
+         Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
+         * .513),
+         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85) 
+         * .513),
+         White_1990 = White,
+         Black_1990 = Black,
+         TotalHousingUnits_1990 = TotalHousingUnits,
+         MobileHomes_1990 = MobileHomes,
+         MedianIncome_1990 = round(MedianIncome * 1.9114))
+```
+
+```{r}
+out1990.sf <- aw_interpolate(TornB.sf, 
+               tid = "ID", 
+               source = US1990.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_1990", "TotalMale_1990", "MaleUnder18_1990",
+                             "Male18to44_1990", "Male45to64_1990", "MaleOver65_1990",
+                             "TotalFemale_1990", "FemaleUnder18_1990",
+                             "Female18to44_1990", "Female45to64_1990",
+                             "FemaleOver65_1990", "White_1990","Black_1990",
+                             "TotalHousingUnits_1990", "MobileHomes_1990"),
+               intensive = c("MedianIncome_1990"),
+               weight = "total", 
+               output = "sf")
+```
+
+
+
 
 Compare this estimate to our previous estimates
 
