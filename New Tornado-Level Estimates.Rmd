@@ -533,6 +533,9 @@ df1$MedianIncome = interpInc
 ```
 
 Run the same code for the 2000--2010 data.
+```{r}
+
+```
 
 
 
