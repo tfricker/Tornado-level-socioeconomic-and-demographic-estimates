@@ -215,7 +215,8 @@ US2010.sf = US2010.sf %>%
          FemaleUnder18_2010 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
          Female18to44_2010 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29
          + Female30.34 + Female35.39 + Female40.44,
-         Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61,
+         Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
+         + Female62.64,
          FemaleOver65_2010 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
          + Female80.84 + FemaleOver85,
          White_2010 = White,
@@ -223,7 +224,7 @@ US2010.sf = US2010.sf %>%
          TotalHousingUnits_2010 = TotalHousingUnits,
          MobileHomes_2010 = MobileHomes,
          MedianIncome_2010 = MedianIncome * 1.032,
-         MedianIncomeM_2010 = MedianIncomeM * 1.032)
+         MedianIncomeM = MedianIncomeM * 1.032)
 ```
 
 Try areal weighted interpolation
@@ -356,7 +357,7 @@ US1990.sf = US1990.sf %>%
          + Pop30.34 + Pop35.39 + Pop40.44) * .513),
          Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
          * .513),
-         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85) 
+         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85)
          * .513),
          White_1990 = White,
          Black_1990 = Black,
@@ -381,6 +382,10 @@ out1990.sf <- aw_interpolate(TornB.sf,
                output = "sf")
 ```
 
+Now there are three sf objects with interpolated variables (out2010.sf, out2000.sf, out1990.sf). Linearily interpolate these values for the specific year of tornado occurrence.
+```{r}
+
+```
 
 
 
