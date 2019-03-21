@@ -18,6 +18,7 @@ library(rgeos)
 library(rgdal)
 library(areal)
 library(tidycensus)
+library(ipumsr)
 ```
 
 ### Data and Methods
@@ -169,23 +170,21 @@ Mobile Homes (H030010/B25024_010E)
 Try downloading shapefile for Census tracts from IPUMS GIS.
 ```{r}
 Tracts_2010.sf <- read_sf(dsn = "2012_Tracts",
-                   stringsAsFactors = FALSE)
+                   stringsAsFactors = FALSE) %>%
+  mutate(STATEFP = as.numeric(STATEFP))
 ```
 
 Import IPUMS data
 ```{r}
-us2010 <- read.csv("2012ACS.csv", header = TRUE)
+us2010 <- read.csv("2012ACS.csv", header = TRUE) %>%
+  mutate(GISJOIN = as.character(GISJOIN))
 ```
 
 Merge the two data sets and remove data from states outside of the contiguous U.S.
 ```{r}
-US2010.sf <- us2010 %>%
-  mutate(ID2 = 1:nrow(us2010),
-    geometry = Tracts_2010.sf$geometry[us2010$GISJOIN]) %>%
-  st_as_sf()
-
-#US2010.sf$ID2 = 1:nrow(US2010.sf)
-#US2010.sf = st_as_sf(US2010.sf)
+US2010.sf <- ipums_shape_inner_join(us2010, Tracts_2010.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf()      
 
 us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
 # Take care of single digit state code
@@ -323,10 +322,9 @@ Tracts_1990.sf <- read_sf(dsn = "1990_Tracts",
 
 us1990 <- read.csv("1990Census_1.csv", header = TRUE)
 
-US1990.sf <- us1990 %>%
-  mutate(ID2 = 1:nrow(us1990),
-    geometry = Tracts_1990.sf$geometry[us1990$GISJOIN]) %>%
-  st_as_sf()
+US1990.sf <- ipums_shape_inner_join(us1990, Tracts_1990.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf() 
 
 us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
 # Take care of single digit state code
@@ -408,25 +406,25 @@ df1$TotalPop_2000[is.na(df1$TotalPop_2000)] = df1$TotalPop_1990[is.na(df1$TotalP
 
 # Males
 df1$TotalMale_2000[is.na(df1$TotalMale_2000)] = df1$TotalMale_1990[is.na(df1$TotalMale_2000)]
-df1$MaleUnder18_2000[is.na(df1$MaleUnder18_2000)] = df1$MaleUnder18_1990[is.na(df$MaleUnder18_2000)]
-df1$Male18to44_2000[is.na(df1$Male18to44_2000)] = df1$Male18to44_1990[is.na(df$Male18to44_2000)]
-df1$Male45to64_2000[is.na(df1$Male45to64_2000)] = df1$Male45to64_1990[is.na(df$Male45to64_2000)]
-df1$MaleOver65_2000[is.na(df1$MaleOver65_2000)] = df1$MaleOver65_1990[is.na(df$MaleOver65_2000)]
+df1$MaleUnder18_2000[is.na(df1$MaleUnder18_2000)] = df1$MaleUnder18_1990[is.na(df1$MaleUnder18_2000)]
+df1$Male18to44_2000[is.na(df1$Male18to44_2000)] = df1$Male18to44_1990[is.na(df1$Male18to44_2000)]
+df1$Male45to64_2000[is.na(df1$Male45to64_2000)] = df1$Male45to64_1990[is.na(df1$Male45to64_2000)]
+df1$MaleOver65_2000[is.na(df1$MaleOver65_2000)] = df1$MaleOver65_1990[is.na(df1$MaleOver65_2000)]
 
 # Females
 df1$TotalFemale_2000[is.na(df1$TotalFemale_2000)] = df1$TotalFemale_1990[is.na(df1$TotalFemale_2000)]
-df1$FemaleUnder18_2000[is.na(df1$FemaleUnder18_2000)] = df1$FemaleUnder18_1990[is.na(df$FemaleUnder18_2000)]
-df1$Female18to44_2000[is.na(df1$Female18to44_2000)] = df1$Female18to44_1990[is.na(df$Female18to44_2000)]
-df1$Female45to64_2000[is.na(df1$Female45to64_2000)] = df1$Female45to64_1990[is.na(df$Female45to64_2000)]
-df1$FemaleOver65_2000[is.na(df1$FemaleOver65_2000)] = df1$FemaleOver65_1990[is.na(df$FemaleOver65_2000)]
+df1$FemaleUnder18_2000[is.na(df1$FemaleUnder18_2000)] = df1$FemaleUnder18_1990[is.na(df1$FemaleUnder18_2000)]
+df1$Female18to44_2000[is.na(df1$Female18to44_2000)] = df1$Female18to44_1990[is.na(df1$Female18to44_2000)]
+df1$Female45to64_2000[is.na(df1$Female45to64_2000)] = df1$Female45to64_1990[is.na(df1$Female45to64_2000)]
+df1$FemaleOver65_2000[is.na(df1$FemaleOver65_2000)] = df1$FemaleOver65_1990[is.na(df1$FemaleOver65_2000)]
 
 # White and Black
-df1$White_2000[is.na(df1$White_2000)] = df1$White_1990[is.na(df$White_2000)]
-df1$Black_2000[is.na(df1$Black_2000)] = df1$Black_1990[is.na(df$Black_2000)]
+df1$White_2000[is.na(df1$White_2000)] = df1$White_1990[is.na(df1$White_2000)]
+df1$Black_2000[is.na(df1$Black_2000)] = df1$Black_1990[is.na(df1$Black_2000)]
 
 # Housing Units and Mobile Homes
-df1$TotalHousingUnits_2000[is.na(df1$TotalHousingUnits_2000)] = df1$TotalHousingUnits_1990[is.na(df$TotalHousingUnits_2000)]
-df1$MobileHomes_2000[is.na(df1$MobileHomes_2000)] = df1$MobileHomes_1990[is.na(df$MobileHomes_2000)]
+df1$TotalHousingUnits_2000[is.na(df1$TotalHousingUnits_2000)] = df1$TotalHousingUnits_1990[is.na(df1$TotalHousingUnits_2000)]
+df1$MobileHomes_2000[is.na(df1$MobileHomes_2000)] = df1$MobileHomes_1990[is.na(df1$MobileHomes_2000)]
 
 # Median Income
 df1$MedianIncome_2000[is.na(df1$MedianIncome_2000)] = df1$MedianIncome_1990[is.na(df1$MedianIncome_2000)]
@@ -439,25 +437,25 @@ df1$TotalPop_1990[is.na(df1$TotalPop_1990)] = df1$TotalPop_2000[is.na(df1$TotalP
 
 # Males
 df1$TotalMale_1990[is.na(df1$TotalMale_1990)] = df1$TotalMale_2000[is.na(df1$TotalMale_1990)]
-df1$MaleUnder18_1990[is.na(df1$MaleUnder18_1990)] = df1$MaleUnder18_2000[is.na(df$MaleUnder18_1990)]
-df1$Male18to44_1990[is.na(df1$Male18to44_1990)] = df1$Male18to44_2000[is.na(df$Male18to44_1990)]
-df1$Male45to64_1990[is.na(df1$Male45to64_1990)] = df1$Male45to64_2000[is.na(df$Male45to64_1990)]
-df1$MaleOver65_1990[is.na(df1$MaleOver65_1990)] = df1$MaleOver65_2000[is.na(df$MaleOver65_1990)]
+df1$MaleUnder18_1990[is.na(df1$MaleUnder18_1990)] = df1$MaleUnder18_2000[is.na(df1$MaleUnder18_1990)]
+df1$Male18to44_1990[is.na(df1$Male18to44_1990)] = df1$Male18to44_2000[is.na(df1$Male18to44_1990)]
+df1$Male45to64_1990[is.na(df1$Male45to64_1990)] = df1$Male45to64_2000[is.na(df1$Male45to64_1990)]
+df1$MaleOver65_1990[is.na(df1$MaleOver65_1990)] = df1$MaleOver65_2000[is.na(df1$MaleOver65_1990)]
 
 # Females
 df1$TotalFemale_1990[is.na(df1$TotalFemale_1990)] = df1$TotalFemale_2000[is.na(df1$TotalFemale_1990)]
-df1$FemaleUnder18_1990[is.na(df1$FemaleUnder18_1990)] = df1$FemaleUnder18_2000[is.na(df$FemaleUnder18_1990)]
-df1$Female18to44_1990[is.na(df1$Female18to44_1990)] = df1$Female18to44_2000[is.na(df$Female18to44_1990)]
-df1$Female45to64_1990[is.na(df1$Female45to64_1990)] = df1$Female45to64_2000[is.na(df$Female45to64_1990)]
-df1$FemaleOver65_1990[is.na(df1$FemaleOver65_1990)] = df1$FemaleOver65_2000[is.na(df$FemaleOver65_1990)]
+df1$FemaleUnder18_1990[is.na(df1$FemaleUnder18_1990)] = df1$FemaleUnder18_2000[is.na(df1$FemaleUnder18_1990)]
+df1$Female18to44_1990[is.na(df1$Female18to44_1990)] = df1$Female18to44_2000[is.na(df1$Female18to44_1990)]
+df1$Female45to64_1990[is.na(df1$Female45to64_1990)] = df1$Female45to64_2000[is.na(df1$Female45to64_1990)]
+df1$FemaleOver65_1990[is.na(df1$FemaleOver65_1990)] = df1$FemaleOver65_2000[is.na(df1$FemaleOver65_1990)]
 
 # White and Black
-df1$White_1990[is.na(df1$White_1990)] = df1$White_2000[is.na(df$White_1990)]
-df1$Black_1990[is.na(df1$Black_1990)] = df1$Black_2000[is.na(df$Black_1990)]
+df1$White_1990[is.na(df1$White_1990)] = df1$White_2000[is.na(df1$White_1990)]
+df1$Black_1990[is.na(df1$Black_1990)] = df1$Black_2000[is.na(df1$Black_1990)]
 
 # Housing Units and Mobile Homes
-df1$TotalHousingUnits_1990[is.na(df1$TotalHousingUnits_1990)] = df1$TotalHousingUnits_2000[is.na(df$TotalHousingUnits_1990)]
-df1$MobileHomes_1990[is.na(df1$MobileHomes_1990)] = df1$MobileHomes_2000[is.na(df$MobileHomes_1990)]
+df1$TotalHousingUnits_1990[is.na(df1$TotalHousingUnits_1990)] = df1$TotalHousingUnits_2000[is.na(df1$TotalHousingUnits_1990)]
+df1$MobileHomes_1990[is.na(df1$MobileHomes_1990)] = df1$MobileHomes_2000[is.na(df1$MobileHomes_1990)]
 
 # Median Income
 df1$MedianIncome_1990[is.na(df1$MedianIncome_1990)] = df1$MedianIncome_2000[is.na(df1$MedianIncome_1990)]
@@ -520,7 +518,7 @@ df1$MaleUnder18 = interpMalesUnder18
 df1$Male18to44 = interpMales18to44
 df1$Male45to64 = interpMales45to64
 df1$MaleOver65 = interpMalesOver65
-df1$TotalFemal = interpFemales
+df1$TotalFemale = interpFemales
 df1$FemaleUnder18 = interpFemalesUnder18
 df1$Female18to44 = interpFemales18to44
 df1$Female45to64 = interpFemales45to64
@@ -532,11 +530,140 @@ df1$MobileHomes = interpMobileHomes
 df1$MedianIncome = interpInc
 ```
 
-Run the same code for the 2000--2010 data.
+Run the same code for the 2000--2010 data. Start with missing 2010 data.
 ```{r}
+# Total Pop
+df2$TotalPop_2010[is.na(df2$TotalPop_2010)] = df2$TotalPop_2000[is.na(df2$TotalPop_2010)]
 
+# Males
+df2$TotalMale_2010[is.na(df2$TotalMale_2010)] = df2$TotalMale_2000[is.na(df2$TotalMale_2010)]
+df2$MaleUnder18_2010[is.na(df2$MaleUnder18_2010)] = df2$MaleUnder18_2000[is.na(df2$MaleUnder18_2010)]
+df2$Male18to44_2010[is.na(df2$Male18to44_2010)] = df2$Male18to44_2000[is.na(df2$Male18to44_2010)]
+df2$Male45to64_2010[is.na(df2$Male45to64_2010)] = df2$Male45to64_2000[is.na(df2$Male45to64_2010)]
+df2$MaleOver65_2010[is.na(df2$MaleOver65_2010)] = df2$MaleOver65_2000[is.na(df2$MaleOver65_2010)]
+
+# Females
+df2$TotalFemale_2010[is.na(df2$TotalFemale_2010)] = df2$TotalFemale_2000[is.na(df2$TotalFemale_2010)]
+df2$FemaleUnder18_2010[is.na(df2$FemaleUnder18_2010)] = df2$FemaleUnder18_2000[is.na(df2$FemaleUnder18_2010)]
+df2$Female18to44_2010[is.na(df2$Female18to44_2010)] = df2$Female18to44_2000[is.na(df2$Female18to44_2010)]
+df2$Female45to64_2010[is.na(df2$Female45to64_2010)] = df2$Female45to64_2000[is.na(df2$Female45to64_2010)]
+df2$FemaleOver65_2010[is.na(df2$FemaleOver65_2010)] = df2$FemaleOver65_2000[is.na(df2$FemaleOver65_2010)]
+
+# White and Black
+df2$White_2010[is.na(df2$White_2010)] = df2$White_2000[is.na(df2$White_2010)]
+df2$Black_2010[is.na(df2$Black_2010)] = df2$Black_2000[is.na(df2$Black_2010)]
+
+# Housing Units and Mobile Homes
+df2$TotalHousingUnits_2010[is.na(df2$TotalHousingUnits_2010)] = df2$TotalHousingUnits_2000[is.na(df2$TotalHousingUnits_2010)]
+df2$MobileHomes_2010[is.na(df2$MobileHomes_2010)] = df2$MobileHomes_2000[is.na(df2$MobileHomes_2010)]
+
+# Median Income
+df2$MedianIncome_2010[is.na(df2$MedianIncome_2010)] = df2$MedianIncome_2000[is.na(df2$MedianIncome_2010)]
 ```
 
+Next, move onto missing 2000 data.
+```{r}
+# Total Pop
+df2$TotalPop_2000[is.na(df2$TotalPop_2000)] = df2$TotalPop_2010[is.na(df2$TotalPop_2000)]
+
+# Males
+df2$TotalMale_2000[is.na(df2$TotalMale_2000)] = df2$TotalMale_2010[is.na(df2$TotalMale_2000)]
+df2$MaleUnder18_2000[is.na(df2$MaleUnder18_2000)] = df2$MaleUnder18_2010[is.na(df2$MaleUnder18_2000)]
+df2$Male18to44_2000[is.na(df2$Male18to44_2000)] = df2$Male18to44_2010[is.na(df2$Male18to44_2000)]
+df2$Male45to64_2000[is.na(df2$Male45to64_2000)] = df2$Male45to64_2010[is.na(df2$Male45to64_2000)]
+df2$MaleOver65_2000[is.na(df2$MaleOver65_2000)] = df2$MaleOver65_2010[is.na(df2$MaleOver65_2000)]
+
+# Females
+df2$TotalFemale_2000[is.na(df2$TotalFemale_2000)] = df2$TotalFemale_2010[is.na(df2$TotalFemale_2000)]
+df2$FemaleUnder18_2000[is.na(df2$FemaleUnder18_2000)] = df2$FemaleUnder18_2010[is.na(df2$FemaleUnder18_2000)]
+df2$Female18to44_2000[is.na(df2$Female18to44_2000)] = df2$Female18to44_2010[is.na(df2$Female18to44_2000)]
+df2$Female45to64_2000[is.na(df2$Female45to64_2000)] = df2$Female45to64_2010[is.na(df2$Female45to64_2000)]
+df2$FemaleOver65_2000[is.na(df2$FemaleOver65_2000)] = df2$FemaleOver65_2010[is.na(df2$FemaleOver65_2000)]
+
+# White and Black
+df2$White_2000[is.na(df2$White_2000)] = df2$White_2010[is.na(df2$White_2000)]
+df2$Black_2000[is.na(df2$Black_2000)] = df2$Black_2010[is.na(df2$Black_2000)]
+
+# Housing Units and Mobile Homes
+df2$TotalHousingUnits_2000[is.na(df2$TotalHousingUnits_2000)] = df2$TotalHousingUnits_2010[is.na(df2$TotalHousingUnits_2000)]
+df2$MobileHomes_2000[is.na(df2$MobileHomes_2000)] = df2$MobileHomes_2010[is.na(df2$MobileHomes_2000)]
+
+# Median Income
+df2$MedianIncome_2000[is.na(df2$MedianIncome_2000)] = df2$MedianIncome_2010[is.na(df2$MedianIncome_2000)]
+
+df2 = na.omit(df2)
+```
+
+Run the function for 2000--2016 tornadoes
+```{r}
+# Total Population
+
+interpPop = lin_interpolate(c(2000, 2010), df2$TotalPop_2000, df2$TotalPop_2010, df2)
+
+# Male Population
+interpMales = lin_interpolate(c(2000, 2010), df2$TotalMale_2000, df2$TotalMale_2010, df2)
+interpMalesUnder18 = lin_interpolate(c(2000, 2010), df2$MaleUnder18_2000, df2$MaleUnder18_2010, df2)
+interpMales18to44 = lin_interpolate(c(2000, 2010), df2$Male18to44_2000, df2$Male18to44_2010, df2)
+interpMales45to64 = lin_interpolate(c(2000, 2010), df2$Male45to64_2000, df2$Male45to64_2010, df2)
+interpMalesOver65 = lin_interpolate(c(2000, 2010), df2$MaleOver65_2000, df2$MaleOver65_2010, df2)
+
+# Female Population
+interpFemales = lin_interpolate(c(2000, 2010), df2$TotalFemale_2000, df2$TotalFemale_2010, df2)
+interpFemalesUnder18 = lin_interpolate(c(2000, 2010), df2$FemaleUnder18_2000, df2$FemaleUnder18_2010, df2)
+interpFemales18to44 = lin_interpolate(c(2000, 2010), df2$Female18to44_2000, df2$Female18to44_2010, df2)
+interpFemales45to64 = lin_interpolate(c(2000, 2010), df2$Female45to64_2000, df2$Female45to64_2010, df2)
+interpFemalesOver65 = lin_interpolate(c(2000, 2010), df2$FemaleOver65_2000, df2$FemaleOver65_2010, df2)
+
+# White and Black
+interpWhite = lin_interpolate(c(2000, 2010), df2$White_2000, df2$White_2010, df2)
+interpBlack = lin_interpolate(c(2000, 2010), df2$Black_2000, df2$Black_2010, df2)
+
+# Housing Units and Mobile Homes
+interpHousingUnits = lin_interpolate(c(2000, 2010), df2$TotalHousingUnits_2000, df2$TotalHousingUnits_2010, df2)
+interpMobileHomes = lin_interpolate(c(2000, 2010), df2$MobileHomes_2000, df2$MobileHomes_2010, df2)
+
+# Median Income
+interpInc = lin_interpolate(c(2000, 2010), df2$MedianIncome_2000, df2$MedianIncome_2010, df2)
+```
+
+Now pair the interpolations to variables in the dataframe.
+```{r}
+df2$TotalPop = interpPop
+df2$TotalMale = interpMales
+df2$MaleUnder18 = interpMalesUnder18
+df2$Male18to44 = interpMales18to44
+df2$Male45to64 = interpMales45to64
+df2$MaleOver65 = interpMalesOver65
+df2$TotalFemale = interpFemales
+df2$FemaleUnder18 = interpFemalesUnder18
+df2$Female18to44 = interpFemales18to44
+df2$Female45to64 = interpFemales45to64
+df2$FemaleOver65 = interpFemalesOver65
+df2$White = interpWhite
+df2$Black = interpBlack
+df2$TotalHousingUnits = interpHousingUnits
+df2$MobileHomes = interpMobileHomes
+df2$MedianIncome = interpInc
+```
+
+Merge the two data frames now
+```{r}
+# Find which columns to leave out
+which(colnames(df1) == "TotalPop_1990")
+which(colnames(df1) == "TotalPop")
+which(colnames(df2) == "TotalPop_2000")
+
+
+Early.df <- df1[,-c(34:65)]
+Late.df <- df2[,-c(34:65)]
+
+SocialCorrelates.sf <- rbind(Early.df, Late.df) %>%
+  mutate(ID = 1:nrow(.)) %>%
+  st_as_sf()
+
+st_write(SocialCorrelates.sf, "SocialCorrelatesNew.shp")
+
+```
 
 
 
