@@ -127,7 +127,9 @@ TornB.sf <- TornB.sf %>%
   filter(Year <= 2016)
 ```
 
-Play with Areal Package and TidyCensus package. Start with a small set of the data and work up.
+Play with Areal Package and TidyCensus package. Start with a small set of the data and work up. 
+
+**This code has been run and is available starting on line 665**
 
 Socioeconomic/Demographic data:
 
@@ -662,9 +664,7 @@ SocialCorrelates.sf <- rbind(Early.df, Late.df) %>%
   st_as_sf()
 
 st_write(SocialCorrelates.sf, "SocialCorrelatesNew.shp")
-
 ```
-
 
 
 
