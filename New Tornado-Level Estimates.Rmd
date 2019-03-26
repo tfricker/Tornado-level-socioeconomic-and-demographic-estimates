@@ -666,13 +666,354 @@ SocialCorrelates.sf <- rbind(Early.df, Late.df) %>%
 st_write(SocialCorrelates.sf, "SocialCorrelatesNew.shp")
 ```
 
+Import `SocialCorrelatesNew.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
+```{r}
+TornSC.sf <- st_read(dsn = "SocialCorrelatesNew", 
+                    layer = "SocialCorrelatesNew", 
+                    stringsAsFactors = FALSE)
+```
+
+Make new columns including total population by age
+```{r}
+TornSC.sf$popD = TornSC.sf$TotalPp/TornSC.sf$AreaPth * 10^6
+TornSC.sf$PopUnder18 = TornSC.sf$MlUnd18 + TornSC.sf$FmlUn18
+TornSC.sf$Pop18to44 = TornSC.sf$Ml18t44 + TornSC.sf$Fml1844
+TornSC.sf$Pop45to64 = TornSC.sf$Ml45t64 + TornSC.sf$Fml4564
+TornSC.sf$PopOver65 = TornSC.sf$MlOvr65 + TornSC.sf$FmlOv65
+```
+
+Maps of casualty producing tornadoes
+```{r}
+library(tmaptools)
+#download.file("http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_state_20m.zip", destfile = "states.zip")
+#unzip("states.zip")
+
+us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+us_geo = subset(us_geo, !(NAME %in% c("Alaska", "Hawaii", "Puerto Rico")))
+colnames(us_geo)[5] = "st"
+
+us_geo = us_geo %>%
+  dplyr::select("st", "NAME" ,"geometry")
+
+sfdf = TornSC.sf
+
+tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf) +
+  tm_polygons(col = "black") +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_format('World', legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+```
+
+Idealized model of the dasymetric procedure.
+```{r}
+EF0m = matrix(c(0, 0, 200, 200, 0, 0, 50, 50, 0, 0), 
+              nrow = 5, ncol = 2)
+EF1m = matrix(c(52.9, 52.9, 147.1, 147.1, 52.9, 13.225, 36.775, 36.775, 13.225, 13.225),
+              nrow = 5, ncol = 2)
+EF2m = matrix(c(80, 80, 120, 120, 80, 20, 30, 30, 20, 20), 
+              nrow = 5, ncol = 2)
+EF3m = matrix(c(93.3, 93.3, 106.7, 106.7, 93.3, 23.325, 26.675, 26.675, 23.325, 23.325), 
+              nrow = 5, ncol = 2)
+trackm = matrix(c(-20, 25, 220, 25), nrow = 2, ncol = 2, byrow = TRUE)
+
+theta = -pi/6
+rot = matrix(c(cos(theta), -sin(theta), sin(theta), cos(theta)),
+             nrow = 2, ncol = 2, byrow = TRUE)
+EF0r = EF0m %*% rot
+EF1r = EF1m %*% rot
+EF2r = EF2m %*% rot
+EF3r = EF3m %*% rot
+trackr = trackm %*% rot
+
+EF0 = Polygons(list(Polygon(EF0r)), 0)
+EF1 = Polygons(list(Polygon(EF1r)), 1)
+EF2 = Polygons(list(Polygon(EF2r)), 2)
+EF3 = Polygons(list(Polygon(EF3r)), 3)
+spsNRC3 = SpatialPolygons(list(EF0, EF1, EF2, EF3))
+
+spsNRC3A.df = fortify(spsNRC3)
+spsNRC3A.df$EF = paste("EF", spsNRC3A.df$id, sep = "")
+
+box1 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(0, 50, 50, 0, 0))
+box2 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(0, 50, 50, 0, 0))
+box3 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(0, 50, 50, 0, 0))
+box4 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(0, 50, 50, 0, 0))
+box5 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(0, 50, 50, 0, 0))
+box6 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(50, 100, 100, 50, 50))
+box7 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(50, 100, 100, 50, 50))
+box8 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(50, 100, 100, 50, 50))
+box9 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(50, 100, 100, 50, 50))
+box10 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(50, 100, 100, 50, 50))
+box11 = data.frame(long = c(-50, -50, 0, 0, -50),
+                 lat = c(100, 150, 150, 100, 100))
+box12 = data.frame(long = c(0, 0, 50, 50, 0),
+                 lat = c(100, 150, 150, 100, 100))
+box13 = data.frame(long = c(50, 50, 100, 100, 50),
+                 lat = c(100, 150, 150, 100, 100))
+box14 = data.frame(long = c(100, 100, 150, 150, 100),
+                 lat = c(100, 150, 150, 100, 100))
+box15 = data.frame(long = c(150, 150, 200, 200, 150),
+                 lat = c(100, 150, 150, 100, 100))
+
+box.df = rbind(box1, box2, box3, box4, box5, box6, box7, box8, box9, box10, box11, box12, box13, box14, box15)
+box.df$inc = rep(c("< $10,000", "$10,000 - $20,000", "$30,001 - $40,000", "$10,000 - $20,000", "< $10,000", "< $10,000", "$20,001 - $30,000", "> $40,000", "$20,001 - $30,000", "< $10,000", "< $10,000", "$10,000 - $20,000", "$30,001 - $40,000", "$10,000 - $20,000", "< $10,000"), each = 5)
+box.df$id = rep(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), each = 5)
+
+lims = c("< $10,000", "$10,000 - $20,000", "$20,001 - $30,000", "$30,001 - $40,000", "> $40,000")
+brks = c("< $10,000", "$10,000 - $20,000", "$20,001 - $30,000", "$30,001 - $40,000", "> $40,000") 
+vals = c("#edf8e9", "#bae4b3", "#74c476", "#31a354", "#006d2c") 
+
+ggplot(spsNRC3A.df[spsNRC3A.df$EF == "EF0", ], aes(x = long, y = lat)) +
+  scale_x_continuous(limits = c(-50, 200)) +
+  scale_y_continuous(limits = c(0, 150)) +
+  coord_fixed() +
+  geom_polygon(mapping = aes(long, lat, fill = factor(inc), group = id), data = box.df) +
+  geom_polygon(mapping = aes(long, lat, fill = factor(inc), group = id), data = box.df, color = "white", show_guide=FALSE) +
+  geom_polygon(fill = "transparent", color = "black") +
+  scale_fill_manual(name = expression("Household Median Income\n(USD)"), limits = lims, breaks = brks, values = vals) +
+  geom_segment(x = trackr[1, 1], xend = trackr[2, 1], y = trackr[1, 2], yend = trackr[2, 2],
+               arrow = grid::arrow(length = grid::unit(.6, "cm"), type = "closed"), size = 1.0, color = "black") +
+  xlab("") + ylab("") +
+   theme(panel.background = element_blank(),
+        panel.grid.major = element_line(colour = "gray", size = .25, linetype = 'dashed'),
+        panel.grid.minor = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        strip.background = element_blank()) 
+```
+
+### Results
+
+The procedure results in estimates of 12 variables that can be analyzed independently or in combination with the other attributes. 
+```{r}
+summary(TornSC.sf$TotalPp); summary(TornSC.sf$popD)
+
+df = data.frame(TornSC.sf) %>%
+  arrange(desc(TotalPp))
+df = df[1:10,] %>%
+  dplyr::select(date, st, inj, fat, cas, TotalPp)
+df
+```
+
+For the set of 2,201 tornadoes, the median total population is 33.68 people with an interquartile range between 3.71 and 198 people. The median population density is 20.1 people per square kilometer with an interquartile range between 7.83 and 65.63 people per square kilometer. It is estimated that as many as 101,752 people were in the path of the Detroit, Michigan, EF2 tornado on 2 July 1997 resulting in 90 injuries. Of the top ten tornadoes ranked by total population, only one (1997 Detroit, Michigan tornado) is estimated to have impacted over 100,000 people. The next closest tornado (2013 St. Louis, Missouri tornado) is estimated to have impacted almost 70,000 fewer people at 36,839.
+
+```{r}
+summary(TornSC.sf$TotalMl); summary(TornSC.sf$TotlFml)
+summary(TornSC.sf$White); summary(TornSC.sf$Black)
+```
+
+For the same set of tornadoes, the median number of males is 16.9 with an interquartile range between 1.9 and 98. Similarly, the median number of females is 16.9 with and interquartile range between 1.9 and 100. The median white population is 26.8 people with an interquartile range between 2.82 and 155 people, and the median black population is 0.85 people with an interquartile range between 0.04 and 13.2 people. On average, casualty-producing tornadoes have impacted nearly three times as many whites (344 people) as blacks (130 people).
+
+```{r}
+summary(TornSC.sf$MdnIncm); summary(TornSC.sf$MoblHms)
+df = data.frame(TornSC.sf) %>%
+  arrange(desc(MoblHms))
+df = df[1:10,] %>%
+  dplyr::select(date, st, inj, fat, cas, MoblHms)
+df
+```
+
+Additionally, the median household median income is \$46,988 with an interquartile range between \$39,559 and \$56,366 and the median number of mobile homes is 1.68 with an interquartile range between .18 and 9.5. It is estimated that as many as 821 mobile homes were in the path of the Hackleburg--Phil Campbell, Alabama EF5 tornado on 27 April 2011 resulting in 145 injuries and 72 deaths. Of the top 10 tornadoes ranked by the number of mobile homes, only two (1999 Bridge Creek--Moore, Oklahoma and 2012 Wichita, Kansas tornadoes) occurred in states outside of the Southeast. Five of the top 10 tornadoes ranked by the number of mobile homes occurred in the state of Alabama alone.
+
+### Validation
+
+Our method is validated by comparing results with demographic statistics of fatalities available in the Storm Events database (https://www.ncdc.noaa.gov/stormevents/). The database records all tornado segments from 1950 through 2016. The tornado segments are divided by county and each segment includes both an episode narrative and event narrative. Event fatality data are available within each event and include the type of death (direct or indirect) along with the age, sex, and location (if known) of the victim. No information about injuries is available.
+
+To link the tornado in the SPC database with the associated tornado segments in the Storm Events database, we use information available in both data sources (e.g. state of occurrence, and number of deaths). For example, the 2011 Joplin, Missouri tornado caused 158 direct deaths. To find this tornado in the Storm Events database, we search for Missouri in the State/Area drop down menu. Next, we choose May 22, 2011 as the begin and end date, and tornado as the event type. After sorting by Death/Injury, the Storm Events database shows an event occurring in Jasper County, Missouri that caused 158 deaths. Choosing the hyper-linked location opens the Storm Events database, where information on the number of deaths, as well as the ages and sex of the fatalities exist.
+
+```{r}
+validation.df = data.frame(om = c(296616, 1147, 140, 634, 613600, 266, 133, 1253, 69, 850, 558, 893, 23, 22, 161, 289605, 833, 305268, 504758, 610234, 368708, 914, 877, 783),
+                          date = c("2011-05-22", "1999-05-03", "2010-04-24", "2000-02-13", "2016-02-24", "2006-04-02", "2008-02-05", "2005-11-06", "1996-03-06", "1999-04-09", "2010-06-05", "1998-02-22", "2007-02-02", "2007-02-02", "2008-02-06", "2011-04-25", "1998-04-08", "2011-04-27", "2014-04-27", "2015-12-23", "2012-03-02", "2002-11-10", "1998-04-16", "1998-04-16") ,
+                          fat = c(158, 36, 10, 11, 3, 16, 22, 24, 4, 4, 7, 25, 13, 8, 4, 4, 32, 20, 16, 9, 6, 4, 2, 2),
+                          EstimatedMale = c(74.7, 17.7, 5.1, 6.1, 1.6, 7.8, 11, 11.6, 1.9, 2, 3.5, 12.7, 6, 3.8, 2.1, 2.1, 15.1, 9.9, 8.1, 4.4, 3, 2, 1, 1),
+                          ActualMale = c(73, 15, 4, 2, 3, 9, 14, 11, 2, 3, 4, 13, 7, 3, 2, 3, 13, 10, 9, 4, 2, 3, 1, 2),
+                          EstimatedFemale = c(83.3, 18.3, 4.9, 4.9, 1.4, 8.2, 11, 12.4, 2.1, 2, 3.5, 12.3, 7, 4.2, 1.9, 1.9, 16.9, 10.1, 7.9, 4.6, 3, 2, 1, 1),
+                          ActualFemale = c(85, 21, 6, 9, 0, 7, 8, 13, 2, 1, 3, 12, 6, 5, 2, 1, 19, 10, 7, 5, 4, 1, 1, 0),
+                          EstimatedUnder17 = c(33.9, 9.5, 2.6, 2.5, 0.4, 3.9, 5.4, 6.1, 1.1, 1.2, 1.6, 5.8, 3.3, 1, 0.8, 1, 7.4, 5.1, 4.2, 2.2, 1.5, 1.1, 0.5, 0.5),
+                          ActualUnder17 = c(13, 3, 3, 2, 1, 2, 1, 4, 1, 0, 1, 1, 3, 1, 1, 0, 4, 3, 4, 1, 0, 0, 0, 0),
+                          Estimated18to44 = c(48.9, 14.5, 3.5, 5.2, 1.2, 5.5, 7.5, 8.7, 1.5, 1.3, 2.2, 9.1, 4.1, 1.4, 1.1, 1.4, 11.4, 7.6, 5.6, 3.3, 1.9, 1.5, 0.7, 0.8),
+                          Actual18to44 = c(32, 15, 1, 4, 1, 5, 7, 9, 0, 2, 3, 7, 3, 1, 0, 0, 5, 5, 3, 1, 1, 1, 0, 0),
+                          Estimated45to64 = c(47.3, 8.4, 2.5, 2.2, 0.9, 4.4, 6.1, 6.1, 1, 1.1, 2.2, 6.5, 3.3, 2.4, 1.3, 1.1, 8.3, 5, 4.4, 2.3, 1.8, 0.9, 0.6, 0.5),
+                          Actual45to64 = c(55, 10, 4, 5, 1, 4, 8, 9, 2, 2, 2, 7, 6, 0, 3, 4, 10, 8, 7, 3, 3, 0, 2, 1),
+                          EstimatedOver65 = c(27.9, 3.6, 1.4, 1.1, 0.5, 2.2, 3, 3.1, 0.4, 0.4, 1, 3.6, 2.3, 3.2, 0.8, 0.5, 4.9, 2.3, 1.8, 1.2, 0.8, 0.5, 0.2, 0.2),
+                          ActualOver65 = c(58, 8, 2, 0, 0, 5, 6, 2, 1, 0, 1, 10, 1, 6, 0, 0, 13, 4, 2, 4, 2, 3, 0, 1))
+
+```
+
+Estimated deaths by age and sex from our methodology are compared to observed deaths for two dozen tornadoes.
+
+Begin with sex.
+```{r}
+A = validation.df %>%
+  ggplot(aes(x = ActualMale, y = EstimatedMale)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Male Deaths") +
+  ylab("Estimated Male Deaths") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+B = validation.df %>%
+  ggplot(aes(x = ActualFemale, y = EstimatedFemale)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Female Deaths") +
+  ylab("Estimated Female Deaths") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+```
+
+Plot together.
+```{r}
+source("http://peterhaschke.com/Code/multiplot.R")
+mat = matrix(c(1, 2), nrow = 1, byrow = TRUE)
+A = A + ggtitle("A") + 
+  theme(plot.title=element_text(hjust=0))
+B = B + ggtitle("B") + 
+  theme(plot.title=element_text(hjust=0))
+multiplot(A, B, layout = mat)
+```
+
+```{r}
+cor.test(validation.df$EstimatedMale, validation.df$ActualMale)
+cor.test(validation.df$EstimatedFemale, validation.df$ActualFemale)
+cor.test(validation.df$EstimatedUnder17, validation.df$ActualUnder17)
+cor.test(validation.df$Estimated18to44, validation.df$Actual18to44)
+cor.test(validation.df$Estimated45to64, validation.df$Actual45to64)
+cor.test(validation.df$EstimatedOver65, validation.df$ActualOver65)
+```
+
+The tornadoes were chosen to create a wide range of possible fatality estimates. Of these tornadoes, the average number of deaths is 18.3 with a minimum of 2 and a maximum of 158. The Pearson correlation between observed and estimated male deaths is 0.99 and the correlation between observed and estimated female deaths is 0.99, both indicating a very strong relationship. The Pearson correlation between observed and estimated deaths for people under the age of 17 is 0.93 and the correlation between observed and estimated deaths for people 18 to 44, people 45 to 64, and people over 65 is 0.97, 0.99, and 0.99, respectively.
+
+
+### Discussion
+
+Having accurate estimates of socioeconomic and demographic variables at the tornado level allows us to infer aggregate demographics. For instance, using the ratio of the white population relative to total population, the number of white casualties per tornado can be estimated. Similarly, using the ratio of the black population relative to total population, the number of black casualties per tornado can be inferred.
+```{r}
+sfdf = TornSC.sf %>%
+  mutate(ratioW = White/TotalPp,
+         WhiteCas = cas * ratioW,
+         ratioB = Black/TotalPp,
+         BlackCas = cas * ratioB) %>%
+  arrange(desc(BlackCas))
+
+sfdf2 = sfdf[1:10,]
+
+sfdf = sfdf %>%
+  arrange(desc(WhiteCas))
+
+sfdf3 = sfdf[1:10,]
+
+A = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf3) +
+  tm_bubbles("WhiteCas", col = "red", alpha = 0.3, sizes.legend = c(200, 400, 800, 1200), title.size="Estimated White Casualties", scale = 5/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_style('white', title="A") +
+  tm_format('World', legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+
+B = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf2) +
+  tm_bubbles("BlackCas", col = "blue", sizes.legend = c(200, 400, 800, 1200), alpha = 0.3, title.size="Estimated Black Casualties", scale = 4/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_style('white', title="B") +
+  tm_format('World', legend.position = c("left", "bottom"),
+                    attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+
+tmap_arrange(A, B, ncol = 1)
+```
+
+The median number of white casualties for the set of 2,201 tornadoes is 1.96 people with an interquartile range of 0.97 and 5.61 people. In comparison, the median number of black casualties for the same set of tornadoes is 0.12 people with an interquartile range of 0.01 and 0.63. The average number of white casualties is 9.19 people and the average number of black casualties is 1.91 people. Of the top 10 tornadoes ranked by white casualties, three occurred in the state of Oklahoma, two in the state of Alabama, and one in Arkansas, Kentucky, Missouri, Georgia, and Texas. Of the top 10 tornadoes ranked by black casualties, only one (1997 Detroit, Michigan tornado) occurred in a state outside of the Southeast.
+
+Using the ratio of the young population (under 17) relative to total population, the number of young casualties per tornado can be estimated. Similarly, using the ratio of the elderly population (over 65) relative to total population, the number of elderly casualties per tornado can be estimated.
+```{r}
+sfdf = TornSC.sf %>%
+  mutate(ratioU = PopUnder18/TotalPp,
+         YoungCas = cas * ratioU,
+         ratioO = PopOver65/TotalPp,
+         OldCas = cas * ratioO) %>%
+  arrange(desc(YoungCas))
+
+sfdf2 = sfdf[1:10,]
+
+sfdf = sfdf %>%
+  arrange(desc(OldCas))
+
+sfdf3 = sfdf[1:10,]
+
+A = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf2) +
+  tm_bubbles("YoungCas", col = "red", alpha = 0.3, sizes.legend = c(100, 200, 300, 400), title.size="Estimated Young Casualties", scale = 5/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_style('white', title="A") +
+  tm_format('World', legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  #tm_compass(position = c("RIGHT", "bottom")) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+
+B = tm_shape(us_geo, projection ="+init=epsg:2163") +
+  tm_borders() +
+  tm_shape(sfdf3) +
+  tm_bubbles("OldCas", col = "blue", sizes.legend = c(100, 200, 300, 400), alpha = 0.3, title.size="Estimated Elderly Casualties", scale = 4/3) +
+  tm_shape(us_geo) + 
+  tm_borders(col = "grey", alpha = 0.3) +
+  tm_style('white', title="B") +
+  tm_format('World', legend.position = c("left", "bottom"),
+                    attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_scale_bar(position = c("right", "bottom")) +
+  tm_layout(frame = FALSE, attr.outside=TRUE)
+
+tmap_arrange(A, B, ncol = 1)
+```
+
+The median number of young casualties for the set of 2,201 tornadoes is 0.64 people with an interquartile range of 0.28 and 1.78. In comparison, the median number of elderly casualties is 0.37 with an interquartile range of 0.17 and 0.99. The average number of young casualties is 2.91 and the average number of elderly casualties is 1.64. Of the top 10 tornadoes ranked by young and elderly casualties, only one (1998 Spencer, South Dakota tornado) occurred in a state outside the southern Great Plains or Southeast.
 
 
 
 
 
 
-
+### OLD CODE
 Compare this estimate to our previous estimates
 
 Import `SocialCorrelates.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
