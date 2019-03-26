@@ -36,6 +36,7 @@ suppressPackageStartupMessages(library("MASS"))
 suppressPackageStartupMessages(library("tmap"))
 suppressPackageStartupMessages(library("tmaptools"))
 suppressPackageStartupMessages(library("areal"))
+suppressPackageStartupMessages(library("ipumsr"))
 #load(file = "January10.RData")
 ```
 
@@ -408,14 +409,26 @@ tm_shape(xx[xx$Name == "Brookport, IL",]) +
   tm_layout(frame = FALSE)
 ```
 
-
+OLD CODE
 ```{r}
 xx = sfdf %>%
   filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 614437 | sfdf$om == 613862 | sfdf$om == 296616 | sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 | sfdf$om == 306606 | sfdf$om == 305917 | sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 613642)
 
 xx = rename(xx, "Name" = "om")
-xx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
+xx$Name = c("Tuscaloosa-Birmingham, AL", "Arab, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
 xx = xx[,c(1,54)]
+#xx = xx[c(2,5,9,15),]
+#yy = TornDAT.sfdf[c(1,5,6,16),]
+```
+
+NEW CODE
+```{r}
+xxx = sfdf %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 614437 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
+
+xxx = rename(xxx, "Name" = "om")
+xxx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL", "Lutts, TN")
+xxx = xxx[,c(1,54)]
 #xx = xx[c(2,5,9,15),]
 #yy = TornDAT.sfdf[c(1,5,6,16),]
 ```
@@ -445,7 +458,7 @@ us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
 
 US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
 
-US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornSC.sf))
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornDAT.sfdf))
 ```
 
 ** This fixes the problem with tidycensus for 2010 ** 
@@ -490,7 +503,7 @@ cities.sfdf = sf::st_as_sf(us.cities)
 tm_shape(TornDAT.sfdf) +
   tm_polygons(col = "red", alpha = 0.3) +
   tm_facets("Name", nrow = 5) +
-  tm_shape(xx) +
+  tm_shape(xxx) +
   tm_polygons(col = "blue", alpha = 0.3) +
   tm_facets("Name", nrow = 5) +
   tm_shape(US2010.sf) + 
@@ -516,15 +529,13 @@ tm_shape(yy) +
   tm_layout(frame = FALSE)
 ```
 
-
-
 ```{r}
-tm_shape(TornDAT.sfdf[c(6,7,9,10),]) +
+tm_shape(TornDAT.sfdf[3,]) +
   tm_polygons(col = "red", alpha = 0.3) +
-  tm_facets("Name", ncol = 2) +
-  tm_shape(xx[c(4,6,7,10),]) +
-  tm_polygons(col = "blue", alpha = 0.3) +
-  tm_facets("Name", ncol = 2) +
+  tm_shape(xx[19,]) +
+  tm_polygons(col = "blue", alpha = 0.3)
+
+
   tm_shape(us2010.sfdf) + 
   tm_borders(col = "black", alpha = 0.3) +
   tm_format_Europe(legend.position = c("left", "bottom"),
@@ -533,6 +544,27 @@ tm_shape(TornDAT.sfdf[c(6,7,9,10),]) +
   tm_layout(frame = FALSE)
 ```
 
+Areal weighted interpolation
+
+```{r}
+TornDAT.sfdf$ID = 1:nrow(TornDAT.sfdf)
+
+
+out2010.sf <- aw_interpolate(TornDAT.sfdf, 
+               tid = "ID", 
+               source = US2010.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_2010", "TotalMale_2010", "MaleUnder18_2010",
+                             "Male18to44_2010", "Male45to64_2010", "MaleOver65_2010",
+                             "TotalFemale_2010", "FemaleUnder18_2010",
+                             "Female18to44_2010", "Female45to64_2010",
+                             "FemaleOver65_2010", "White_2010",
+                             "Black_2010", "TotalHousingUnits_2010", "MobileHomes_2010"),
+               intensive = c("MedianIncome_2010"),
+               weight = "total", 
+               output = "sf")
+
+```
 
 Run the code to estimate socioeconomic and demographic variables via the 2010 Census Tracts. This data is from the American Community Survey.
 ```{r}
