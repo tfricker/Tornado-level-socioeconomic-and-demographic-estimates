@@ -530,9 +530,9 @@ tm_shape(yy) +
 ```
 
 ```{r}
-tm_shape(TornDAT.sfdf[3,]) +
+tm_shape(TornDAT.sfdf[2,]) +
   tm_polygons(col = "red", alpha = 0.3) +
-  tm_shape(xx[19,]) +
+  tm_shape(xxx[1,]) +
   tm_polygons(col = "blue", alpha = 0.3)
 
 
