@@ -3,6 +3,8 @@ title: "Demographic Comparisons"
 author: "Tyler Fricker"
 date: "5/14/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 Set working directory and load packages.
 ```{r}
@@ -33,7 +35,8 @@ suppressPackageStartupMessages(library("raster"))
 suppressPackageStartupMessages(library("MASS"))
 suppressPackageStartupMessages(library("tmap"))
 suppressPackageStartupMessages(library("tmaptools"))
-load(file = "January10.RData")
+suppressPackageStartupMessages(library("areal"))
+#load(file = "January10.RData")
 ```
 
 Load DAT data
@@ -340,7 +343,10 @@ TorSC.sfdf = sf::st_read(dsn = "SocialCorrelates",
 TorSC.sfdf$Date_1 = as.Date(TorSC.sfdf$date)
 TorSC.sfdf = rename(TorSC.sfdf, "Date" = "Date_1")
 
-us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+#us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+us_geo <- st_read(dsn = "states", 
+                    layer = "cb_2015_us_state_20m", 
+                    stringsAsFactors = FALSE)
 us_geo = subset(us_geo, !(NAME %in% c("Alaska", "Hawaii", "Puerto Rico")))
 colnames(us_geo)[5] = "st"
 
@@ -361,6 +367,24 @@ tm_shape(us_geo, projection ="+init=epsg:4326") +
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
   tm_layout(frame = FALSE)
+```
+
+Import `SocialCorrelatesNew.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
+```{r}
+TornSC.sf <- st_read(dsn = "SocialCorrelatesNew", 
+                    layer = "SocialCorrelatesNew", 
+                    stringsAsFactors = FALSE)
+```
+
+Make new columns including total population by age
+```{r}
+TornSC.sf$popD = TornSC.sf$TotalPp/TornSC.sf$AreaPth * 10^6
+TornSC.sf$PopUnder18 = TornSC.sf$MlUnd18 + TornSC.sf$FmlUn18
+TornSC.sf$Pop18to44 = TornSC.sf$Ml18t44 + TornSC.sf$Fml1844
+TornSC.sf$Pop45to64 = TornSC.sf$Ml45t64 + TornSC.sf$Fml4564
+TornSC.sf$PopOver65 = TornSC.sf$MlOvr65 + TornSC.sf$FmlOv65
+
+sfdf = TornSC.sf
 ```
 
 ```{r}
@@ -391,9 +415,68 @@ xx = sfdf %>%
 
 xx = rename(xx, "Name" = "om")
 xx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
-xx = xx[,c(1,50)]
+xx = xx[,c(1,54)]
 #xx = xx[c(2,5,9,15),]
 #yy = TornDAT.sfdf[c(1,5,6,16),]
+```
+
+Try downloading shapefile for Census tracts from IPUMS GIS.
+```{r}
+Tracts_2010.sf <- read_sf(dsn = "2012_Tracts",
+                   stringsAsFactors = FALSE) %>%
+  mutate(STATEFP = as.numeric(STATEFP))
+```
+
+Import IPUMS data
+```{r}
+us2010 <- read.csv("2012ACS.csv", header = TRUE) %>%
+  mutate(GISJOIN = as.character(GISJOIN))
+```
+
+Merge the two data sets and remove data from states outside of the contiguous U.S.
+```{r}
+US2010.sf <- ipums_shape_inner_join(us2010, Tracts_2010.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf()      
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornSC.sf))
+```
+
+** This fixes the problem with tidycensus for 2010 ** 
+
+Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
+
+Now focus on cleaning up the sf object (combine ages and margins of error)
+```{r}
+US2010.sf = US2010.sf %>%
+  mutate(TotalPop_2010 = TotalPop,
+         TotalMale_2010 = TotalMale,
+         MaleUnder18_2010 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
+         Male18to44_2010 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34
+         + Male35.39 + Male40.44,
+         Male45to64_2010 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
+         MaleOver65_2010 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
+         + MaleOver85,
+         TotalFemale_2010 = TotalFemale,
+         FemaleUnder18_2010 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
+         Female18to44_2010 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29
+         + Female30.34 + Female35.39 + Female40.44,
+         Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
+         + Female62.64,
+         FemaleOver65_2010 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
+         + Female80.84 + FemaleOver85,
+         White_2010 = White,
+         Black_2010 = Black,
+         TotalHousingUnits_2010 = TotalHousingUnits,
+         MobileHomes_2010 = MobileHomes,
+         MedianIncome_2010 = MedianIncome * 1.032,
+         MedianIncomeM = MedianIncomeM * 1.032)
 ```
 
 ```{r}

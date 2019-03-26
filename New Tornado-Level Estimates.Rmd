@@ -812,14 +812,14 @@ df = df[1:10,] %>%
 df
 ```
 
-For the set of 2,201 tornadoes, the median total population is 33.68 people with an interquartile range between 3.71 and 198 people. The median population density is 20.1 people per square kilometer with an interquartile range between 7.83 and 65.63 people per square kilometer. It is estimated that as many as 101,752 people were in the path of the Detroit, Michigan, EF2 tornado on 2 July 1997 resulting in 90 injuries. Of the top ten tornadoes ranked by total population, only one (1997 Detroit, Michigan tornado) is estimated to have impacted over 100,000 people. The next closest tornado (2013 St. Louis, Missouri tornado) is estimated to have impacted almost 70,000 fewer people at 36,839.
+For the set of 2,201 tornadoes, the median total population is 33.68 people with an interquartile range between 3.71 and 198 people. The median population density is 20.1 people per square kilometer with an interquartile range between 7.83 and 65.63 people per square kilometer. It is estimated that as many as 101,752 people were in the path of the Detroit, Michigan, EF2 tornado on 2 July 1997 resulting in 90 injuries. Of the top ten tornadoes ranked by total population, only one (1997 Detroit, Michigan tornado) is estimated to have impacted over 100,000 people. The next closest tornado (2013 St. Louis, Missouri tornado) is estimated to have impacted almost 70,000 fewer people at 36,840.
 
 ```{r}
 summary(TornSC.sf$TotalMl); summary(TornSC.sf$TotlFml)
 summary(TornSC.sf$White); summary(TornSC.sf$Black)
 ```
 
-For the same set of tornadoes, the median number of males is 16.9 with an interquartile range between 1.9 and 98. Similarly, the median number of females is 16.9 with and interquartile range between 1.9 and 100. The median white population is 26.8 people with an interquartile range between 2.82 and 155 people, and the median black population is 0.85 people with an interquartile range between 0.04 and 13.2 people. On average, casualty-producing tornadoes have impacted nearly three times as many whites (344 people) as blacks (130 people).
+For the same set of tornadoes, the median number of males is 16.9 with an interquartile range between 1.9 and 98. Similarly, the median number of females is 16.9 with and interquartile range between 1.9 and 100. The median white population is 26.8 people with an interquartile range between 2.82 and 155 people, and the median black population is 0.85 people with an interquartile range between 0.04 and 13.2 people. On average, casualty-producing tornadoes have impacted nearly three times as many white people (344 people) as black people (130 people).
 
 ```{r}
 summary(TornSC.sf$MdnIncm); summary(TornSC.sf$MoblHms)

@@ -1,0 +1,2111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<Folder>
+	<name>Temporary Places</name>
+	<open>1</open>
+	<Folder>
+		<name>Tornadoes</name>
+		<open>1</open>
+		<Folder>
+			<name>Joplin</name>
+			<Folder>
+				<name>Tornado Points</name>
+				<Folder>
+					<name>Joplin Tornado Path</name>
+					<Document id="Joplin_Tornado_Damage_F1" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+						<name>Joplin_Tornado_Damage_F1</name>
+						<Snippet maxLines="0"></Snippet>
+						<Style id="PolyStyle00_copy5">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff447089</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Style id="PolyStyle00">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff447089</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<StyleMap id="PolyStyle00_copy3">
+							<Pair>
+								<key>normal</key>
+								<styleUrl>#PolyStyle00_copy4</styleUrl>
+							</Pair>
+							<Pair>
+								<key>highlight</key>
+								<styleUrl>#PolyStyle00_copy5</styleUrl>
+							</Pair>
+						</StyleMap>
+						<Style id="PolyStyle00_copy4">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff447089</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Folder id="FeatureLayer0">
+							<name>Joplin_Tornado_Damage_F1</name>
+							<Snippet maxLines="0"></Snippet>
+							<Placemark id="ID_00000">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>0</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy3</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>absolute</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>absolute</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.455073,37.07502,100 -94.46612500000001,37.075562,100 -94.47747800000002,37.076477,100 -94.486389,37.07666,100 -94.50072,37.07556000000001,100 -94.50951000000002,37.07383,100 -94.51792900000002,37.071884,100 -94.526337,37.070263,100 -94.53289800000002,37.069214,100 -94.541748,37.067871,100 -94.54974400000002,37.065247,100 -94.557678,37.063049,100 -94.592896,37.053162,100 -94.59310100000002,37.051895,100 -94.59234600000002,37.051147,100 -94.57562300000001,37.051147,100 -94.56740000000001,37.05141,100 -94.55603000000002,37.052246,100 -94.54547100000001,37.052917,100 -94.538208,37.053526,100 -94.52899200000002,37.054016,100 -94.519757,37.055394,100 -94.51059600000001,37.056535,100 -94.49615500000002,37.059326,100 -94.48718300000002,37.060852,100 -94.478027,37.062195,100 -94.471898,37.06219,100 -94.461246,37.061528,100 -94.452989,37.059234,100 -94.44442700000002,37.056635,100 -94.420856,37.047355,100 -94.406031,37.044104,100 -94.391352,37.039187,100 -94.37602200000001,37.033274,100 -94.33847400000003,37.025921,100 -94.32112800000002,37.022281,100 -94.306016,37.016671,100 -94.29243099999999,37.011073,100 -94.27194400000003,37.004363,100 -94.249399,36.994488,100 -94.240821,36.990444,100 -94.23530600000001,36.988607,100 -94.232773,36.990644,100 -94.23345500000001,36.994833,100 -94.2516,37.006005,100 -94.268518,37.012929,100 -94.28322300000001,37.017998,100 -94.30028400000001,37.025493,100 -94.32741,37.034844,100 -94.368955,37.045266,100 -94.378163,37.049621,100 -94.39243999999999,37.055546,100 -94.40414700000001,37.058972,100 -94.41307000000001,37.061542,100 -94.42452299999999,37.065731,100 -94.43764100000001,37.071019,100 -94.44674600000001,37.073751,100 -94.455073,37.07502,100 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+						</Folder>
+					</Document>
+					<Document id="Joplin_Tornado_Damage_F2" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+						<name>Joplin_Tornado_Damage_F2</name>
+						<Snippet maxLines="0"></Snippet>
+						<Style id="PolyStyle000">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ffbeebff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<StyleMap id="PolyStyle00_copy6">
+							<Pair>
+								<key>normal</key>
+								<styleUrl>#PolyStyle00_copy7</styleUrl>
+							</Pair>
+							<Pair>
+								<key>highlight</key>
+								<styleUrl>#PolyStyle00_copy8</styleUrl>
+							</Pair>
+						</StyleMap>
+						<Style id="PolyStyle00_copy7">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ffbeebff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Style id="PolyStyle00_copy8">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ffbeebff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Folder id="FeatureLayer0">
+							<name>Joplin_Tornado_Damage_F2</name>
+							<Snippet maxLines="0"></Snippet>
+							<Placemark id="ID_00000">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>0</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy6</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>relativeToGround</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>relativeToGround</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.37878499999999,37.045971,210 -94.38444400000003,37.049195,210 -94.387472,37.050716,210 -94.393784,37.053661,210 -94.40321900000001,37.055831,210 -94.42077000000001,37.060659,210 -94.436035,37.065674,210 -94.444397,37.069458,210 -94.451172,37.071411,210 -94.45678700000001,37.07251,210 -94.46612500000001,37.073608,210 -94.4776,37.07428,210 -94.48651100000001,37.074463,210 -94.500244,37.072754,210 -94.50750700000002,37.070984,210 -94.51409900000002,37.069641,210 -94.52203400000001,37.068542,210 -94.53381300000002,37.066772,210 -94.541382,37.065002,210 -94.546448,37.062805,210 -94.556702,37.060425,210 -94.572733,37.057312,210 -94.574099,37.056343,210 -94.574243,37.055208,210 -94.573376,37.053984,210 -94.57098100000002,37.053475,210 -94.56066900000002,37.054016,210 -94.55017100000001,37.055542,210 -94.545227,37.055542,210 -94.53753700000002,37.056641,210 -94.52874799999999,37.057739,210 -94.52124000000002,37.05822800000001,210 -94.51123,37.059509,210 -94.498047,37.061707,210 -94.489502,37.064148,210 -94.48059100000003,37.065002,210 -94.47283899999999,37.065247,210 -94.46292,37.06406000000001,210 -94.457627,37.06321,210 -94.45140900000001,37.061171,210 -94.43919,37.05661,210 -94.422118,37.05214600000001,210 -94.407057,37.04847700000001,210 -94.39845,37.04675,210 -94.39129800000001,37.044196,210 -94.38809200000003,37.043475,210 -94.382047,37.04222600000001,210 -94.37910599999999,37.042347,210 -94.377698,37.043797,210 -94.37878499999999,37.045971,210 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+							<Placemark id="ID_00001">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>1</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy6</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>relativeToGround</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>relativeToGround</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.286509,37.013174,210 -94.26695599999999,37.0054,210 -94.26540300000002,37.007417,210 -94.26578000000001,37.00925,210 -94.272657,37.012644,210 -94.279191,37.015493,210 -94.28514199999999,37.016965,210 -94.28758400000001,37.016207,210 -94.286509,37.013174,210 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+						</Folder>
+					</Document>
+					<Document id="Joplin_Tornado_Damage_F3" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+						<name>Joplin_Tornado_Damage_F3</name>
+						<Snippet maxLines="0"></Snippet>
+						<Style id="PolyStyle001">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff00aaff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Style id="PolyStyle00_copy50">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff00aaff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<StyleMap id="PolyStyle00_copy30">
+							<Pair>
+								<key>normal</key>
+								<styleUrl>#PolyStyle00_copy40</styleUrl>
+							</Pair>
+							<Pair>
+								<key>highlight</key>
+								<styleUrl>#PolyStyle00_copy50</styleUrl>
+							</Pair>
+						</StyleMap>
+						<Style id="PolyStyle00_copy40">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff00aaff</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Folder id="FeatureLayer0">
+							<name>Joplin_Tornado_Damage_F3</name>
+							<Snippet maxLines="0"></Snippet>
+							<Placemark id="ID_00000">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>0</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy30</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>relativeToGround</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>relativeToGround</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.44702100000002,37.0672,220 -94.45361300000002,37.069458,220 -94.460876,37.071167,220 -94.46581999999999,37.072266,220 -94.468018,37.07251,220 -94.471436,37.072937,220 -94.474487,37.072937,220 -94.47717299999999,37.073181,220 -94.48339799999999,37.072266,220 -94.48773199999999,37.07251,220 -94.49047900000001,37.072754,220 -94.492859,37.072937,220 -94.49505600000001,37.07251,220 -94.49829100000001,37.071838,220 -94.50720200000002,37.069641,220 -94.51355,37.068298,220 -94.519836,37.0672,220 -94.529724,37.066101,220 -94.535645,37.065002,220 -94.540161,37.063477,220 -94.54425000000002,37.061951,220 -94.55095799999999,37.060115,220 -94.55552900000001,37.058427,220 -94.55590800000002,37.05621300000001,220 -94.55426000000001,37.055542,220 -94.54657,37.057129,220 -94.535095,37.057983,220 -94.527405,37.059509,220 -94.520264,37.059998,220 -94.51007100000001,37.060852,220 -94.497742,37.062805,220 -94.48803700000001,37.064575,220 -94.480225,37.065674,220 -94.47363300000001,37.066772,220 -94.468463,37.067146,220 -94.464304,37.06637,220 -94.45861300000001,37.06532700000001,220 -94.45270400000001,37.063801,220 -94.44754700000001,37.06281,220 -94.44350900000002,37.061864,220 -94.44005199999999,37.060932,220 -94.436894,37.06012,220 -94.43596700000001,37.060911,220 -94.43791,37.062339,220 -94.44238300000002,37.064575,220 -94.44702100000002,37.0672,220 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+						</Folder>
+					</Document>
+					<Document id="Joplin_Tornado_Damage_F4" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+						<name>Joplin_Tornado_Damage_F4</name>
+						<Snippet maxLines="0"></Snippet>
+						<Style id="PolyStyle00_copy41">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff445a89</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<StyleMap id="PolyStyle00_copy31">
+							<Pair>
+								<key>normal</key>
+								<styleUrl>#PolyStyle00_copy41</styleUrl>
+							</Pair>
+							<Pair>
+								<key>highlight</key>
+								<styleUrl>#PolyStyle00_copy51</styleUrl>
+							</Pair>
+						</StyleMap>
+						<Style id="PolyStyle002">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff445a89</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Style id="PolyStyle00_copy51">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff445a89</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Folder id="FeatureLayer0">
+							<name>Joplin_Tornado_Damage_F4</name>
+							<Snippet maxLines="0"></Snippet>
+							<Placemark id="ID_00000">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>0</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy31</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>relativeToGround</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>relativeToGround</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.464417,37.071167,260 -94.46624799999999,37.071655,260 -94.468445,37.071838,260 -94.471436,37.071838,260 -94.473877,37.072083,260 -94.476929,37.072266,260 -94.47937,37.072083,260 -94.480896,37.071655,260 -94.48571800000001,37.070557,260 -94.49029600000002,37.070712,260 -94.492971,37.071054,260 -94.49539400000002,37.071133,260 -94.49708900000002,37.070586,260 -94.49895700000002,37.069968,260 -94.50250200000001,37.069017,260 -94.50640900000001,37.067688,260 -94.51532,37.065918,260 -94.52862500000001,37.063721,260 -94.53369100000001,37.063049,260 -94.53723100000002,37.063049,260 -94.54193100000001,37.062195,260 -94.54425000000002,37.061523,260 -94.54669199999999,37.060181,260 -94.549988,37.059082,260 -94.55072,37.058655,260 -94.55096399999999,37.057739,260 -94.549438,37.057739,260 -94.54699700000001,37.05822800000001,260 -94.543701,37.059082,260 -94.540283,37.059998,260 -94.53601100000002,37.060425,260 -94.53064000000002,37.060181,260 -94.52655,37.060425,260 -94.52014200000001,37.061279,260 -94.51701800000001,37.061474,260 -94.51313600000002,37.061696,260 -94.50940700000001,37.062608,260 -94.497925,37.065674,260 -94.49334700000001,37.06658900000001,260 -94.489929,37.066772,260 -94.486267,37.066772,260 -94.481995,37.0672,260 -94.479004,37.067688,260 -94.47570800000001,37.068298,260 -94.47113,37.068787,260 -94.465271,37.068298,260 -94.449392,37.064818,260 -94.44480800000001,37.063282,260 -94.44271600000002,37.06243,260 -94.442404,37.063737,260 -94.445914,37.065315,260 -94.459351,37.069458,260 -94.46228000000001,37.070313,260 -94.464417,37.071167,260 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+						</Folder>
+					</Document>
+					<Document id="Joplin_Tornado_Damage_F5" xsi:schemaLocation="http://www.opengis.net/kml/2.2 http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd http://www.google.com/kml/ext/2.2 http://code.google.com/apis/kml/schema/kml22gx.xsd">
+						<name>Joplin_Tornado_Damage_F5</name>
+						<Snippet maxLines="0"></Snippet>
+						<Style id="PolyStyle00_copy2">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff6666cd</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<StyleMap id="PolyStyle00_copy0">
+							<Pair>
+								<key>normal</key>
+								<styleUrl>#PolyStyle00_copy1</styleUrl>
+							</Pair>
+							<Pair>
+								<key>highlight</key>
+								<styleUrl>#PolyStyle00_copy2</styleUrl>
+							</Pair>
+						</StyleMap>
+						<Style id="PolyStyle00_copy1">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff6666cd</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Style id="PolyStyle003">
+							<LabelStyle>
+								<color>00000000</color>
+								<scale>0</scale>
+							</LabelStyle>
+							<PolyStyle>
+								<color>ff6666cd</color>
+								<outline>0</outline>
+							</PolyStyle>
+						</Style>
+						<Folder id="FeatureLayer0">
+							<name>Joplin_Tornado_Damage_F5</name>
+							<Snippet maxLines="0"></Snippet>
+							<Placemark id="ID_00000">
+								<name>0</name>
+								<Snippet maxLines="0"></Snippet>
+								<description><![CDATA[<html xmlns:fo="http://www.w3.org/1999/XSL/Format" xmlns:msxsl="urn:schemas-microsoft-com:xslt">
+
+<head>
+
+<META http-equiv="Content-Type" content="text/html">
+
+</head>
+
+<body style="margin:0px 0px 0px 0px;overflow:auto;background:#FFFFFF;">
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-collapse:collapse;padding:3px 3px 3px 3px">
+
+<tr style="text-align:center;font-weight:bold;background:#9CBCE2">
+
+<td>0</td>
+
+</tr>
+
+<tr>
+
+<td>
+
+<table style="font-family:Arial,Verdana,Times;font-size:12px;text-align:left;width:100;border-spacing:0px; padding:3px 3px 3px 3px">
+
+<tr>
+
+<td>FID</td>
+
+<td>0</td>
+
+</tr>
+
+<tr bgcolor="#D4E4F3">
+
+<td>Id</td>
+
+<td>0</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>]]></description>
+								<styleUrl>#PolyStyle00_copy0</styleUrl>
+								<MultiGeometry>
+									<altitudeMode>absolute</altitudeMode>
+									<Polygon>
+										<tessellate>1</tessellate>
+										<altitudeMode>absolute</altitudeMode>
+										<outerBoundaryIs>
+											<LinearRing>
+												<coordinates>
+-94.52667200000001,37.061279,400 -94.524658,37.061523,400 -94.52301,37.061951,400 -94.521484,37.062378,400 -94.52014200000001,37.062622,400 -94.511597,37.063477,400 -94.50952100000001,37.063477,400 -94.506958,37.063904,400 -94.504639,37.064575,400 -94.498474,37.066345,400 -94.496399,37.066772,400 -94.49408000000001,37.0672,400 -94.49243200000001,37.067444,400 -94.490112,37.067688,400 -94.48773199999999,37.067444,400 -94.47882100000003,37.068298,400 -94.47540300000001,37.068787,400 -94.47229000000002,37.06897,400 -94.468262,37.069214,400 -94.46557600000001,37.06897,400 -94.462952,37.068298,400 -94.46276899999999,37.069214,400 -94.463379,37.070068,400 -94.464722,37.070557,400 -94.46881100000002,37.070984,400 -94.476135,37.070557,400 -94.48156700000001,37.070068,400 -94.48718300000002,37.069458,400 -94.49078400000001,37.069458,400 -94.49334700000001,37.069458,400 -94.49475099999999,37.069458,400 -94.49707000000002,37.068787,400 -94.50079300000002,37.067871,400 -94.50762899999999,37.066772,400 -94.51104700000001,37.065918,400 -94.51501500000001,37.065247,400 -94.52063,37.064148,400 -94.52520800000001,37.063049,400 -94.527771,37.062805,400 -94.52917500000001,37.062378,400 -94.529968,37.061951,400 -94.53064000000002,37.061523,400 -94.53070099999999,37.060852,400 -94.52929700000001,37.060852,400 -94.528198,37.06109600000001,400 -94.52667200000001,37.061279,400 </coordinates>
+											</LinearRing>
+										</outerBoundaryIs>
+									</Polygon>
+								</MultiGeometry>
+							</Placemark>
+						</Folder>
+					</Document>
+				</Folder>
+				<Document>
+					<name>Joplin Tornado_Path.kml</name>
+					<Style id="sn_ylw-pushpin">
+						<LineStyle>
+							<color>990000ff</color>
+							<width>7</width>
+						</LineStyle>
+					</Style>
+					<Style id="linecolor">
+						<LineStyle>
+							<color>99ff0000</color>
+							<width>7</width>
+						</LineStyle>
+					</Style>
+					<Placemark>
+						<styleUrl>#sn_ylw-pushpin</styleUrl>
+						<LineString>
+							<extrude>1</extrude>
+							<tessellate>1</tessellate>
+							<coordinates>
+-94.59289800000001,37.053082,0 -94.56768700000001,37.0555896,0 -94.54980000000001,37.0582,0 -94.531138,37.060871,0 -94.50709999999999,37.0642,0 -94.47778200000001,37.068401,0 -94.4652,37.0695,0 -94.45950000000002,37.0689,0 -94.44650000000002,37.0648,0 -94.4108,37.0543,0 -94.392,37.0502,0 -94.37300000000001,37.0409,0 -94.35540000000002,37.0369,0 -94.3164,37.0273,0 -94.27820000000001,37.0126,0 -94.2614,37.0058,0 -94.2381,36.9937,0 -94.22100000000002,36.9839,0 </coordinates>
+						</LineString>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_1.kml</name>
+					<Style id="EFScale9">
+						<IconStyle>
+							<Icon>
+								<href>http://maps.google.com/mapfiles/kml/shapes/info.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale90">
+						<IconStyle>
+							<Icon>
+								<href>http://maps.google.com/mapfiles/kml/shapes/info.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale900">
+						<IconStyle>
+							<Icon>
+								<href>http://maps.google.com/mapfiles/kml/shapes/info.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <a>Approximate area of first indication of damage to trees observed from aerial photographs.</a><br><br>
+</body>]]></description>
+						<styleUrl>#EFScale90</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.59289800000001,37.053082,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_2.kml</name>
+					<Style id="EFScale10">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale100">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Damage in this area consisted of partial or total loss of roofing from numerous homes.</p>
+</body>]]></description>
+						<styleUrl>#EFScale100</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.56768700000001,37.0555896,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_3.kml</name>
+					<Style id="EFScale1100">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale11">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale110">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-4 (Winds 166-200 MPH)</p><p></p>
+</body>]]></description>
+						<styleUrl>#EFScale1100</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.54980000000001,37.0582,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_4.kml</name>
+					<Style id="EFScale121">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale120">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale12">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-5 (Winds greater than 200 MPH)</p><p>Damage became more widespread as the tornado crossed Maiden Lane...causing significant damage to windows and the roof of St. Johns Hospital.  The tornado further intensified as it destroyed numerous homes and businesses.  The highest rated damage in this area was to a church school.</p>
+</body>]]></description>
+						<styleUrl>#EFScale12</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.531138,37.060871,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_5.kml</name>
+					<Style id="EFScale130">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1300">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale13">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-5 (Winds greater than 200 MPH)</p><p></p>
+</body>]]></description>
+						<styleUrl>#EFScale130</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.50709999999999,37.0642,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_6.kml</name>
+					<Style id="EFScale140">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale14">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1400">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-5 (Winds greater than 200 MPH)</p><p>The tornado continued to destroy numerous homes and businesses between 32nd and 20th Street.  Three story apartment complexes had the top two floors removed.  A bank was totally destroyed with the exception of the vault.  Additional damage noted in this area included two story apartment complexes leveled.  A Dillon's grocery store had significant roof and exterior wall damage.  The tornado crossed Rangeline Road near 20th Street.  Most intense damage was noted just east of Rangeline and 20th where a Home Depot was destroyed by 190 to nearly 200 mph winds.  In addition, a concrete block and heavy steel building had the steel roof beams collapsed.</p>
+</body>]]></description>
+						<styleUrl>#EFScale140</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.47778200000001,37.068401,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_7.kml</name>
+					<Style id="EFScale150">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale15">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1500">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F5.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<name>Joplin Tornado</name>
+						<description><![CDATA[<body>
+        <p>EF-5 (Winds greater than 200 MPH)</p><p>The tornado continued moving eastward along and south of 20th Street destroying numerous warehouse-style facilities through Duquesne Road. </p>
+</body>]]></description>
+						<styleUrl>#EFScale150</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.4652,37.0695,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_8.kml</name>
+					<Style id="EFScale16">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale160">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1600">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F4.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-4 (Winds 166-200 MPH)</p><p>Many homes completely destroyed.  Several light poles snapped at mid section.  Cell phone tower toppled.  Some debarking of trees</p>
+</body>]]></description>
+						<styleUrl>#EFScale160</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.45949999999999,37.0689,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_9.kml</name>
+					<Style id="EFScale17">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F3.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1700">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F3.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale170">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F3.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-3 (Winds 136-165 MPH)</p><p>Numerous trees snapped and uprooted.  Numerous homes with collapsed walls.  </p>
+</body>]]></description>
+						<styleUrl>#EFScale1700</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.44649999999999,37.0648,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_10.kml</name>
+					<Style id="EFScale180">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1800">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale18">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>A large warehouse lost > 50% of its roof.  The southeast corner of the building collapsed.</p>
+</body>]]></description>
+						<styleUrl>#EFScale18</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.4108,37.0543,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_11.kml</name>
+					<Style id="EFScale19">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1900">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale190">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>A storage unit building lost its roof and had its compartment doors collapsed inward.  Minor roof damage to several other structures.</p>
+</body>]]></description>
+						<styleUrl>#EFScale1900</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.392,37.0502,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_12.kml</name>
+					<Style id="EFScale">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Minor roof damage to an outbuilding evident on aerial photographs.</p>
+</body>]]></description>
+						<styleUrl>#EFScale</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.37300000000001,37.0409,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_13.kml</name>
+					<Style id="EFScale0">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Damage to trees and buildings evident on high resolution imagery.</p>
+</body>]]></description>
+						<styleUrl>#EFScale0</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.35540000000002,37.0369,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_14.kml</name>
+					<Style id="EFScale1">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Damage to structures evident on high resolution imagery.</p>
+</body>]]></description>
+						<styleUrl>#EFScale1</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.3164,37.0273,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_15.kml</name>
+					<Style id="EFScale2">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Damage to several structures on high resolution imagery.</p>
+</body>]]></description>
+						<styleUrl>#EFScale2</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.27820000000001,37.0126,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_16.kml</name>
+					<Style id="EFScale3">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Damage to structures evident on high resolution imagery.</p>
+</body>]]></description>
+						<styleUrl>#EFScale3</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.2614,37.0058,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Document>
+					<name>Joplin Tornado_Point_17.kml</name>
+					<Style id="EFScale4">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Several trees down.</p>
+</body>]]></description>
+						<styleUrl>#EFScale4</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.2381,36.9937,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+			</Folder>
+		</Folder>
+		<Folder>
+			<name>Galena</name>
+			<Document>
+				<name>Galena Tornado_Path.kml</name>
+				<open>1</open>
+				<Style id="linecolor1">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="sn_ylw-pushpin4">
+					<LineStyle>
+						<color>990000ff</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="linecolor0">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Placemark>
+					<styleUrl>#sn_ylw-pushpin4</styleUrl>
+					<LineString>
+						<extrude>1</extrude>
+						<tessellate>1</tessellate>
+						<coordinates>
+-93.50082999999999,36.834866,0 -93.48783000000002,36.83775,0 -93.48861333000002,36.835217,0 -93.4543,36.83407,0 -93.43886699999999,36.83693,0 -93.41630999999998,36.83473,0 -93.37130000000001,36.82448,0 -93.34117500000002,36.8151,0 -93.219894,36.807011,0 </coordinates>
+					</LineString>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_1.kml</name>
+				<Style id="EFScale000">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale00">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Few frees snapped and twisted.</p>
+</body>]]></description>
+					<styleUrl>#EFScale00</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.50082999999999,36.834866,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_2.kml</name>
+				<Style id="EFScale111">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale101">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Single wide mobile home partially damaged.</p>
+</body>]]></description>
+					<styleUrl>#EFScale101</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.48783000000002,36.83775,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_3.kml</name>
+				<Style id="EFScale20">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale22">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Mobile home totally destroyed. </p>
+</body>]]></description>
+					<styleUrl>#EFScale22</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.48861333000002,36.835217,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_4.kml</name>
+				<Style id="EFScale30">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale31">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Partial collapse of turkey barn.  Damage to metal frame building.</p>
+</body>]]></description>
+					<styleUrl>#EFScale30</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.4543,36.83407,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_5.kml</name>
+				<Style id="EFScale40">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale400">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<name>Galena Tornado</name>
+					<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Turkey barns destroyed. Trees snapped. </p>
+</body>]]></description>
+					<styleUrl>#EFScale400</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.43886699999999,36.83693,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_6.kml</name>
+				<Style id="EFScale50">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale5">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Trees snapped and downed. Minor roof damage to home.</p>
+</body>]]></description>
+					<styleUrl>#EFScale50</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.41630999999998,36.83473,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_7.kml</name>
+				<Style id="EFScale6">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale60">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Roof damage to a house. Outbuliding destroyed. Trees snapped and uprooted.</p>
+</body>]]></description>
+					<styleUrl>#EFScale6</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.37130000000001,36.82448,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_8.kml</name>
+				<Style id="EFScale7">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale70">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>A few trees uprooted and multiple large limbs downed. A car port was lifted and rotated 180 degrees and then set back down 10 yards from where it originally was located.</p>
+</body>]]></description>
+					<styleUrl>#EFScale7</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.34117500000002,36.8151,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Galena Tornado_Point_9.kml</name>
+				<Style id="EFScale80">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale8">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Multiple trees were uprooted or snapped, with this tree damage occurring on both sides of highway 65. A shed that was bolted to a concrete foundation was pulled from the foundation and rolled 50 yards from its original location. A buried electrically line to the shed was pulled out of the ground as the shed was rolled. A tall tower that was staked to the ground with 2 and a half foot long stakes was knocked over. </p>
+</body>]]></description>
+					<styleUrl>#EFScale8</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.219894,36.807011,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+		</Folder>
+		<Folder>
+			<name>Wentworth</name>
+			<open>1</open>
+			<Document>
+				<name>Wentworth Tornado_Path.kml</name>
+				<open>1</open>
+				<Style id="sn_ylw-pushpin50">
+					<LineStyle>
+						<color>990000ff</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="linecolor2">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="linecolor20">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="sn_ylw-pushpin5">
+					<LineStyle>
+						<color>990000ff</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Placemark>
+					<styleUrl>#sn_ylw-pushpin5</styleUrl>
+					<LineString>
+						<extrude>1</extrude>
+						<tessellate>1</tessellate>
+						<coordinates>
+-94.187,37.0046,0 -94.1336,36.9925,0 -94.07470000000002,36.9926,0 -94.04600000000001,36.9885,0 -94.0251,36.9811,0 -93.9352,36.9778,0 </coordinates>
+					</LineString>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Wentworth Tornado_Point_2.kml</name>
+				<Style id="EFScale28">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale280">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Tree uprooted with minor damage to roof soffit.</p>
+</body>]]></description>
+					<styleUrl>#EFScale28</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.187,37.0046,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Wentworth Tornado_Point_3.kml</name>
+				<Style id="EFScale290">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale29">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Numerous trees uprooted along roadside shelter belt.  Numerous power poles down along Highway J (2-4 miles along J).  Three mobile homes destroyed...one tossed and wrapped around tree...one with partial roof uplift...one with all exterior walls removed.</p>
+</body>]]></description>
+					<styleUrl>#EFScale29</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.1336,36.9925,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Wentworth Tornado_Point_4.kml</name>
+				<Style id="EFScale300">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale301">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<name>Wentworth Tornado</name>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Numerous uprooed in city of Wentworth...one out building had roof removed.</p>
+</body>]]></description>
+					<styleUrl>#EFScale300</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.07470000000002,36.9926,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Wentworth Tornado_Point_5.kml</name>
+				<Style id="EFScale310">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale311">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Mobile home flipped and wrapped around building.  Half of machine shop building destroyed.</p>
+</body>]]></description>
+					<styleUrl>#EFScale310</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.04600000000001,36.9885,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Wentworth Tornado_Point_6.kml</name>
+				<Style id="EFScale32">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale320">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Document>
+					<name>Joplin Tornado_Point_2.kml</name>
+					<Style id="EFScale1010">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Style id="EFScale1000">
+						<IconStyle>
+							<Icon>
+								<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2.png</href>
+							</Icon>
+						</IconStyle>
+						<LabelStyle>
+							<color>ff00ff00</color>
+						</LabelStyle>
+					</Style>
+					<Placemark>
+						<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Damage in this area consisted of partial or total loss of roofing from numerous homes.</p>
+</body>]]></description>
+						<styleUrl>#EFScale1010</styleUrl>
+						<Point>
+							<altitudeMode>relativeToGround</altitudeMode>
+							<coordinates>-94.56768700000001,37.0555896,0</coordinates>
+						</Point>
+					</Placemark>
+				</Document>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Multiple trees uprooted. Home with <20% of roof removed.  Machine shed with one-quarter of roof removed. Fence pushed over to east. Home with collapsed garage door and siding.  Separate garage had collapsed walls.</p>
+</body>]]></description>
+					<styleUrl>#EFScale320</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.0251,36.9811,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+		</Folder>
+		<Folder>
+			<name>Southwest City</name>
+			<Document>
+				<name>Wentworth Tornado_Point_7.kml</name>
+				<Style id="EFScale21">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale23">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>Three out buildings destroyed.  One shed flipped.  Home with ~20% of roof removed. One large hardwood tree uprooted.</p>
+</body>]]></description>
+					<styleUrl>#EFScale21</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-93.9352,36.9778,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Path.kml</name>
+				<open>1</open>
+				<Style id="linecolor10">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="sn_ylw-pushpin6">
+					<LineStyle>
+						<color>990000ff</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Style id="linecolor11">
+					<LineStyle>
+						<color>99ff0000</color>
+						<width>7</width>
+					</LineStyle>
+				</Style>
+				<Placemark>
+					<styleUrl>#sn_ylw-pushpin6</styleUrl>
+					<LineString>
+						<extrude>1</extrude>
+						<tessellate>1</tessellate>
+						<coordinates>
+-94.618,36.559,0 -94.61640000000001,36.559,0 -94.614,36.56,0 -94.6032,36.5553,0 -94.59699999999999,36.547,0 </coordinates>
+					</LineString>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Point_1.kml</name>
+				<Style id="EFScale220">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale221">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>MBS - Buckling of roof purlins - several vehicles nearby moved up to 25 yards.</p>
+        <img height='200' src='http://www.crh.noaa.gov/images/sgf/tornadotracks/photos/swcity_ok_052211.jpg'/>
+        <p>Damage in Oklahoma just before crossing into Missouri.</p>
+</body>]]></description>
+					<styleUrl>#EFScale220</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.618,36.559,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Point_2.kml</name>
+				<Style id="EFScale231">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F3p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale230">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F3p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-3 (Winds 136-165 MPH)</p><p>2 injury - all walls collapsed.</p>
+        <img height='200' src='http://www.crh.noaa.gov/images/sgf/tornadotracks/photos/swcity_052211.jpg'/>
+        <p>All walls on home collapsed.</p>
+</body>]]></description>
+					<styleUrl>#EFScale230</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.61640000000001,36.559,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Point_3.kml</name>
+				<Style id="EFScale24">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale240">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F2p.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<name>Southwest City Tornado</name>
+					<description><![CDATA[<body>
+        <p>EF-2 (Winds 111-135 MPH)</p><p>Automobile flipped and destroyed.</p>
+        <img height='200' src='http://www.crh.noaa.gov/images/sgf/tornadotracks/photos/swc3_052211.jpg'/>
+        <p>Automobile destroyed.</p>
+</body>]]></description>
+					<styleUrl>#EFScale240</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.614,36.56,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Point_4.kml</name>
+				<Style id="EFScale250">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale25">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F1.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-1 (Winds 86-110 MPH)</p><p>DI2 DOD3 90-100</p>
+</body>]]></description>
+					<styleUrl>#EFScale25</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.6032,36.5553,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+			<Document>
+				<name>Southwest City Tornado_Point_5.kml</name>
+				<Style id="EFScale260">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Style id="EFScale26">
+					<IconStyle>
+						<Icon>
+							<href>http://www.crh.noaa.gov/images/sgf/tornadotracks/icons/F0.png</href>
+						</Icon>
+					</IconStyle>
+					<LabelStyle>
+						<color>ff00ff00</color>
+					</LabelStyle>
+				</Style>
+				<Placemark>
+					<description><![CDATA[<body>
+        <p>EF-0 (Winds 65-85 MPH)</p><p>Apparent end of track near Simmons. Some damage to chicken houses.</p>
+</body>]]></description>
+					<styleUrl>#EFScale26</styleUrl>
+					<Point>
+						<altitudeMode>relativeToGround</altitudeMode>
+						<coordinates>-94.59699999999999,36.547,0</coordinates>
+					</Point>
+				</Placemark>
+			</Document>
+		</Folder>
+	</Folder>
+</Folder>
+</kml>
