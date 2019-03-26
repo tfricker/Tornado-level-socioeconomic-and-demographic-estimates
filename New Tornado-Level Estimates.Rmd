@@ -1008,9 +1008,25 @@ tmap_arrange(A, B, ncol = 1)
 
 The median number of young casualties for the set of 2,201 tornadoes is 0.64 people with an interquartile range of 0.28 and 1.78. In comparison, the median number of elderly casualties is 0.37 with an interquartile range of 0.17 and 0.99. The average number of young casualties is 2.91 and the average number of elderly casualties is 1.64. Of the top 10 tornadoes ranked by young and elderly casualties, only one (1998 Spencer, South Dakota tornado) occurred in a state outside the southern Great Plains or Southeast.
 
+Having tornado-level aggregated socioeconomic and demographic information, the next step toward understanding tornado casualties is to examine how these factors are related to the number of deaths and injuries. For example, the Pearson correlation between estimated socioeconomic and demographic variables and the number of deaths and injuries are seen below.
+```{r}
+cor(TornSC.sf$fat, TornSC.sf$TotalPp); cor(TornSC.sf$inj, TornSC.sf$TotalPp)
+cor(TornSC.sf$fat, TornSC.sf$popD); cor(TornSC.sf$inj, TornSC.sf$popD) 
+cor(TornSC.sf$fat, TornSC.sf$TotalMl); cor(TornSC.sf$inj, TornSC.sf$TotalMl)
+cor(TornSC.sf$fat, TornSC.sf$TotlFml); cor(TornSC.sf$inj, TornSC.sf$TotlFml)
+cor(TornSC.sf$fat, TornSC.sf$White); cor(TornSC.sf$inj, TornSC.sf$White)
+cor(TornSC.sf$fat, TornSC.sf$Black); cor(TornSC.sf$inj, TornSC.sf$Black)
+cor(TornSC.sf$fat, TornSC.sf$MdnIncm); cor(TornSC.sf$inj, TornSC.sf$MdnIncm)
+cor(TornSC.sf$fat, TornSC.sf$MoblHms); cor(TornSC.sf$inj, TornSC.sf$MoblHms)
+cor(TornSC.sf$fat, TornSC.sf$PopUnder18); cor(TornSC.sf$inj, TornSC.sf$PopUnder18)
+cor(TornSC.sf$fat, TornSC.sf$Pop18to44); cor(TornSC.sf$inj, TornSC.sf$Pop18to44)
+cor(TornSC.sf$fat, TornSC.sf$Pop45to64); cor(TornSC.sf$inj, TornSC.sf$Pop45to64)
+cor(TornSC.sf$fat, TornSC.sf$PopOver65); cor(TornSC.sf$inj, TornSC.sf$PopOver65)
+```
 
+The coefficients range between 0.01 and 0.48 for the number of deaths and between $-$0.01 and 0.42 for the number of injuries. A moderate correlation exists between the number of deaths and injuries for total population, number of males, number of females, white population, black population, and the number of mobile homes. While bi-variate correlations limit the ability to meaningfully interpret the effect a specific variable has on the number of deaths and injuries given the influence of omitted intervening variables, they do provide signals for which variables may play a role in statistically explaining the number of deaths and injuries. For example, the relatively high correlation with mobile homes is consistent with previous research, as is the relatively high correlation with race.
 
-
+How climate change will influence tornado activity, and in turn tornado casualties remains an open and challenging question. Statistically, given a tornado that produces at least one casualty, the casualty rate depends on the number of people in harm's way and on the power of the winds inside the vortex. Using a regression model, Fricker et al. (2017) find that casualties increase by 33\% ($\pm$ 3\%) with a doubling of the tornado energy and that casualties increase by 21\% ($\pm$ 3\%) with a doubling of the number of people affected, on average. Including an interaction term in the regression model provides an even better description of casualties given population and energy. But these findings are only the beginning of the story as socioeconomic and demographic variables likely impact the casualty rate. Having estimates of these variables at the individual tornado level provides an opportunity to build a model to estimate casualty rates from changes in socioeconomic and demographic variables controlling for population and energy.
 
 
 ### OLD CODE
