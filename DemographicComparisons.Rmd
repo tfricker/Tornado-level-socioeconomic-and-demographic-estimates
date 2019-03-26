@@ -493,7 +493,7 @@ tm_shape(TornDAT.sfdf) +
   tm_shape(xx) +
   tm_polygons(col = "blue", alpha = 0.3) +
   tm_facets("Name", nrow = 5) +
-  tm_shape(us2010.sfdf) + 
+  tm_shape(US2010.sf) + 
   tm_borders(col = "grey80", alpha = 0.3) +
   tm_format_Europe(legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
