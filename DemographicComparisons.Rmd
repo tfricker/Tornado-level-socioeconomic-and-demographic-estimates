@@ -842,3 +842,10 @@ REblack2 = sum(RMSEblack/out2010.sf$Black_2010[out2010.sf$Black_2010 >= 100])/20
 REMH = sum(RMSEmobile/out2010.sf$MobileHomes_2010)/20
 REMI = sum(RMSEinc/out2010.sf$MedianIncome_2010)/20
 ```
+
+Determine the number of tracts intersected by the actual paths.
+```{r}
+summary(lengths(st_overlaps(TornDAT.sfdf, US2010.sf)))
+```
+
+
