@@ -429,8 +429,6 @@ xxx = sfdf %>%
 xxx = rename(xxx, "Name" = "om")
 xxx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
 xxx = xxx[,c(1,54)]
-#xx = xx[c(2,5,9,15),]
-#yy = TornDAT.sfdf[c(1,5,6,16),]
 ```
 
 Try downloading shapefile for Census tracts from IPUMS GIS.
