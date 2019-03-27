@@ -898,6 +898,72 @@ B = B + ggtitle("B") +
 multiplot(A, B, layout = mat)
 ```
 
+Age groups.
+```{r}
+A = validation.df %>%
+  ggplot(aes(x = ActualUnder17, y = EstimatedUnder17)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Deaths Age Under 18") +
+  ylab("Estimated Deaths Age Under 18") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+B = validation.df %>%
+  ggplot(aes(x = Actual18to44, y = Estimated18to44)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Deaths Age 18 to 44") +
+  ylab("Estimated Deaths Age 18 to 44") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+C = validation.df %>%
+  ggplot(aes(x = Actual45to64, y = Estimated45to64)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Deaths Age 45 to 64") +
+  ylab("Estimated Deaths Age 45 to 64") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+
+D = validation.df %>%
+  ggplot(aes(x = ActualOver65, y = EstimatedOver65)) +
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1) +
+  xlim(0, 90) +
+  ylim(0, 90) +
+  xlab("Observed Deaths Age Over 65") +
+  ylab("Estimated Deaths Age Over 65") +
+  theme_minimal()
+#  theme_economist_white() + 
+#  scale_colour_economist()
+```
+
+Plot together.
+```{r}
+source("http://peterhaschke.com/Code/multiplot.R")
+mat = matrix(c(1, 2, 3, 4), nrow = 2, byrow = TRUE)
+A = A + ggtitle("A") + 
+  theme(plot.title=element_text(hjust=0))
+B = B + ggtitle("B") + 
+  theme(plot.title=element_text(hjust=0))
+C = C + ggtitle("C") + 
+  theme(plot.title=element_text(hjust=0))
+D = D + ggtitle("D") + 
+  theme(plot.title=element_text(hjust=0))
+multiplot(A, B, C, D, layout = mat)
+```
+
 ```{r}
 cor.test(validation.df$EstimatedMale, validation.df$ActualMale)
 cor.test(validation.df$EstimatedFemale, validation.df$ActualFemale)
