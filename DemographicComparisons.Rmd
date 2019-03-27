@@ -802,30 +802,30 @@ Diffmale = sum(out2010.sf$TotalMale_2010) - sum(SPC.sf$TotalMl)
 RMSEmale = sqrt((abs(Diffmale)^2)/20)
 
 # Females
-Difffemale = sum(df4$TotalFemales) - sum(SPC.df$TotalFemales)
+Difffemale = sum(out2010.sf$TotalFemale_2010) - sum(SPC.sf$TotlFml)
 RMSEfemale = sqrt((abs(Difffemale)^2)/20)
 
 # White People
-Diffwhite = sum(df4$WhitePeople) - sum(SPC.df$WhitePeople)
+Diffwhite = sum(out2010.sf$White_2010) - sum(SPC.sf$White)
 RMSEwhite = sqrt((abs(Diffwhite)^2)/20)
 
 # Black People
-Diffblack = sum(df4$BlackPeople) - sum(SPC.df$BlackPeople)
+Diffblack = sum(out2010.sf$Black_2010) - sum(SPC.sf$Black)
 RMSEblack = sqrt((abs(Diffblack)^2)/20)
 
 # Median Income
-Diffinc = sum(df4$MedianIncome) - sum(SPC.df$MedianIncome)
+Diffinc = sum(out2010.sf$MedianIncome_2010) - sum(SPC.sf$MdnIncm)
 RMSEinc = sqrt((abs(Diffinc)^2)/20)
 
 # Mobile Homes
-Diffmobile = sum(df4$MobileHomes) - sum(SPC.df$MobileHomes)
+Diffmobile = sum(out2010.sf$MobileHomes_2010) - sum(SPC.sf$MoblHms)
 RMSEmobile = sqrt((abs(Diffmobile)^2)/20)
 
 #Exclude = sum(df4$MobileHomes[-1]) - sum(SPC.df$MobileHomes[-1])
 #sqrt((abs(Exclude)^2)/20)
 
 # Population Density
-DiffpopD = sum(df4$popD) - sum(SPC.df$popD)
+DiffpopD = sum(out2010.sf$popD) - sum(SPC.sf$popD)
 RMSEpopD = sqrt((abs(DiffpopD)^2)/20)
 
 #Exclude = sum(df4$popD[c(-1.,-5)]) - sum(SPC.df$popD[c(-1,-5)])
@@ -835,12 +835,12 @@ RMSEpopD = sqrt((abs(DiffpopD)^2)/20)
 Relative Error
 ```{r}
 REpop = sum(RMSEpop/out2010.sf$TotalPop_2010)/20
-REpopD = sum(RMSEpopD/df4$popD)/20
+REpopD = sum(RMSEpopD/out2010.sf$popD)/20
 REmale = sum(RMSEmale/out2010.sf$TotalPop_2010)/20
-REfemale = sum(RMSEfemale/df4$TotalFemales)/20
-REwhite = sum(RMSEwhite/df4$WhitePeople)/20
-REblack = sum(RMSEblack/df4$BlackPeople)/20
-REblack2 = sum(RMSEblack/df4$BlackPeople[df4$BlackPeople >= 100])/20
-REMH = sum(RMSEmobile/df4$MobileHomes)/20
-REMI = sum(RMSEinc/df4$MedianIncome)/20
+REfemale = sum(RMSEfemale/out2010.sf$TotalFemale_2010)/20
+REwhite = sum(RMSEwhite/out2010.sf$White_2010)/20
+REblack = sum(RMSEblack/out2010.sf$Black_2010)/20
+REblack2 = sum(RMSEblack/out2010.sf$Black_2010[out2010.sf$Black_2010 >= 100])/20
+REMH = sum(RMSEmobile/out2010.sf$MobileHomes_2010)/20
+REMI = sum(RMSEinc/out2010.sf$MedianIncome_2010)/20
 ```
