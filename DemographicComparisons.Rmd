@@ -424,10 +424,10 @@ xx = xx[,c(1,54)]
 NEW CODE
 ```{r}
 xxx = sfdf %>%
-  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 614437 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 613642 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
 
 xxx = rename(xxx, "Name" = "om")
-xxx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL", "Lutts, TN")
+xxx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
 xxx = xxx[,c(1,54)]
 #xx = xx[c(2,5,9,15),]
 #yy = TornDAT.sfdf[c(1,5,6,16),]
@@ -548,7 +548,9 @@ Areal weighted interpolation
 
 ```{r}
 TornDAT.sfdf$ID = 1:nrow(TornDAT.sfdf)
+TornDAT.sfdf <- st_transform(TornDAT.sfdf, crs = st_crs(TornSC.sf))
 
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornSC.sf))
 
 out2010.sf <- aw_interpolate(TornDAT.sfdf, 
                tid = "ID", 
@@ -564,6 +566,10 @@ out2010.sf <- aw_interpolate(TornDAT.sfdf,
                weight = "total", 
                output = "sf")
 
+out2010.sf$PopUnder18 = out2010.sf$MaleUnder18_2010 + out2010.sf$FemaleUnder18_2010
+out2010.sf$Pop18to44 = out2010.sf$Male18to44_2010 + out2010.sf$Female18to44_2010
+out2010.sf$Pop45to64 = out2010.sf$Male45to64_2010 + out2010.sf$Female45to64_2010
+out2010.sf$PopOver65 = out2010.sf$MaleOver65_2010 + out2010.sf$FemaleOver65_2010
 ```
 
 Run the code to estimate socioeconomic and demographic variables via the 2010 Census Tracts. This data is from the American Community Survey.
@@ -656,6 +662,8 @@ df4$popD = df4$TotalPeople/(AreaTor2010/10^6)
 df4 = df4[,c(1,17:28)]
 ```
 
+OLD CODE
+
 Put the Data together
 ```{r}
 SPC.df = Torn.df %>%
@@ -687,6 +695,41 @@ cor.test((df4$MedianIncome), (SPC.df$MedianIncome))
 cor.test((df4$MobileHomes), (SPC.df$MobileHomes))
 ```
 
+NEW CODE
+Put the Data together
+```{r}
+SPC.sf = TornSC.sf %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 613642 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
+
+which(colnames(SPC.sf) == "AreaPth")
+which(colnames(SPC.sf) == "TotalPp")
+
+SPC.sf = SPC.sf[,c(1,29, 33:53)]
+SPC.sf = SPC.sf %>%
+  rename("Name" = "om") %>%
+  mutate(Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL"))
+
+out2010.sf$AreaPath = SPC.sf$AreaPth[c(2,1,20,18,5,15,4,3,8,12,7,19,10,13,14,9,11,6,17,16)]
+out2010.sf$popD = out2010.sf$TotalPop_2010/out2010.sf$AreaPath * 10^6
+
+
+out2010.sf = out2010.sf %>%
+  arrange(out2010.sf$Name)
+
+SPC.sf = SPC.sf %>%
+  arrange(SPC.sf$Name)
+
+cor.test((out2010.sf$TotalPop_2010), (SPC.sf$TotalPp))
+cor.test((out2010.sf$popD), (SPC.sf$popD))
+cor.test((out2010.sf$TotalMale_2010), (SPC.sf$TotalMl))
+cor.test((out2010.sf$TotalFemale_2010), (SPC.sf$TotlFml))
+cor.test((out2010.sf$White_2010), (SPC.sf$White))
+cor.test((out2010.sf$Black_2010), (SPC.sf$Black))
+cor.test((out2010.sf$MedianIncome_2010), (SPC.sf$MdnIncm))
+cor.test((out2010.sf$MobileHomes_2010), (SPC.sf$MoblHms))
+```
+
+OLD CODE
 Root Mean Square Error
 ```{r}
 # Total People
@@ -744,4 +787,60 @@ REMH = sum(RMSEmobile/df4$MobileHomes)/20
 REMI = sum(RMSEinc/df4$MedianIncome)/20
 ```
 
+### NEW CODE
+Root Mean Square Error
+```{r}
+# Total People
+Diffpop = sum(out2010.sf$TotalPop_2010) - sum(SPC.sf$TotalPp)
+RMSEpop = sqrt((abs(Diffpop)^2)/20)
 
+#Exclude = sum(df4$TotalPeople[c(-1,-5)]) - sum(SPC.df$TotalPeople[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+
+# Males
+Diffmale = sum(out2010.sf$TotalMale_2010) - sum(SPC.sf$TotalMl)
+RMSEmale = sqrt((abs(Diffmale)^2)/20)
+
+# Females
+Difffemale = sum(df4$TotalFemales) - sum(SPC.df$TotalFemales)
+RMSEfemale = sqrt((abs(Difffemale)^2)/20)
+
+# White People
+Diffwhite = sum(df4$WhitePeople) - sum(SPC.df$WhitePeople)
+RMSEwhite = sqrt((abs(Diffwhite)^2)/20)
+
+# Black People
+Diffblack = sum(df4$BlackPeople) - sum(SPC.df$BlackPeople)
+RMSEblack = sqrt((abs(Diffblack)^2)/20)
+
+# Median Income
+Diffinc = sum(df4$MedianIncome) - sum(SPC.df$MedianIncome)
+RMSEinc = sqrt((abs(Diffinc)^2)/20)
+
+# Mobile Homes
+Diffmobile = sum(df4$MobileHomes) - sum(SPC.df$MobileHomes)
+RMSEmobile = sqrt((abs(Diffmobile)^2)/20)
+
+#Exclude = sum(df4$MobileHomes[-1]) - sum(SPC.df$MobileHomes[-1])
+#sqrt((abs(Exclude)^2)/20)
+
+# Population Density
+DiffpopD = sum(df4$popD) - sum(SPC.df$popD)
+RMSEpopD = sqrt((abs(DiffpopD)^2)/20)
+
+#Exclude = sum(df4$popD[c(-1.,-5)]) - sum(SPC.df$popD[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+```
+
+Relative Error
+```{r}
+REpop = sum(RMSEpop/out2010.sf$TotalPop_2010)/20
+REpopD = sum(RMSEpopD/df4$popD)/20
+REmale = sum(RMSEmale/out2010.sf$TotalPop_2010)/20
+REfemale = sum(RMSEfemale/df4$TotalFemales)/20
+REwhite = sum(RMSEwhite/df4$WhitePeople)/20
+REblack = sum(RMSEblack/df4$BlackPeople)/20
+REblack2 = sum(RMSEblack/df4$BlackPeople[df4$BlackPeople >= 100])/20
+REMH = sum(RMSEmobile/df4$MobileHomes)/20
+REMI = sum(RMSEinc/df4$MedianIncome)/20
+```
