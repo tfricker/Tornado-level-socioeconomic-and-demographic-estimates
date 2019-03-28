@@ -850,6 +850,12 @@ summary(lengths(st_overlaps(TornDAT.sfdf, US2010.sf)))
 
 Play with the Beauregard, Al tornado.
 ```{r}
+Beauregard.sfdf = sf::st_read(dsn = "Beauregard", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
 
+Beauregard.sfdf = rename(Beauregard.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Beauregard, AL") %>%
+  Beauregard.sfdf[c(1,9)]
 ```
 
