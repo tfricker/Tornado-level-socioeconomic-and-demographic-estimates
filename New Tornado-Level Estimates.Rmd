@@ -65,8 +65,8 @@ Add a data/time column also add columns for path length, width, and area in metr
 Torn.sf <- Torn.sf %>%
   mutate(dy = format(as.Date(date, format="%Y-%m-%d"), "%d"),
          DateTime = as.POSIXct(paste(yr, mo, dy, time), format = "%Y%m%d%H:%M:%S"),
-         Hour = hour(DateTime),
-         Year = year(DateTime),
+         Hour = lubridate::hour(DateTime),
+         Year = lubridate::year(DateTime),
          Length = len * 1609.34,
          Length = ifelse(Length == 0, min(Length[Length > 0]), Length), #takes care of zero length
          Width = wid * .9144,
