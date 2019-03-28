@@ -389,7 +389,6 @@ sfdf = TornSC.sf
 ```
 
 ```{r}
-
 tm_shape(sfdf[sfdf$om == 480993,]) +
   tm_polygons(col = "blue", alpha = 0.3) +
   tm_shape(Brookport.sfdf) +
@@ -857,5 +856,20 @@ Beauregard.sfdf = sf::st_read(dsn = "Beauregard",
 Beauregard.sfdf = rename(Beauregard.sfdf, "Name" = "efscale") %>%
   mutate(Name = "Beauregard, AL") %>%
   Beauregard.sfdf[c(1,9)]
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(Beauregard.sfdf))
+
+AL2010.sf <- US2010.sf[US2010.sf$STATE == "Alabama",]
+
+tmap_mode("view")
+tm_basemap(leaflet::providers$Esri.WorldTopoMap) +
+tm_shape(Beauregard.sfdf) +
+  tm_polygons(col = "grey", alpha = 0.3) +
+  tm_shape(AL2010.sf) + 
+  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(panel.label.bg.color = "white", frame = FALSE)
 ```
 
