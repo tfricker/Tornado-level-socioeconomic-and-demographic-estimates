@@ -848,4 +848,8 @@ Determine the number of tracts intersected by the actual paths.
 summary(lengths(st_overlaps(TornDAT.sfdf, US2010.sf)))
 ```
 
+Play with the Beauregard, Al tornado.
+```{r}
+
+```
 
