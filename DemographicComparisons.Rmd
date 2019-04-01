@@ -900,10 +900,31 @@ out2017.sf <- aw_interpolate(Beauregard.sfdf,
 
 The EF4 Beauregard-Smiths Station, AL tornado resulted in 113 casualties---23 fatalities and 90 injuries---and had a storm path length of 26.73 miles and 1600 yards. The storm occurred at 2:00pm CST on March 3, 2019.
 
-Find the actual path area
+Find the actual path area and popD
 ```{r}
 Beauregard.sfdf$PathArea <- st_area(Beauregard.sfdf)
+Beauregard.sfdf$popD <- (out2017.sf$B01001_001E/Beauregard.sfdf$PathArea) * 10^6
+Beauregard.sfdf$mag <- 4
+Beauregard.sfdf$smh = 2.4266140
+Beauregard.sfdf$syr = 2.31
+
+perc <- c(1, 0, 0, 0, 0, 0, 
+          .772, .228, 0, 0, 0, 0,
+          .616, .268, .115, 0, 0, 0,
+          .529, .271, .133, .067, 0, 0,
+          .543, .238, .131, .056, .032, 0,
+          .538, .223, .119, .07, .033, .017)
+percM <- matrix(perc, ncol = 6, byrow = TRUE)
+threshW <- c(29.06, 38.45, 49.62, 60.8, 74.21, 89.41)
+midptW <- c(diff(threshW)/2 + threshW[-length(threshW)], threshW[length(threshW)] + 7.5)
+ef <- Beauregard.sfdf$mag + 1
+EW3 <- numeric()
+for(i in 1:length(ef)) EW3[i] = midptW^3 %*% percM[ef[i], ]
+Beauregard.sfdf <- Beauregard.sfdf %>%
+  mutate(ED = EW3 * PathArea)
 ```
 The path area of the Beauregard-Smiths Station, AL tornado was 40774487.
+
+The estimated number of casualties for the Beauregard, AL tornado was 55 people. The actual number was 113 for a difference of 58. This would register as an UDT.
 
 
