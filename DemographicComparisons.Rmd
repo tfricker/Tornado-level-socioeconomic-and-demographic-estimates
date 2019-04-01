@@ -861,12 +861,18 @@ US2010.sf <- st_transform(US2010.sf, crs = st_crs(Beauregard.sfdf))
 
 AL2010.sf <- US2010.sf[US2010.sf$STATE == "Alabama",]
 
+# US cities
+library(maps)
+cities = us.cities
+
 tmap_mode("view")
-tm_basemap(leaflet::providers$Esri.WorldTopoMap) +
+tm_basemap(leaflet::providers$Esri.WorldImagery) +
+  tm_tiles("CartoDB.PositronOnlyLabels") +
 tm_shape(Beauregard.sfdf) +
-  tm_polygons(col = "grey", alpha = 0.3) +
-  tm_shape(AL2010.sf) + 
-  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_polygons(col = "grey", alpha = 0.01, border.col = "red") +
+#  tm_shape(AL2010.sf) + 
+#  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_scale_bar() +
   tm_format_Europe(legend.position = c("left", "bottom"),
                    attr.position = c("left", "bottom"),
                    legend.frame = FALSE) +
