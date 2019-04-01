@@ -873,3 +873,37 @@ tm_shape(Beauregard.sfdf) +
   tm_layout(panel.label.bg.color = "white", frame = FALSE)
 ```
 
+Get Alabama 2017 tract data. Only grab total population, total housing units, and mobile home units. Then overlay and extract information about the Beauregard, AL tornado.
+```{r}
+AL2017.sf <- get_acs(state = "AL",
+          geography = "tract", 
+          variables = c("B01001_001", "B25024_001", "B25024_010"),
+          year = 2017,
+          output = "wide",
+          geometry = TRUE)
+
+AL2017.sf <- st_transform(AL2017.sf, 
+                     crs = "+proj=lcc +lat_1=60 +lat_2=30 +lon_0=-90 +units=m")
+
+Beauregard.sfdf <- st_transform(Beauregard.sfdf, crs = st_crs(AL2017.sf))
+Beauregard.sfdf$ID <-  1:nrow(Beauregard.sfdf)
+AL2017.sf$ID2 <- 1:nrow(AL2017.sf)
+
+out2017.sf <- aw_interpolate(Beauregard.sfdf, 
+               tid = "ID", 
+               source = AL2017.sf, 
+               sid = "ID2",
+               extensive = c("B01001_001E", "B25024_001E", "B25024_010E"),
+               weight = "total", 
+               output = "sf")
+```
+
+The EF4 Beauregard-Smiths Station, AL tornado resulted in 113 casualties---23 fatalities and 90 injuries---and had a storm path length of 26.73 miles and 1600 yards. The storm occurred at 2:00pm CST on March 3, 2019.
+
+Find the actual path area
+```{r}
+Beauregard.sfdf$PathArea <- st_area(Beauregard.sfdf)
+```
+The path area of the Beauregard-Smiths Station, AL tornado was 40774487.
+
+
