@@ -294,6 +294,8 @@ df2 = data.frame(US2010.sf) %>%
   select(MobileHomes, MobileHomesM)
 
 df2 = df2[df2$MobileHomes != 0,]
+
+summary(df2)
 ```
 
 
