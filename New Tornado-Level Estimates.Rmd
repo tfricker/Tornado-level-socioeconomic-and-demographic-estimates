@@ -228,6 +228,75 @@ US2010.sf = US2010.sf %>%
          MedianIncomeM = MedianIncomeM * 1.032)
 ```
 
+Find margins of error for the aggregated count data (in percentage error)
+```{r}
+df = data.frame(US2010.sf) %>%
+  mutate(TotalPopM = TotalPopM/(TotalPop + TotalPopM),
+         TotalMaleM = TotalMaleP/(TotalMale + TotalMaleP),
+         MaleUnder18M = sqrt(MaleUnder5M^2 + Male5.9M^2 + Male10.14M^2 +
+            Male15.17M^2)/((MaleUnder5 + Male5.9 + Male10.14 + Male15.17) +
+            (sqrt(MaleUnder5M^2 + Male5.9M^2 + Male10.14M^2 + Male15.17M^2))),
+         Male18to44M = sqrt(Male18.19M + Male20M + Male21M + Male22.24M + Male25.29M +
+            Male30.34M + Male35.39M + Male40.44M)/((Male18.19 + Male20 + Male21 + 
+            Male22.24 + Male25.29 + Male30.34 + Male35.39 + Male40.44) + (Male18.19M +
+            Male20M + Male21M + Male22.24M + Male25.29M + Male30.34M + Male35.39M +
+            Male40.44M)),
+        Male45to64M = sqrt(Male45.49M + Male50.54M + Male55.59M + Male60.61M +
+            Male62.64M)/((Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64) +
+            sqrt(Male45.49M + Male50.54M + Male55.59M + Male60.61M + Male62.64M)),
+        MaleOver65M = sqrt(Male65.66M + Male67.69M + Male70.74M + Male75.79M + Male80.84M
+         + MaleOver85M)/((Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
+         + MaleOver85) + sqrt(Male65.66M + Male67.69M + Male70.74M + Male75.79M +
+            Male80.84M + MaleOver85M)),
+        TotalFemaleM = TotalFemaleM/(TotalFemale + TotalFemaleM),
+        FemaleUnder18M = sqrt(FemaleUnder5M + Female5.9M + Female10.14M +
+            Female15.17M)/((FemaleUnder5 + Female5.9 + Female10.14 + Female15.17) +
+            sqrt(FemaleUnder5M + Female5.9M + Female10.14M + Female15.17M)),
+        Female18to44M = sqrt(Female18.19M + Female20M + Female21M + Female22.24M +
+            Female25.29M + Female30.34M + Female35.39M + Female40.44M)/((Female18.19 +
+            Female20 + Female21 + Female22.24 + Female25.29 + Female30.34 + Female35.39 +
+            Female40.44) + sqrt(Female18.19M + Female20M + Female21M + Female22.24M +
+            Female25.29M + Female30.34M + Female35.39M + Female40.44M)),
+        Female45to64M = sqrt(Female45.49M + Female50.54M + Female55.59M + 
+            Female60.61M + Female62.64M)/((Female45.49 + Female50.54 + Female55.59 +
+            Female60.61 + Female62.64) + sqrt(Female45.49M + Female50.54M + 
+            Female55.59M + Female60.61M + Female62.64M)),
+        FemaleOver65M = sqrt(Female65.66M + Female67.69M + Female70.74M + Female75.79M 
+         + Female80.84.1 + FemaleOver85.1)/((Female65.66 + Female67.69 + Female70.74 +
+           Female75.79 + Female80.84 + FemaleOver85) + sqrt(Female65.66M + Female67.69M +
+           Female70.74M + Female75.79M + Female80.84.1 + FemaleOver85.1)),
+        WhiteM = WhiteM/(White + WhiteM),
+        BlackM = BlackM/(Black + BlackM),
+        MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM),
+        MedianIncomeM = MedianIncomeM/(MedianIncome + MedianIncomeM)) %>%
+  select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
+         Male45to64M, MaleOver65M, TotalFemaleM, FemaleUnder18M, Female18to44M,
+         Female45to64M, FemaleOver65M, WhiteM, BlackM, MobileHomesM, MedianIncomeM)
+```
+
+Summarize the MOE from 2010 ACS data.
+```{r}
+summary(df)
+```
+
+Margins of error for population density data are more complicated. Manually edit here:
+```{r}
+x = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
+xx = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
+xxx = xx/(x + xx)
+summary(xxx)
+```
+
+Investigate the mobile homes MOE in more detail.
+```{r}
+df2 = data.frame(US2010.sf) %>%
+  mutate(MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM)) %>%
+  select(MobileHomes, MobileHomesM)
+
+df2 = df2[df2$MobileHomes != 0,]
+```
+
+
 Try areal weighted interpolation
 
 The cookie cutters are the simple feature _polygons_ defining the boundaries we want values interpolated to. This is defined as the target object and it is the first argument in the `aw_interpolate()` function. We need to identify each cookie cutter with a unique target id (`tid`).
