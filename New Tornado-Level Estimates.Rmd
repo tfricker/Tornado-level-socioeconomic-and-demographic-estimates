@@ -759,7 +759,7 @@ library(tmaptools)
 #download.file("http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_state_20m.zip", destfile = "states.zip")
 #unzip("states.zip")
 
-us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+us_geo <- read_shape("states/cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
 us_geo = subset(us_geo, !(NAME %in% c("Alaska", "Hawaii", "Puerto Rico")))
 colnames(us_geo)[5] = "st"
 
