@@ -23,7 +23,10 @@ Tornado-Level-Estimates-PUBLIC-OLD.Rmd
 1990Census_2.csv
 1990Census_2.txt
 1990_Tracts
-SocialCorrelatesNew
 states
 SocialCorrelatesOLD.csv
 SocialCorrelatesOLD
+SocialCorrelatesNew
+ArealPackage.Rmd
+
+
