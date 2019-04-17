@@ -426,10 +426,8 @@ US1990.sf = US1990.sf %>%
          + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .513),
          Female18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
          + Pop30.34 + Pop35.39 + Pop40.44) * .513),
-         Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
-         * .513),
-         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85)
-         * .513),
+         Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64)          * .513),
+         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 +                   PopOver85) * .513),
          White_1990 = White,
          Black_1990 = Black,
          TotalHousingUnits_1990 = TotalHousingUnits,
@@ -543,9 +541,9 @@ data = data
 interp = numeric()
 for(i in 1:nrow(data)){
   interp[i] = approx(x = x, 
-                  y = c(y1[i], y2[i]), 
-                  xout = data$Year[i],
-                  rule = 2)$y
+                     y = c(y1[i], y2[i]), 
+                     xout = data$Year[i],
+                     rule = 2)$y
 }
 return(interp)
 }
@@ -775,8 +773,8 @@ tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
   tm_format('World', legend.position = c("left", "bottom"),
-                   attr.position = c("left", "bottom"),
-                   legend.frame = FALSE) +
+            attr.position = c("left", "bottom"),
+            legend.frame = FALSE) +
   #tm_compass(position = c("RIGHT", "bottom")) +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
@@ -859,11 +857,18 @@ ggplot(spsNRC3A.df[spsNRC3A.df$EF == "EF0", ], aes(x = long, y = lat)) +
   geom_polygon(mapping = aes(long, lat, fill = factor(inc), group = id), data = box.df, color = "white", show_guide=FALSE) +
   geom_polygon(fill = "transparent", color = "black") +
   scale_fill_manual(name = expression("Household Median Income\n(USD)"), limits = lims, breaks = brks, values = vals) +
-  geom_segment(x = trackr[1, 1], xend = trackr[2, 1], y = trackr[1, 2], yend = trackr[2, 2],
-               arrow = grid::arrow(length = grid::unit(.6, "cm"), type = "closed"), size = 1.0, color = "black") +
+  geom_segment(x = trackr[1, 1], 
+               xend = trackr[2, 1], 
+               y = trackr[1, 2], 
+               yend = trackr[2, 2], 
+               arrow = grid::arrow(length = grid::unit(.6, "cm"), type = "closed"), 
+               size = 1.0, 
+               color = "black") +
   xlab("") + ylab("") +
    theme(panel.background = element_blank(),
-        panel.grid.major = element_line(colour = "gray", size = .25, linetype = 'dashed'),
+        panel.grid.major = element_line(colour = "gray", 
+                                        size = .25, 
+                                        linetype = 'dashed'),
         panel.grid.minor = element_blank(),
         axis.ticks = element_blank(),
         axis.text = element_blank(),
@@ -878,8 +883,10 @@ summary(TornSC.sf$TotalPp); summary(TornSC.sf$popD)
 
 df = data.frame(TornSC.sf) %>%
   arrange(desc(TotalPp))
+
 df = df[1:10,] %>%
   dplyr::select(date, st, inj, fat, cas, TotalPp)
+
 df
 ```
 
@@ -896,8 +903,10 @@ For the same set of tornadoes, the median number of males is 16.9 with an interq
 summary(TornSC.sf$MdnIncm); summary(TornSC.sf$MoblHms)
 df = data.frame(TornSC.sf) %>%
   arrange(desc(MoblHms))
+
 df = df[1:10,] %>%
   dplyr::select(date, st, inj, fat, cas, MoblHms)
+
 df
 ```
 
@@ -911,20 +920,20 @@ To link the tornado in the SPC database with the associated tornado segments in 
 
 ```{r}
 validation.df = data.frame(om = c(296616, 1147, 140, 634, 613600, 266, 133, 1253, 69, 850, 558, 893, 23, 22, 161, 289605, 833, 305268, 504758, 610234, 368708, 914, 877, 783),
-                          date = c("2011-05-22", "1999-05-03", "2010-04-24", "2000-02-13", "2016-02-24", "2006-04-02", "2008-02-05", "2005-11-06", "1996-03-06", "1999-04-09", "2010-06-05", "1998-02-22", "2007-02-02", "2007-02-02", "2008-02-06", "2011-04-25", "1998-04-08", "2011-04-27", "2014-04-27", "2015-12-23", "2012-03-02", "2002-11-10", "1998-04-16", "1998-04-16") ,
-                          fat = c(158, 36, 10, 11, 3, 16, 22, 24, 4, 4, 7, 25, 13, 8, 4, 4, 32, 20, 16, 9, 6, 4, 2, 2),
-                          EstimatedMale = c(74.7, 17.7, 5.1, 6.1, 1.6, 7.8, 11, 11.6, 1.9, 2, 3.5, 12.7, 6, 3.8, 2.1, 2.1, 15.1, 9.9, 8.1, 4.4, 3, 2, 1, 1),
-                          ActualMale = c(73, 15, 4, 2, 3, 9, 14, 11, 2, 3, 4, 13, 7, 3, 2, 3, 13, 10, 9, 4, 2, 3, 1, 2),
-                          EstimatedFemale = c(83.3, 18.3, 4.9, 4.9, 1.4, 8.2, 11, 12.4, 2.1, 2, 3.5, 12.3, 7, 4.2, 1.9, 1.9, 16.9, 10.1, 7.9, 4.6, 3, 2, 1, 1),
-                          ActualFemale = c(85, 21, 6, 9, 0, 7, 8, 13, 2, 1, 3, 12, 6, 5, 2, 1, 19, 10, 7, 5, 4, 1, 1, 0),
-                          EstimatedUnder17 = c(33.9, 9.5, 2.6, 2.5, 0.4, 3.9, 5.4, 6.1, 1.1, 1.2, 1.6, 5.8, 3.3, 1, 0.8, 1, 7.4, 5.1, 4.2, 2.2, 1.5, 1.1, 0.5, 0.5),
-                          ActualUnder17 = c(13, 3, 3, 2, 1, 2, 1, 4, 1, 0, 1, 1, 3, 1, 1, 0, 4, 3, 4, 1, 0, 0, 0, 0),
-                          Estimated18to44 = c(48.9, 14.5, 3.5, 5.2, 1.2, 5.5, 7.5, 8.7, 1.5, 1.3, 2.2, 9.1, 4.1, 1.4, 1.1, 1.4, 11.4, 7.6, 5.6, 3.3, 1.9, 1.5, 0.7, 0.8),
-                          Actual18to44 = c(32, 15, 1, 4, 1, 5, 7, 9, 0, 2, 3, 7, 3, 1, 0, 0, 5, 5, 3, 1, 1, 1, 0, 0),
-                          Estimated45to64 = c(47.3, 8.4, 2.5, 2.2, 0.9, 4.4, 6.1, 6.1, 1, 1.1, 2.2, 6.5, 3.3, 2.4, 1.3, 1.1, 8.3, 5, 4.4, 2.3, 1.8, 0.9, 0.6, 0.5),
-                          Actual45to64 = c(55, 10, 4, 5, 1, 4, 8, 9, 2, 2, 2, 7, 6, 0, 3, 4, 10, 8, 7, 3, 3, 0, 2, 1),
-                          EstimatedOver65 = c(27.9, 3.6, 1.4, 1.1, 0.5, 2.2, 3, 3.1, 0.4, 0.4, 1, 3.6, 2.3, 3.2, 0.8, 0.5, 4.9, 2.3, 1.8, 1.2, 0.8, 0.5, 0.2, 0.2),
-                          ActualOver65 = c(58, 8, 2, 0, 0, 5, 6, 2, 1, 0, 1, 10, 1, 6, 0, 0, 13, 4, 2, 4, 2, 3, 0, 1))
+                           date = c("2011-05-22", "1999-05-03", "2010-04-24", "2000-02-13", "2016-02-24", "2006-04-02", "2008-02-05", "2005-11-06", "1996-03-06", "1999-04-09", "2010-06-05", "1998-02-22", "2007-02-02", "2007-02-02", "2008-02-06", "2011-04-25", "1998-04-08", "2011-04-27", "2014-04-27", "2015-12-23", "2012-03-02", "2002-11-10", "1998-04-16", "1998-04-16") ,
+                           fat = c(158, 36, 10, 11, 3, 16, 22, 24, 4, 4, 7, 25, 13, 8, 4, 4, 32, 20, 16, 9, 6, 4, 2, 2),
+                           EstimatedMale = c(74.7, 17.7, 5.1, 6.1, 1.6, 7.8, 11, 11.6, 1.9, 2, 3.5, 12.7, 6, 3.8, 2.1, 2.1, 15.1, 9.9, 8.1, 4.4, 3, 2, 1, 1),
+                           ActualMale = c(73, 15, 4, 2, 3, 9, 14, 11, 2, 3, 4, 13, 7, 3, 2, 3, 13, 10, 9, 4, 2, 3, 1, 2),
+                           EstimatedFemale = c(83.3, 18.3, 4.9, 4.9, 1.4, 8.2, 11, 12.4, 2.1, 2, 3.5, 12.3, 7, 4.2, 1.9, 1.9, 16.9, 10.1, 7.9, 4.6, 3, 2, 1, 1),
+                           ActualFemale = c(85, 21, 6, 9, 0, 7, 8, 13, 2, 1, 3, 12, 6, 5, 2, 1, 19, 10, 7, 5, 4, 1, 1, 0),
+                           EstimatedUnder17 = c(33.9, 9.5, 2.6, 2.5, 0.4, 3.9, 5.4, 6.1, 1.1, 1.2, 1.6, 5.8, 3.3, 1, 0.8, 1, 7.4, 5.1, 4.2, 2.2, 1.5, 1.1, 0.5, 0.5),
+                           ActualUnder17 = c(13, 3, 3, 2, 1, 2, 1, 4, 1, 0, 1, 1, 3, 1, 1, 0, 4, 3, 4, 1, 0, 0, 0, 0),
+                           Estimated18to44 = c(48.9, 14.5, 3.5, 5.2, 1.2, 5.5, 7.5, 8.7, 1.5, 1.3, 2.2, 9.1, 4.1, 1.4, 1.1, 1.4, 11.4, 7.6, 5.6, 3.3, 1.9, 1.5, 0.7, 0.8),
+                           Actual18to44 = c(32, 15, 1, 4, 1, 5, 7, 9, 0, 2, 3, 7, 3, 1, 0, 0, 5, 5, 3, 1, 1, 1, 0, 0),
+                           Estimated45to64 = c(47.3, 8.4, 2.5, 2.2, 0.9, 4.4, 6.1, 6.1, 1, 1.1, 2.2, 6.5, 3.3, 2.4, 1.3, 1.1, 8.3, 5, 4.4, 2.3, 1.8, 0.9, 0.6, 0.5),
+                           Actual45to64 = c(55, 10, 4, 5, 1, 4, 8, 9, 2, 2, 2, 7, 6, 0, 3, 4, 10, 8, 7, 3, 3, 0, 2, 1),
+                           EstimatedOver65 = c(27.9, 3.6, 1.4, 1.1, 0.5, 2.2, 3, 3.1, 0.4, 0.4, 1, 3.6, 2.3, 3.2, 0.8, 0.5, 4.9, 2.3, 1.8, 1.2, 0.8, 0.5, 0.2, 0.2),
+                           ActualOver65 = c(58, 8, 2, 0, 0, 5, 6, 2, 1, 0, 1, 10, 1, 6, 0, 0, 13, 4, 2, 4, 2, 3, 0, 1))
 
 ```
 
@@ -1068,13 +1077,17 @@ sfdf3 = sfdf[1:10,]
 A = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_shape(sfdf3) +
-  tm_bubbles("WhiteCas", col = "red", alpha = 0.3, sizes.legend = c(200, 400, 800, 1200), title.size="Estimated White Casualties", scale = 5/3) +
+  tm_bubbles("WhiteCas", col = "red", 
+             alpha = 0.3, 
+             sizes.legend = c(200, 400, 800, 1200), 
+             title.size="Estimated White Casualties", 
+             scale = 5/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
   tm_style('white', title="A") +
   tm_format('World', legend.position = c("left", "bottom"),
-                   attr.position = c("left", "bottom"),
-                   legend.frame = FALSE) +
+            attr.position = c("left", "bottom"),
+            legend.frame = FALSE) +
   #tm_compass(position = c("RIGHT", "bottom")) +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
@@ -1082,13 +1095,18 @@ A = tm_shape(us_geo, projection ="+init=epsg:2163") +
 B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_shape(sfdf2) +
-  tm_bubbles("BlackCas", col = "blue", sizes.legend = c(200, 400, 800, 1200), alpha = 0.3, title.size="Estimated Black Casualties", scale = 4/3) +
+  tm_bubbles("BlackCas", 
+             col = "blue", 
+             sizes.legend = c(200, 400, 800, 1200), 
+             alpha = 0.3, 
+             title.size="Estimated Black Casualties", 
+             scale = 4/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
   tm_style('white', title="B") +
   tm_format('World', legend.position = c("left", "bottom"),
-                    attr.position = c("left", "bottom"),
-                   legend.frame = FALSE) +
+            attr.position = c("left", "bottom"),
+            legend.frame = FALSE) +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 
@@ -1116,13 +1134,17 @@ sfdf3 = sfdf[1:10,]
 A = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_shape(sfdf2) +
-  tm_bubbles("YoungCas", col = "red", alpha = 0.3, sizes.legend = c(100, 200, 300, 400), title.size="Estimated Young Casualties", scale = 5/3) +
+  tm_bubbles("YoungCas", col = "red", 
+             alpha = 0.3, 
+             sizes.legend = c(100, 200, 300, 400), 
+             title.size="Estimated Young Casualties", 
+             scale = 5/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
   tm_style('white', title="A") +
   tm_format('World', legend.position = c("left", "bottom"),
-                   attr.position = c("left", "bottom"),
-                   legend.frame = FALSE) +
+            attr.position = c("left", "bottom"),
+            legend.frame = FALSE) +
   #tm_compass(position = c("RIGHT", "bottom")) +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
@@ -1130,13 +1152,17 @@ A = tm_shape(us_geo, projection ="+init=epsg:2163") +
 B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_borders() +
   tm_shape(sfdf3) +
-  tm_bubbles("OldCas", col = "blue", sizes.legend = c(100, 200, 300, 400), alpha = 0.3, title.size="Estimated Elderly Casualties", scale = 4/3) +
+  tm_bubbles("OldCas", col = "blue", 
+             sizes.legend = c(100, 200, 300, 400), 
+             alpha = 0.3, 
+             title.size="Estimated Elderly Casualties", 
+             scale = 4/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
   tm_style('white', title="B") +
   tm_format('World', legend.position = c("left", "bottom"),
-                    attr.position = c("left", "bottom"),
-                   legend.frame = FALSE) +
+            attr.position = c("left", "bottom"),
+            legend.frame = FALSE) +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 
