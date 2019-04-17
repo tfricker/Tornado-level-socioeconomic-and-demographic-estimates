@@ -194,7 +194,7 @@ US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
 US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornB.sf))
 ```
 
-** This fixes the problem with tidycensus for 2010 ** 
+**This fixes the problem with tidycensus for 2010** 
 
 Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
 
@@ -914,7 +914,7 @@ Additionally, the median household median income is \$46,988 with an interquarti
 
 Our results are validated by comparing 20 actual and modeled paths and their associated estimates. 
 
-** To see this validation download Demographic-Comparisons.Rmd **
+**To see this validation download Demographic-Comparisons.Rmd**
 
 Our method is validated by comparing results with demographic statistics of fatalities available in the Storm Events database (https://www.ncdc.noaa.gov/stormevents/). The database records all tornado segments from 1950 through 2016. The tornado segments are divided by county and each segment includes both an episode narrative and event narrative. Event fatality data are available within each event and include the type of death (direct or indirect) along with the age, sex, and location (if known) of the victim. No information about injuries is available.
 
