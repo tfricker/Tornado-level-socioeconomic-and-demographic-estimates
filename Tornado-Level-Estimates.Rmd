@@ -3,6 +3,8 @@ title: "Tornado-Level-Estimates"
 author: "Tyler Fricker"
 date: "4/17/2019"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 Set working directory and load packages.
 ```{r}
@@ -775,7 +777,7 @@ tm_shape(us_geo, projection ="+init=epsg:2163") +
             attr.position = c("left", "bottom"),
             legend.frame = FALSE) +
   #tm_compass(position = c("RIGHT", "bottom")) +
-  tm_scale_bar(position = c("right", "bottom")) +
+  #tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 ```
 
