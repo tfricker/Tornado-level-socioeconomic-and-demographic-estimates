@@ -847,6 +847,9 @@ Determine the number of tracts intersected by the actual paths.
 summary(lengths(st_overlaps(TornDAT.sfdf, US2010.sf)))
 ```
 
+
+### Beauregard, AL Tornado
+
 Play with the Beauregard, Al tornado.
 ```{r}
 Beauregard.sfdf = sf::st_read(dsn = "Beauregard", 
@@ -933,4 +936,116 @@ The path area of the Beauregard-Smiths Station, AL tornado was 40774487.
 
 The estimated number of casualties for the Beauregard, AL tornado was 55 people. The actual number was 113 for a difference of 58. This would register as an UDT.
 
+### Dayton, Ohio Tornado
 
+```{r}
+Dayton = readOGR("Dayton.kml") 
+
+Dayton.sfdf = sf::st_as_sf(Dayton) 
+Dayton.sfdf = Dayton.sfdf %>%
+  mutate(Name = "Dayton, OH") %>%
+  Dayton.sfdf[-c(2)]
+
+tmap_mode("view")
+tm_basemap(leaflet::providers$Esri.WorldImagery) +
+  tm_tiles("CartoDB.PositronOnlyLabels") +
+tm_shape(Dayton.sfdf) +
+  tm_polygons(col = "grey", alpha = 0.01, border.col = "red") +
+#  tm_shape(AL2010.sf) + 
+#  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_scale_bar() +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(panel.label.bg.color = "white", frame = FALSE)
+```
+
+Get Ohio 2017 tract data. Only grab total population, total housing units, and mobile home units. Then overlay and extract information about the Dayton, OH tornado.
+```{r}
+OH2017.sf <- get_acs(state = "OH",
+          geography = "tract", 
+          variables = c("B01001_001", "B25024_001", "B25024_010"),
+          year = 2017,
+          output = "wide",
+          geometry = TRUE)
+
+OH2017.sf <- st_transform(OH2017.sf, 
+                     crs = "+proj=lcc +lat_1=60 +lat_2=30 +lon_0=-90 +units=m")
+
+Dayton.sfdf <- st_transform(Dayton.sfdf, crs = st_crs(OH2017.sf))
+Dayton.sfdf$ID <-  1:nrow(Dayton.sfdf)
+OH2017.sf$ID2 <- 1:nrow(OH2017.sf)
+
+out2017.sf <- aw_interpolate(Dayton.sfdf, 
+               tid = "ID", 
+               source = OH2017.sf, 
+               sid = "ID2",
+               extensive = c("B01001_001E", "B25024_001E", "B25024_010E"),
+               weight = "total", 
+               output = "sf")
+```
+
+The Dayton, OH tornado impacted an estimated 86,372 people.
+
+What would it have looked like in 1990?
+
+Collect 1990 Census Tract information. Use IPUMS again, because it is cleaner than tidycensus.
+```{r}
+Tracts_1990.sf <- read_sf(dsn = "1990_Tracts",
+                   stringsAsFactors = FALSE)
+
+us1990 <- read.csv("1990Census_1.csv", header = TRUE)
+
+US1990.sf <- ipums_shape_inner_join(us1990, Tracts_1990.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf() 
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US1990.sf <- US1990.sf[US1990.sf$STATEA %in% us,]
+
+US1990.sf <- st_transform(US1990.sf, crs = st_crs(OH2017.sf))
+```
+
+Now focus on cleaning up the sf object
+```{r}
+US1990.sf = US1990.sf %>%
+  mutate(TotalPop_1990 = TotalPop,
+         TotalMale_1990 = TotalMale,
+         MaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .487),
+         Male18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .487),
+         Male45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
+         * .487),
+         MaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85) 
+         * .487),
+         TotalFemale_1990 = TotalFemale,
+         FemaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .513),
+         Female18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .513),
+         Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64)          * .513),
+         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 +                   PopOver85) * .513),
+         White_1990 = White,
+         Black_1990 = Black,
+         TotalHousingUnits_1990 = TotalHousingUnits,
+         MobileHomes_1990 = MobileHomes,
+         MedianIncome_1990 = round(MedianIncome * 1.9114))
+```
+
+Now interpolate
+```{r}
+out1990.sf <- aw_interpolate(Dayton.sfdf, 
+               tid = "ID", 
+               source = US1990.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_1990", "TotalHousingUnits_1990",
+                             "MobileHomes_1990"),
+               weight = "total", 
+               output = "sf")
+```
+
+In 1990, the Dayton, OH tornado would have impacted an estimated 86,777 people.
