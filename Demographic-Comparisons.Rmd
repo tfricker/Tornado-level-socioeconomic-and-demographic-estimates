@@ -1,0 +1,1051 @@
+---
+title: "Demographic Comparisons"
+author: "Tyler Fricker"
+date: "5/14/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+Set working directory and load packages.
+```{r}
+#setwd("~/Dropbox/Tyler")
+suppressPackageStartupMessages(library("ggplot2"))
+suppressPackageStartupMessages(library("ggmap"))
+suppressPackageStartupMessages(library("ggthemes"))
+suppressPackageStartupMessages(library("dplyr"))
+suppressPackageStartupMessages(library("tidyr"))
+suppressPackageStartupMessages(library("rgdal"))
+suppressPackageStartupMessages(library("rgeos"))
+suppressPackageStartupMessages(library("scales"))
+suppressPackageStartupMessages(library("broom"))
+suppressPackageStartupMessages(library("RColorBrewer"))
+suppressPackageStartupMessages(library("maps"))
+suppressPackageStartupMessages(library("maptools"))
+suppressPackageStartupMessages(library("wesanderson"))
+suppressPackageStartupMessages(library("sf"))
+suppressPackageStartupMessages(library("classInt"))
+suppressPackageStartupMessages(library("leaflet"))
+suppressPackageStartupMessages(library("Hmisc"))
+suppressPackageStartupMessages(library("devtools"))
+suppressPackageStartupMessages(library("tidycensus"))
+suppressPackageStartupMessages(library("purrr"))
+suppressPackageStartupMessages(library("tidyverse"))
+suppressPackageStartupMessages(library("reshape2"))
+suppressPackageStartupMessages(library("raster"))
+suppressPackageStartupMessages(library("MASS"))
+suppressPackageStartupMessages(library("tmap"))
+suppressPackageStartupMessages(library("tmaptools"))
+suppressPackageStartupMessages(library("areal"))
+suppressPackageStartupMessages(library("ipumsr"))
+#load(file = "January10.RData")
+```
+
+Load DAT data
+
+Start with Tuscaloosa-Birmingham tornado
+```{r}
+TB.sfdf = sf::st_read(dsn = "TuscBirm", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+TB.sfdf = TB.sfdf[1,]
+
+TB.sfdf = rename(TB.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Tuscaloosa-Birmingham, AL") %>%
+  TB.sfdf[c(1,14)]
+
+Arab.sfdf = sf::st_read(dsn = "Arab", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Arab.sfdf = Arab.sfdf[5,]
+Arab.sfdf = rename(Arab.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Arab, AL") %>%
+  Arab.sfdf[c(1,14)]
+
+Rosalie.sfdf = sf::st_read(dsn = "Rosalie", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Rosalie.sfdf = rename(Rosalie.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Rosalie, AL") %>%
+  Rosalie.sfdf[c(1,14)]
+
+Katie.sfdf = sf::st_read(dsn = "Katie", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Katie.sfdf = rename(Katie.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Katie, OK") %>%
+  Katie.sfdf[c(1,14)]
+
+Joplin = readOGR("JoplinTornado.kml") 
+
+Joplin.sfdf = sf::st_as_sf(Joplin) 
+Joplin.sfdf = Joplin.sfdf %>%
+  mutate(Name = "Joplin, MO") %>%
+  Joplin.sfdf[-c(2)]
+
+GarRow.sfdf = sf::st_read(dsn = "Garland-Rowlett", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+GarRow.sfdf = rename(GarRow.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Garland-Rowlett, TX") %>%
+  GarRow.sfdf[c(1,14)]
+
+Griffin.sfdf = sf::st_read(dsn = "Griffin", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Griffin.sfdf = Griffin.sfdf[1,]
+
+Griffin.sfdf = rename(Griffin.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Griffin, GA") %>%
+  Griffin.sfdf[c(1,14)]
+
+Cartersville.sfdf = sf::st_read(dsn = "Cartersville", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Cartersville.sfdf = Cartersville.sfdf[1,]
+
+Cartersville.sfdf = rename(Cartersville.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Cartersville, GA") %>%
+  Cartersville.sfdf[c(1,14)]
+
+Salem.sfdf = sf::st_read(dsn = "Salem", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Salem.sfdf = Salem.sfdf[1,]
+
+Salem.sfdf = rename(Salem.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Salem, AL") %>%
+  Salem.sfdf[c(1,14)]
+
+Tulsa.sfdf = sf::st_read(dsn = "Tulsa", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Tulsa.sfdf = Tulsa.sfdf[1,]
+
+Tulsa.sfdf = rename(Tulsa.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Tulsa, OK") %>%
+  Tulsa.sfdf[c(1,14)]
+
+Brookport.sfdf = sf::st_read(dsn = "Brookport", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Brookport.sfdf = Brookport.sfdf[1,]
+
+Brookport.sfdf = rename(Brookport.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Brookport, IL") %>%
+  Brookport.sfdf[c(1,14)]
+
+Boswell.sfdf = sf::st_read(dsn = "Boswell", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Boswell.sfdf = Boswell.sfdf[1,]
+
+Boswell.sfdf = rename(Boswell.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Boswell, OK") %>%
+  Boswell.sfdf[c(1,14)]
+
+TornDAT.sfdf = rbind(TB.sfdf, Arab.sfdf, Rosalie.sfdf, Katie.sfdf, Joplin.sfdf, GarRow.sfdf, Griffin.sfdf, Cartersville.sfdf, Salem.sfdf, Tulsa.sfdf, Brookport.sfdf, Boswell.sfdf)
+
+TornDAT = as(TornDAT.sfdf, "Spatial")
+
+TornDAT = spTransform(TornDAT, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+```
+
+The Columbia, MS tornado is a buffered tornado path.
+```{r}
+Columbia.sfdf = sf::st_read(dsn = "Columbia", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Columbia = as(Columbia.sfdf, "Spatial")
+
+Columbia = spTransform(Columbia, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+C = gBuffer(Columbia, byid = TRUE, width = (Columbia$width * .9144)/2)
+
+Columbia.sfdf = sf::st_as_sf(C)
+
+Columbia.sfdf = rename(Columbia.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Columbia, MS") %>%
+  Columbia.sfdf[c(1,23)]
+
+```
+
+So is the Rochelle, IL tornado
+```{r}
+Rochelle.sfdf = sf::st_read(dsn = "Rochelle", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Rochelle = as(Rochelle.sfdf, "Spatial")
+
+Rochelle = spTransform(Rochelle, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+R = gBuffer(Rochelle, byid = TRUE, width = (Rochelle$width * .9144)/2)
+
+Rochelle.sfdf = sf::st_as_sf(R)
+
+Rochelle.sfdf = rename(Rochelle.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Rochelle, IL") %>%
+  Rochelle.sfdf[c(1,23)]
+```
+
+As is Lutts, TN tornado
+```{r}
+Lutts.sfdf = sf::st_read(dsn = "Lutts", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Lutts = as(Lutts.sfdf, "Spatial")
+
+Lutts = spTransform(Lutts, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+L = gBuffer(Lutts, byid = TRUE, width = (Lutts$width * .9144)/2)
+
+Lutts.sfdf = sf::st_as_sf(L)
+
+Lutts.sfdf = rename(Lutts.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Lutts, TN") %>%
+  Lutts.sfdf[c(1,23)]
+```
+
+```{r}
+Blountstown.sfdf = sf::st_read(dsn = "Blountstown", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Blountstown = as(Blountstown.sfdf, "Spatial")
+
+Blountstown = spTransform(Blountstown, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+B = gBuffer(Blountstown, byid = TRUE, width = (Blountstown$width * .9144)/2)
+
+Blountstown.sfdf = sf::st_as_sf(B)
+
+Blountstown.sfdf = rename(Blountstown.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Blountstown, FL") %>%
+  Blountstown.sfdf[c(1,23)]
+```
+
+```{r}
+Laurel.sfdf = sf::st_read(dsn = "Laurel", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Laurel = as(Laurel.sfdf, "Spatial")
+
+Laurel = spTransform(Laurel, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+La = gBuffer(Laurel, byid = TRUE, width = (350 * .9144)/2) # width given in dataset
+
+Laurel.sfdf = sf::st_as_sf(La)
+
+Laurel.sfdf = rename(Laurel.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Laurel, MS") %>%
+  Laurel.sfdf[c(1,23)]
+```
+
+```{r}
+Westville.sfdf = sf::st_read(dsn = "Westville", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Westville = as(Westville.sfdf, "Spatial")
+
+Westville = spTransform(Westville, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+W = gBuffer(Westville, byid = TRUE, width = (Westville$width * .9144)/2)
+
+Westville.sfdf = sf::st_as_sf(W)
+
+Westville.sfdf = rename(Westville.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Westville, IL") %>%
+  Westville.sfdf[c(1,23)]
+```
+
+
+```{r}
+Edison.sfdf = sf::st_read(dsn = "Edison", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Edison = as(Edison.sfdf, "Spatial")
+
+Edison = spTransform(Edison, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+E = gBuffer(Edison, byid = TRUE, width = (Edison$width * .9144)/2)
+
+Edison.sfdf = sf::st_as_sf(E)
+
+Edison.sfdf = rename(Edison.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Edison, GA") %>%
+  Edison.sfdf[c(1,23)]
+```
+
+```{r}
+Dermott.sfdf = sf::st_read(dsn = "Dermott", 
+                      layer = "extractDamagePaths", 
+                      stringsAsFactors = FALSE)
+
+Dermott = as(Dermott.sfdf, "Spatial")
+
+Dermott = spTransform(Dermott, CRS("+proj=lcc +lat_1=33 +lat_2=45 +lat_0=39 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0 "))
+
+D = gBuffer(Dermott, byid = TRUE, width = (Dermott$width * .9144)/2)
+
+Dermott.sfdf = sf::st_as_sf(D)
+
+Dermott.sfdf = rename(Dermott.sfdf, "Name" = "event_id") %>%
+  mutate(Name = "Dermott, AR") %>%
+  Dermott.sfdf[c(1,23)]
+```
+
+
+Add the polygons together
+```{r}
+TornDAT.sfdf = sf::st_as_sf(TornDAT)
+
+TornDAT.sfdf = rbind(TornDAT.sfdf, Columbia.sfdf, Rochelle.sfdf, Lutts.sfdf, Blountstown.sfdf, Laurel.sfdf, Westville.sfdf, Edison.sfdf, Dermott.sfdf)
+#TornDAT.sfdf = TornDAT.sfdf[c(1,3,5:8),]
+
+TornDAT = as(TornDAT.sfdf, "Spatial")
+```
+
+Maps of casualty producing tornadoes
+
+Get Texas tracts
+```{r}
+TXtracts.sfdf =
+  get_acs(state = "TX",
+          geography = "tract", 
+          variables = c("B01001_001E"),
+          year = 2010,
+          geometry = TRUE)
+```
+
+```{r}
+#download.file("http://www2.census.gov/geo/tiger/GENZ2015/shp/cb_2015_us_state_20m.zip", destfile = "states.zip")
+#unzip("states.zip")
+
+TorSC.sfdf = sf::st_read(dsn = "SocialCorrelates", 
+                      layer = "SocialCorrelates", 
+                      stringsAsFactors = FALSE)
+
+TorSC.sfdf$Date_1 = as.Date(TorSC.sfdf$date)
+TorSC.sfdf = rename(TorSC.sfdf, "Date" = "Date_1")
+
+#us_geo <- read_shape("cb_2015_us_state_20m.shp", as.sf = TRUE, stringsAsFactors = FALSE)
+us_geo <- st_read(dsn = "states", 
+                    layer = "cb_2015_us_state_20m", 
+                    stringsAsFactors = FALSE)
+us_geo = subset(us_geo, !(NAME %in% c("Alaska", "Hawaii", "Puerto Rico")))
+colnames(us_geo)[5] = "st"
+
+us_geo = us_geo %>%
+  dplyr::select("st", "NAME" ,"geometry")
+
+sfdf = TorSC.sfdf
+
+tm_shape(us_geo, projection ="+init=epsg:4326") +
+  tm_borders() +
+  tm_shape(sfdf[sfdf$om == 606471,]) +
+  tm_polygons(col = "blue", alpha = 0.3) +
+  tm_shape(TXtracts.sfdf) + 
+  tm_borders(col = "black", alpha = 0.3) +
+  tm_shape(GarRow.sfdf) +
+  tm_polygons(col = "red", alpha = 0.4) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+```
+
+Import `SocialCorrelatesNew.shp` containing the casualty-producing tornadoes 1995-2016 and estimates of socioeconomic and demographic data at the tornado level. Add `Date` and `hr` columns to the data frame.
+```{r}
+TornSC.sf <- st_read(dsn = "SocialCorrelatesNew", 
+                    layer = "SocialCorrelatesNew", 
+                    stringsAsFactors = FALSE)
+```
+
+Make new columns including total population by age
+```{r}
+TornSC.sf$popD = TornSC.sf$TotalPp/TornSC.sf$AreaPth * 10^6
+TornSC.sf$PopUnder18 = TornSC.sf$MlUnd18 + TornSC.sf$FmlUn18
+TornSC.sf$Pop18to44 = TornSC.sf$Ml18t44 + TornSC.sf$Fml1844
+TornSC.sf$Pop45to64 = TornSC.sf$Ml45t64 + TornSC.sf$Fml4564
+TornSC.sf$PopOver65 = TornSC.sf$MlOvr65 + TornSC.sf$FmlOv65
+
+sfdf = TornSC.sf
+```
+
+```{r}
+tm_shape(sfdf[sfdf$om == 480993,]) +
+  tm_polygons(col = "blue", alpha = 0.3) +
+  tm_shape(Brookport.sfdf) +
+  tm_polygons(col = "red", alpha = 0.4) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+
+tm_shape(xx[xx$Name == "Brookport, IL",]) +
+  tm_polygons(col = "blue", alpha = 0.3) +
+  tm_shape(TornDAT.sfdf[TornDAT.sfdf$Name == "Brookport, IL",]) +
+  tm_polygons(col = "red", alpha = 0.4) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+```
+
+OLD CODE
+```{r}
+xx = sfdf %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 614437 | sfdf$om == 613862 | sfdf$om == 296616 | sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 | sfdf$om == 306606 | sfdf$om == 305917 | sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 613642)
+
+xx = rename(xx, "Name" = "om")
+xx$Name = c("Tuscaloosa-Birmingham, AL", "Arab, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL", "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
+xx = xx[,c(1,54)]
+#xx = xx[c(2,5,9,15),]
+#yy = TornDAT.sfdf[c(1,5,6,16),]
+```
+
+NEW CODE
+```{r}
+xxx = sfdf %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 613642 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
+
+xxx = rename(xxx, "Name" = "om")
+xxx$Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL")
+xxx = xxx[,c(1,54)]
+```
+
+Try downloading shapefile for Census tracts from IPUMS GIS.
+```{r}
+Tracts_2010.sf <- read_sf(dsn = "2012_Tracts",
+                   stringsAsFactors = FALSE) %>%
+  mutate(STATEFP = as.numeric(STATEFP))
+```
+
+Import IPUMS data
+```{r}
+us2010 <- read.csv("2012ACS.csv", header = TRUE) %>%
+  mutate(GISJOIN = as.character(GISJOIN))
+```
+
+Merge the two data sets and remove data from states outside of the contiguous U.S.
+```{r}
+US2010.sf <- ipums_shape_inner_join(us2010, Tracts_2010.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf()      
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US2010.sf <- US2010.sf[US2010.sf$STATEA %in% us,]
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornDAT.sfdf))
+```
+
+** This fixes the problem with tidycensus for 2010 ** 
+
+Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
+
+Now focus on cleaning up the sf object (combine ages and margins of error)
+```{r}
+US2010.sf = US2010.sf %>%
+  mutate(TotalPop_2010 = TotalPop,
+         TotalMale_2010 = TotalMale,
+         MaleUnder18_2010 = MaleUnder5 + Male5.9 + Male10.14 + Male15.17,
+         Male18to44_2010 = Male18.19 + Male20 + Male21 + Male22.24 + Male25.29 + Male30.34
+         + Male35.39 + Male40.44,
+         Male45to64_2010 = Male45.49 + Male50.54 + Male55.59 + Male60.61 + Male62.64,
+         MaleOver65_2010 = Male65.66 + Male67.69 + Male70.74 + Male75.79 + Male80.84
+         + MaleOver85,
+         TotalFemale_2010 = TotalFemale,
+         FemaleUnder18_2010 = FemaleUnder5 + Female5.9 + Female10.14 + Female15.17,
+         Female18to44_2010 = Female18.19 + Female20 + Female21 + Female22.24 + Female25.29
+         + Female30.34 + Female35.39 + Female40.44,
+         Female45to64_2010 = Female45.49 + Female50.54 + Female55.59 + Female60.61 
+         + Female62.64,
+         FemaleOver65_2010 = Female65.66 + Female67.69 + Female70.74 + Female75.79 
+         + Female80.84 + FemaleOver85,
+         White_2010 = White,
+         Black_2010 = Black,
+         TotalHousingUnits_2010 = TotalHousingUnits,
+         MobileHomes_2010 = MobileHomes,
+         MedianIncome_2010 = MedianIncome * 1.032,
+         MedianIncomeM = MedianIncomeM * 1.032)
+```
+
+```{r}
+maps::map("usa")
+data(us.cities)
+map.cities(x = us.cities)
+
+coordinates(us.cities) = cbind(us.cities$long, us.cities$lat)
+cities.sfdf = sf::st_as_sf(us.cities) 
+
+tm_shape(TornDAT.sfdf) +
+  tm_polygons(col = "red", alpha = 0.3) +
+  tm_facets("Name", nrow = 5) +
+  tm_shape(xxx) +
+  tm_polygons(col = "blue", alpha = 0.3) +
+  tm_facets("Name", nrow = 5) +
+  tm_shape(US2010.sf) + 
+  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(panel.label.bg.color = "white", frame = FALSE)
+```
+
+```{r}
+tm_shape(yy) +
+  tm_polygons(col = "red", alpha = 0.3) +
+  tm_facets("Name") +
+  tm_shape(xx) +
+  tm_polygons(col = "blue", alpha = 0.3) +
+  tm_facets("Name") +
+  tm_shape(us2010.sfdf) + 
+  tm_borders(col = "black", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+```
+
+```{r}
+tm_shape(TornDAT.sfdf[2,]) +
+  tm_polygons(col = "red", alpha = 0.3) +
+  tm_shape(xxx[1,]) +
+  tm_polygons(col = "blue", alpha = 0.3)
+
+
+  tm_shape(us2010.sfdf) + 
+  tm_borders(col = "black", alpha = 0.3) +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(frame = FALSE)
+```
+
+Areal weighted interpolation
+
+```{r}
+TornDAT.sfdf$ID = 1:nrow(TornDAT.sfdf)
+TornDAT.sfdf <- st_transform(TornDAT.sfdf, crs = st_crs(TornSC.sf))
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornSC.sf))
+
+out2010.sf <- aw_interpolate(TornDAT.sfdf, 
+               tid = "ID", 
+               source = US2010.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_2010", "TotalMale_2010", "MaleUnder18_2010",
+                             "Male18to44_2010", "Male45to64_2010", "MaleOver65_2010",
+                             "TotalFemale_2010", "FemaleUnder18_2010",
+                             "Female18to44_2010", "Female45to64_2010",
+                             "FemaleOver65_2010", "White_2010",
+                             "Black_2010", "TotalHousingUnits_2010", "MobileHomes_2010"),
+               intensive = c("MedianIncome_2010"),
+               weight = "total", 
+               output = "sf")
+
+out2010.sf$PopUnder18 = out2010.sf$MaleUnder18_2010 + out2010.sf$FemaleUnder18_2010
+out2010.sf$Pop18to44 = out2010.sf$Male18to44_2010 + out2010.sf$Female18to44_2010
+out2010.sf$Pop45to64 = out2010.sf$Male45to64_2010 + out2010.sf$Female45to64_2010
+out2010.sf$PopOver65 = out2010.sf$MaleOver65_2010 + out2010.sf$FemaleOver65_2010
+```
+
+Run the code to estimate socioeconomic and demographic variables via the 2010 Census Tracts. This data is from the American Community Survey.
+```{r}
+spT2010 = spTransform(us2010SP, CRS(proj4string(TornDAT)))
+
+inter = gIntersects(spT2010, TornDAT, byid = TRUE)
+ids = which(inter, arr.ind = TRUE)
+
+Areas2010 = list()
+for(i in 1:nrow(ids)){
+    Areas2010[[i]] = gArea(gIntersection(spT2010[ids[i, 2], ], TornDAT[ids[i, 1], ]))
+    }
+Areas2010.df = data.frame(matrix(unlist(Areas2010), ncol = 1, byrow = TRUE))
+names(Areas2010.df) = "TornAreaInTract"
+Areas2010.df$Tract = ids[, 2]
+Areas2010.df$Torn = ids[, 1]
+```
+
+```{r}
+AreaTor2010 = gArea(TornDAT, byid = TRUE)
+AreaTract2010 = gArea(spT2010, byid = TRUE)
+Areas2010.df$TractArea = AreaTract2010[Areas2010.df$Tract]
+Areas2010.df$TornArea = AreaTor2010[Areas2010.df$Torn]
+Areas2010.df$GEOID = spT2010$GEOID[Areas2010.df$Tract]
+Areas2010.df$TractPopulation2010 = us2010SP$B01001_001E[Areas2010.df$Tract]
+Areas2010.df$TractMalePopulation2010 = us2010SP$B01001_002E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationUnder17 = us2010SP$B01001_003E[Areas2010.df$Tract] + us2010SP$B01001_004E[Areas2010.df$Tract] + us2010SP$B01001_005E[Areas2010.df$Tract] + us2010SP$B01001_006E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population18to44 = us2010SP$B01001_007E[Areas2010.df$Tract] + us2010SP$B01001_008E[Areas2010.df$Tract] + us2010SP$B01001_009E[Areas2010.df$Tract] + us2010SP$B01001_010E[Areas2010.df$Tract] + us2010SP$B01001_011E[Areas2010.df$Tract] + us2010SP$B01001_012E[Areas2010.df$Tract] + us2010SP$B01001_013E[Areas2010.df$Tract] + us2010SP$B01001_014E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population45to64 = us2010SP$B01001_015E[Areas2010.df$Tract] + us2010SP$B01001_016E[Areas2010.df$Tract] + us2010SP$B01001_017E[Areas2010.df$Tract] + us2010SP$B01001_018E[Areas2010.df$Tract] + us2010SP$B01001_019E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationOver65 = us2010SP$B01001_020E[Areas2010.df$Tract] + us2010SP$B01001_021E[Areas2010.df$Tract] + us2010SP$B01001_022E[Areas2010.df$Tract] + us2010SP$B01001_023E[Areas2010.df$Tract] + us2010SP$B01001_024E[Areas2010.df$Tract] + us2010SP$B01001_025E[Areas2010.df$Tract]
+Areas2010.df$TractFemalePopulation2010 = us2010SP$B01001_026E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationUnder17 = us2010SP$B01001_027E[Areas2010.df$Tract] + us2010SP$B01001_028E[Areas2010.df$Tract] + us2010SP$B01001_029E[Areas2010.df$Tract] + us2010SP$B01001_030E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population18to44 = us2010SP$B01001_031E[Areas2010.df$Tract] + us2010SP$B01001_032E[Areas2010.df$Tract] + us2010SP$B01001_033E[Areas2010.df$Tract] + us2010SP$B01001_034E[Areas2010.df$Tract] + us2010SP$B01001_035E[Areas2010.df$Tract] + us2010SP$B01001_036E[Areas2010.df$Tract] + us2010SP$B01001_037E[Areas2010.df$Tract] + us2010SP$B01001_038E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population45to64 = us2010SP$B01001_039E[Areas2010.df$Tract] + us2010SP$B01001_040E[Areas2010.df$Tract] + us2010SP$B01001_041E[Areas2010.df$Tract] + us2010SP$B01001_042E[Areas2010.df$Tract] + us2010SP$B01001_043E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationOver65 = us2010SP$B01001_044E[Areas2010.df$Tract] + us2010SP$B01001_045E[Areas2010.df$Tract] + us2010SP$B01001_046E[Areas2010.df$Tract] + us2010SP$B01001_047E[Areas2010.df$Tract] + us2010SP$B01001_048E[Areas2010.df$Tract] + us2010SP$B01001_049E[Areas2010.df$Tract]
+Areas2010.df$TractWhitePopulation2010 = us2010SP$B02001_002E[Areas2010.df$Tract]
+Areas2010.df$TractBlackPopulation2010 = us2010SP$B02001_003E[Areas2010.df$Tract]
+Areas2010.df$TractMedianIncome2010 = us2010SP$B19013_001E[Areas2010.df$Tract]
+Areas2010.df$TractMobileHomes2010 = us2010SP$B25024_010E[Areas2010.df$Tract]
+
+df4 = Areas2010.df %>%
+  mutate(ratio = TornAreaInTract/TractArea,
+         ratio2 = TornAreaInTract/TornArea,
+         PeopleInTornadoPerTract2010 = TractPopulation2010 * ratio,
+         MalesInTornadoPerTract2010 = TractMalePopulation2010 * ratio,
+         MalesUnder17InTornaoPerTract2010 = TractMale2010PopulationUnder17 * ratio,
+         Males18to44InTornaoPerTract2010 = TractMale2010Population18to44 * ratio,
+         Males45to64InTornaoPerTract2010 = TractMale2010Population45to64 * ratio,
+         MalesOver65InTornaoPerTract2010 = TractMale2010PopulationOver65 * ratio,
+         FemalesInTornadoPerTract2010 = TractFemalePopulation2010 * ratio,
+         FemalesUnder17InTornaoPerTract2010 = TractFemale2010PopulationUnder17 * ratio,
+         Females18to44InTornaoPerTract2010 = TractFemale2010Population18to44 * ratio,
+         Females45to64InTornaoPerTract2010 = TractFemale2010Population45to64 * ratio,
+         FemalesOver65InTornaoPerTract2010 = TractFemale2010PopulationOver65 * ratio,
+         WhitePeopleInTornadoPerTract2010 = TractWhitePopulation2010 * ratio,
+         BlackPeopleInTornadoPerTract2010 = TractBlackPopulation2010 * ratio,
+         IncomeInTornadoPerTract2010 = TractMedianIncome2010 * ratio2,
+         MobileHomesInTornadoPerTract2010 = TractMobileHomes2010 * ratio) %>%
+  group_by(Torn) %>%
+  dplyr::summarize(TotalPeople2010 = sum(PeopleInTornadoPerTract2010),
+                   TotalMales2010 = sum(MalesInTornadoPerTract2010),
+                   Total2010MalesUnder17 = sum(MalesUnder17InTornaoPerTract2010),
+                   Total2010Males18to44 = sum(Males18to44InTornaoPerTract2010),
+                   Total2010Males45to64 = sum(Males45to64InTornaoPerTract2010),
+                   Total2010MalesOver65 = sum(MalesOver65InTornaoPerTract2010),
+                   TotalFemales2010 = sum(FemalesInTornadoPerTract2010),
+                   Total2010FemalesUnder17 = sum(FemalesUnder17InTornaoPerTract2010),
+                   Total2010Females18to44 = sum(Females18to44InTornaoPerTract2010),
+                   Total2010Females45to64 = sum(Females45to64InTornaoPerTract2010),
+                   Total2010FemalesOver65 = sum(FemalesOver65InTornaoPerTract2010),
+                   TotalWhitePeople2010 = sum(WhitePeopleInTornadoPerTract2010),
+                   TotalBlackPeople2010 = sum(BlackPeopleInTornadoPerTract2010),
+                   MedianIncome2010 = sum(IncomeInTornadoPerTract2010),
+                   MobileHomes2010 = sum(MobileHomesInTornadoPerTract2010))
+
+df4$TotalPeople = df4$TotalPeople2010
+df4$TotalMales = df4$TotalMales2010
+df4$TotalFemales = df4$TotalFemales2010
+df4$PeopleUnder17 = df4$Total2010MalesUnder17 + df4$Total2010FemalesUnder17
+df4$People18to44 = df4$Total2010Males18to44 + df4$Total2010Females18to44
+df4$People45to64 = df4$Total2010Males45to64 + df4$Total2010Females45to64
+df4$PeopleOver65 = df4$Total2010MalesOver65 + df4$Total2010FemalesOver65
+df4$WhitePeople = df4$TotalWhitePeople2010
+df4$BlackPeople = df4$TotalBlackPeople2010
+df4$MedianIncome = df4$MedianIncome2010
+df4$MobileHomes = df4$MobileHomes2010
+df4$popD = df4$TotalPeople/(AreaTor2010/10^6)
+
+df4 = df4[,c(1,17:28)]
+```
+
+OLD CODE
+
+Put the Data together
+```{r}
+SPC.df = Torn.df %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 614437 | sfdf$om == 613862 | sfdf$om == 296616 | sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 | sfdf$om == 306606 | sfdf$om == 305917 | sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 613642)
+SPC.df = SPC.df[,c(1,19:30)]
+SPC.df = SPC.df %>%
+  rename("Torn" = "om") %>%
+  rename("popD" = "popD2") %>%
+  mutate(Torn = c(2,1,7,8,5,18,11,9,16,13,17,10,14,15,6,20,19,4,12,3))  
+
+Complete.df = rbind(df4, SPC.df)
+
+Complete.df = Complete.df %>%
+  arrange(Complete.df$Torn)
+
+df4 = df4 %>%
+  arrange(df4$Torn)
+
+SPC.df = SPC.df %>%
+  arrange(SPC.df$Torn)
+
+cor.test((df4$TotalPeople), (SPC.df$TotalPeople))
+cor.test((df4$popD), (SPC.df$popD))
+cor.test((df4$TotalMales), (SPC.df$TotalMales))
+cor.test((df4$TotalFemales), (SPC.df$TotalFemales))
+cor.test((df4$WhitePeople), (SPC.df$WhitePeople))
+cor.test((df4$BlackPeople), (SPC.df$BlackPeople))
+cor.test((df4$MedianIncome), (SPC.df$MedianIncome))
+cor.test((df4$MobileHomes), (SPC.df$MobileHomes))
+```
+
+NEW CODE
+Put the Data together
+```{r}
+SPC.sf = TornSC.sf %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 305917 | sfdf$om == 306606 | sfdf$om == 296616 | sfdf$om == 613642 | sfdf$om == 613862 |  sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 |  sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 614436)
+
+which(colnames(SPC.sf) == "AreaPth")
+which(colnames(SPC.sf) == "TotalPp")
+
+SPC.sf = SPC.sf[,c(1,29, 33:53)]
+SPC.sf = SPC.sf %>%
+  rename("Name" = "om") %>%
+  mutate(Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL"))
+
+out2010.sf$AreaPath = SPC.sf$AreaPth[c(2,1,20,18,5,15,4,3,8,12,7,19,10,13,14,9,11,6,17,16)]
+out2010.sf$popD = out2010.sf$TotalPop_2010/out2010.sf$AreaPath * 10^6
+
+
+out2010.sf = out2010.sf %>%
+  arrange(out2010.sf$Name)
+
+SPC.sf = SPC.sf %>%
+  arrange(SPC.sf$Name)
+
+cor.test((out2010.sf$TotalPop_2010), (SPC.sf$TotalPp))
+cor.test((out2010.sf$popD), (SPC.sf$popD))
+cor.test((out2010.sf$TotalMale_2010), (SPC.sf$TotalMl))
+cor.test((out2010.sf$TotalFemale_2010), (SPC.sf$TotlFml))
+cor.test((out2010.sf$White_2010), (SPC.sf$White))
+cor.test((out2010.sf$Black_2010), (SPC.sf$Black))
+cor.test((out2010.sf$MedianIncome_2010), (SPC.sf$MdnIncm))
+cor.test((out2010.sf$MobileHomes_2010), (SPC.sf$MoblHms))
+```
+
+OLD CODE
+Root Mean Square Error
+```{r}
+# Total People
+Diffpop = sum(df4$TotalPeople) - sum(SPC.df$TotalPeople)
+RMSEpop = sqrt((abs(Diffpop)^2)/20)
+
+#Exclude = sum(df4$TotalPeople[c(-1,-5)]) - sum(SPC.df$TotalPeople[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+
+# Males
+Diffmale = sum(df4$TotalMales) - sum(SPC.df$TotalMales)
+RMSEmale = sqrt((abs(Diffmale)^2)/20)
+
+# Females
+Difffemale = sum(df4$TotalFemales) - sum(SPC.df$TotalFemales)
+RMSEfemale = sqrt((abs(Difffemale)^2)/20)
+
+# White People
+Diffwhite = sum(df4$WhitePeople) - sum(SPC.df$WhitePeople)
+RMSEwhite = sqrt((abs(Diffwhite)^2)/20)
+
+# Black People
+Diffblack = sum(df4$BlackPeople) - sum(SPC.df$BlackPeople)
+RMSEblack = sqrt((abs(Diffblack)^2)/20)
+
+# Median Income
+Diffinc = sum(df4$MedianIncome) - sum(SPC.df$MedianIncome)
+RMSEinc = sqrt((abs(Diffinc)^2)/20)
+
+# Mobile Homes
+Diffmobile = sum(df4$MobileHomes) - sum(SPC.df$MobileHomes)
+RMSEmobile = sqrt((abs(Diffmobile)^2)/20)
+
+#Exclude = sum(df4$MobileHomes[-1]) - sum(SPC.df$MobileHomes[-1])
+#sqrt((abs(Exclude)^2)/20)
+
+# Population Density
+DiffpopD = sum(df4$popD) - sum(SPC.df$popD)
+RMSEpopD = sqrt((abs(DiffpopD)^2)/20)
+
+#Exclude = sum(df4$popD[c(-1.,-5)]) - sum(SPC.df$popD[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+```
+
+Relative Error
+```{r}
+REpop = sum(RMSEpop/df4$TotalPeople)/20
+REpopD = sum(RMSEpopD/df4$popD)/20
+REmale = sum(RMSEmale/df4$TotalMales)/20
+REfemale = sum(RMSEfemale/df4$TotalFemales)/20
+REwhite = sum(RMSEwhite/df4$WhitePeople)/20
+REblack = sum(RMSEblack/df4$BlackPeople)/20
+REblack2 = sum(RMSEblack/df4$BlackPeople[df4$BlackPeople >= 100])/20
+REMH = sum(RMSEmobile/df4$MobileHomes)/20
+REMI = sum(RMSEinc/df4$MedianIncome)/20
+```
+
+### NEW CODE
+Root Mean Square Error
+```{r}
+# Total People
+Diffpop = sum(out2010.sf$TotalPop_2010) - sum(SPC.sf$TotalPp)
+RMSEpop = sqrt((abs(Diffpop)^2)/20)
+
+#Exclude = sum(df4$TotalPeople[c(-1,-5)]) - sum(SPC.df$TotalPeople[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+
+# Males
+Diffmale = sum(out2010.sf$TotalMale_2010) - sum(SPC.sf$TotalMl)
+RMSEmale = sqrt((abs(Diffmale)^2)/20)
+
+# Females
+Difffemale = sum(out2010.sf$TotalFemale_2010) - sum(SPC.sf$TotlFml)
+RMSEfemale = sqrt((abs(Difffemale)^2)/20)
+
+# White People
+Diffwhite = sum(out2010.sf$White_2010) - sum(SPC.sf$White)
+RMSEwhite = sqrt((abs(Diffwhite)^2)/20)
+
+# Black People
+Diffblack = sum(out2010.sf$Black_2010) - sum(SPC.sf$Black)
+RMSEblack = sqrt((abs(Diffblack)^2)/20)
+
+# Median Income
+Diffinc = sum(out2010.sf$MedianIncome_2010) - sum(SPC.sf$MdnIncm)
+RMSEinc = sqrt((abs(Diffinc)^2)/20)
+
+# Mobile Homes
+Diffmobile = sum(out2010.sf$MobileHomes_2010) - sum(SPC.sf$MoblHms)
+RMSEmobile = sqrt((abs(Diffmobile)^2)/20)
+
+#Exclude = sum(df4$MobileHomes[-1]) - sum(SPC.df$MobileHomes[-1])
+#sqrt((abs(Exclude)^2)/20)
+
+# Population Density
+DiffpopD = sum(out2010.sf$popD) - sum(SPC.sf$popD)
+RMSEpopD = sqrt((abs(DiffpopD)^2)/20)
+
+#Exclude = sum(df4$popD[c(-1.,-5)]) - sum(SPC.df$popD[c(-1,-5)])
+#sqrt((abs(Exclude)^2)/20)
+```
+
+Relative Error
+```{r}
+REpop = sum(RMSEpop/out2010.sf$TotalPop_2010)/20
+REpopD = sum(RMSEpopD/out2010.sf$popD)/20
+REmale = sum(RMSEmale/out2010.sf$TotalPop_2010)/20
+REfemale = sum(RMSEfemale/out2010.sf$TotalFemale_2010)/20
+REwhite = sum(RMSEwhite/out2010.sf$White_2010)/20
+REblack = sum(RMSEblack/out2010.sf$Black_2010)/20
+REblack2 = sum(RMSEblack/out2010.sf$Black_2010[out2010.sf$Black_2010 >= 100])/20
+REMH = sum(RMSEmobile/out2010.sf$MobileHomes_2010)/20
+REMI = sum(RMSEinc/out2010.sf$MedianIncome_2010)/20
+```
+
+Determine the number of tracts intersected by the actual paths.
+```{r}
+summary(lengths(st_overlaps(TornDAT.sfdf, US2010.sf)))
+```
+
+
+### Beauregard, AL Tornado
+
+Play with the Beauregard, Al tornado.
+```{r}
+Beauregard.sfdf = sf::st_read(dsn = "Beauregard", 
+                      layer = "extractDamagePolys", 
+                      stringsAsFactors = FALSE)
+
+Beauregard.sfdf = rename(Beauregard.sfdf, "Name" = "efscale") %>%
+  mutate(Name = "Beauregard, AL") %>%
+  Beauregard.sfdf[c(1,9)]
+
+US2010.sf <- st_transform(US2010.sf, crs = st_crs(Beauregard.sfdf))
+
+AL2010.sf <- US2010.sf[US2010.sf$STATE == "Alabama",]
+
+# US cities
+library(maps)
+cities = us.cities
+
+tmap_mode("view")
+tm_basemap(leaflet::providers$Esri.WorldImagery) +
+  tm_tiles("CartoDB.PositronOnlyLabels") +
+tm_shape(Beauregard.sfdf) +
+  tm_polygons(col = "grey", alpha = 0.01, border.col = "red") +
+#  tm_shape(AL2010.sf) + 
+#  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_scale_bar() +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(panel.label.bg.color = "white", frame = FALSE)
+```
+
+Get Alabama 2017 tract data. Only grab total population, total housing units, and mobile home units. Then overlay and extract information about the Beauregard, AL tornado.
+```{r}
+AL2017.sf <- get_acs(state = "AL",
+          geography = "tract", 
+          variables = c("B01001_001", "B25024_001", "B25024_010"),
+          year = 2017,
+          output = "wide",
+          geometry = TRUE)
+
+AL2017.sf <- st_transform(AL2017.sf, 
+                     crs = "+proj=lcc +lat_1=60 +lat_2=30 +lon_0=-90 +units=m")
+
+Beauregard.sfdf <- st_transform(Beauregard.sfdf, crs = st_crs(AL2017.sf))
+Beauregard.sfdf$ID <-  1:nrow(Beauregard.sfdf)
+AL2017.sf$ID2 <- 1:nrow(AL2017.sf)
+
+out2017.sf <- aw_interpolate(Beauregard.sfdf, 
+               tid = "ID", 
+               source = AL2017.sf, 
+               sid = "ID2",
+               extensive = c("B01001_001E", "B25024_001E", "B25024_010E"),
+               weight = "total", 
+               output = "sf")
+```
+
+The EF4 Beauregard-Smiths Station, AL tornado resulted in 113 casualties---23 fatalities and 90 injuries---and had a storm path length of 26.73 miles and 1600 yards. The storm occurred at 2:00pm CST on March 3, 2019.
+
+Find the actual path area and popD
+```{r}
+Beauregard.sfdf$PathArea <- st_area(Beauregard.sfdf)
+Beauregard.sfdf$popD <- (out2017.sf$B01001_001E/Beauregard.sfdf$PathArea) * 10^6
+Beauregard.sfdf$mag <- 4
+Beauregard.sfdf$smh = 2.4266140
+Beauregard.sfdf$syr = 2.31
+
+perc <- c(1, 0, 0, 0, 0, 0, 
+          .772, .228, 0, 0, 0, 0,
+          .616, .268, .115, 0, 0, 0,
+          .529, .271, .133, .067, 0, 0,
+          .543, .238, .131, .056, .032, 0,
+          .538, .223, .119, .07, .033, .017)
+percM <- matrix(perc, ncol = 6, byrow = TRUE)
+threshW <- c(29.06, 38.45, 49.62, 60.8, 74.21, 89.41)
+midptW <- c(diff(threshW)/2 + threshW[-length(threshW)], threshW[length(threshW)] + 7.5)
+ef <- Beauregard.sfdf$mag + 1
+EW3 <- numeric()
+for(i in 1:length(ef)) EW3[i] = midptW^3 %*% percM[ef[i], ]
+Beauregard.sfdf <- Beauregard.sfdf %>%
+  mutate(ED = EW3 * PathArea)
+```
+The path area of the Beauregard-Smiths Station, AL tornado was 40774487.
+
+The estimated number of casualties for the Beauregard, AL tornado was 55 people. The actual number was 113 for a difference of 58. This would register as an UDT.
+
+### Dayton, Ohio Tornado
+
+```{r}
+Dayton = readOGR("Dayton.kml") 
+
+Dayton.sfdf = sf::st_as_sf(Dayton) 
+Dayton.sfdf = Dayton.sfdf %>%
+  mutate(Name = "Dayton, OH") %>%
+  Dayton.sfdf[-c(2)]
+
+tmap_mode("view")
+tm_basemap(leaflet::providers$Esri.WorldImagery) +
+  tm_tiles("CartoDB.PositronOnlyLabels") +
+tm_shape(Dayton.sfdf) +
+  tm_polygons(col = "grey", alpha = 0.01, border.col = "red") +
+#  tm_shape(AL2010.sf) + 
+#  tm_borders(col = "grey80", alpha = 0.3) +
+  tm_scale_bar() +
+  tm_format_Europe(legend.position = c("left", "bottom"),
+                   attr.position = c("left", "bottom"),
+                   legend.frame = FALSE) +
+  tm_layout(panel.label.bg.color = "white", frame = FALSE)
+```
+
+Get Ohio 2017 tract data. Only grab total population, total housing units, and mobile home units. Then overlay and extract information about the Dayton, OH tornado.
+```{r}
+OH2017.sf <- get_acs(state = "OH",
+          geography = "tract", 
+          variables = c("B01001_001", "B25024_001", "B25024_010"),
+          year = 2017,
+          output = "wide",
+          geometry = TRUE)
+
+OH2017.sf <- st_transform(OH2017.sf, 
+                     crs = "+proj=lcc +lat_1=60 +lat_2=30 +lon_0=-90 +units=m")
+
+Dayton.sfdf <- st_transform(Dayton.sfdf, crs = st_crs(OH2017.sf))
+Dayton.sfdf$ID <-  1:nrow(Dayton.sfdf)
+OH2017.sf$ID2 <- 1:nrow(OH2017.sf)
+
+out2017.sf <- aw_interpolate(Dayton.sfdf, 
+               tid = "ID", 
+               source = OH2017.sf, 
+               sid = "ID2",
+               extensive = c("B01001_001E", "B25024_001E", "B25024_010E"),
+               weight = "total", 
+               output = "sf")
+```
+
+The Dayton, OH tornado impacted an estimated 86,372 people.
+
+What would it have looked like in 1990?
+
+Collect 1990 Census Tract information. Use IPUMS again, because it is cleaner than tidycensus.
+```{r}
+Tracts_1990.sf <- read_sf(dsn = "1990_Tracts",
+                   stringsAsFactors = FALSE)
+
+us1990 <- read.csv("1990Census_1.csv", header = TRUE)
+
+US1990.sf <- ipums_shape_inner_join(us1990, Tracts_1990.sf, by = "GISJOIN") %>%
+  mutate(ID2 = 1:nrow(.)) %>%
+     st_as_sf() 
+
+us <- unique(fips_codes$state_code)[c(1, 3:8, 10:11, 13:51)]
+# Take care of single digit state code
+us[1] = 1; us[2] = 4; us[3] = 5; us[4] = 6; us[5] = 8; us[6] = 9
+
+US1990.sf <- US1990.sf[US1990.sf$STATEA %in% us,]
+
+US1990.sf <- st_transform(US1990.sf, crs = st_crs(OH2017.sf))
+```
+
+Now focus on cleaning up the sf object
+```{r}
+US1990.sf = US1990.sf %>%
+  mutate(TotalPop_1990 = TotalPop,
+         TotalMale_1990 = TotalMale,
+         MaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .487),
+         Male18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .487),
+         Male45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64) 
+         * .487),
+         MaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 + PopOver85) 
+         * .487),
+         TotalFemale_1990 = TotalFemale,
+         FemaleUnder18_1990 = round((PopUnder1 + Pop1.2 + Pop3.4 + Pop5 + Pop6 + Pop7.9 
+         + Pop10.11 + Pop12.13 + Pop14 + Pop15 + Pop16 + Pop17) * .513),
+         Female18to44_1990 = round((Pop18 + Pop19 + Pop20 + Pop21 + Pop22.24 + Pop25.29 
+         + Pop30.34 + Pop35.39 + Pop40.44) * .513),
+         Female45to64_1990 = round((Pop45.49 + Pop50.54 + Pop55.59 + Pop60.61 + Pop62.64)          * .513),
+         FemaleOver65_1990 = round((Pop65.69 + Pop70.74 + Pop75.79 + Pop80.84 +                   PopOver85) * .513),
+         White_1990 = White,
+         Black_1990 = Black,
+         TotalHousingUnits_1990 = TotalHousingUnits,
+         MobileHomes_1990 = MobileHomes,
+         MedianIncome_1990 = round(MedianIncome * 1.9114))
+```
+
+Now interpolate
+```{r}
+out1990.sf <- aw_interpolate(Dayton.sfdf, 
+               tid = "ID", 
+               source = US1990.sf, 
+               sid = "ID2",
+               extensive = c("TotalPop_1990", "TotalHousingUnits_1990",
+                             "MobileHomes_1990"),
+               weight = "total", 
+               output = "sf")
+```
+
+In 1990, the Dayton, OH tornado would have impacted an estimated 86,777 people.
