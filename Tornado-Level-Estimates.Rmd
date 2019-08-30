@@ -268,11 +268,12 @@ df = data.frame(US2010.sf) %>%
          Female70.74M + Female75.79M + Female80.84.1 + FemaleOver85.1)),
          WhiteM = WhiteM/(White + WhiteM),
          BlackM = BlackM/(Black + BlackM),
+         TotalHousingUnitsM = TotalHousingUnitsM/(TotalHousingUnits + TotalHousingUnitsM),
          MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM),
          MedianIncomeM = MedianIncomeM/(MedianIncome + MedianIncomeM)) %>%
   select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
          Male45to64M, MaleOver65M, TotalFemaleM, FemaleUnder18M, Female18to44M,
-         Female45to64M, FemaleOver65M, WhiteM, BlackM, MobileHomesM, MedianIncomeM)
+         Female45to64M, FemaleOver65M, WhiteM, BlackM, TotalHousingUnitsM, MobileHomesM, MedianIncomeM)
 ```
 
 Summarize the MOE from 2010 ACS data.
