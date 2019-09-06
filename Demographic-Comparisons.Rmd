@@ -462,6 +462,35 @@ US2010.sf <- st_transform(US2010.sf, crs = st_crs(TornDAT.sfdf))
 
 Removing states outside of the contiguous US changes the number of tracts from 74001 to 72359.
 
+Calculate Standard Errors and Coefficient of Variables for information
+```{r}
+PopD = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
+PopD2 = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
+PopDM = PopD2/(PopD + PopD2)
+summary(PopDM)
+
+df = US2010.sf
+df$PopD = PopD
+df$PopDM = PopDM
+
+df = data.frame(df) %>%
+  mutate(TotalPopSE = TotalPopM/1.645,
+         TotalPopCV = (TotalPopSE/TotalPop) * 100,
+         PopDSE = PopDM/1.645,
+         PopDCV = (PopDSE/PopD) * 100,
+         Black = Black,
+         BlackSE = BlackM/1.645,
+         BlackCV = (BlackSE/Black) * 100,
+         MedianIncomeSE = MedianIncomeM/1.645,
+         MedianIncomeCV = (MedianIncomeSE/MedianIncome) * 100,
+         MobileHomes = MobileHomes,
+         MobileHomesSE = MobileHomesM/1.645,
+         MobileHomesCV = (MobileHomesSE/MobileHomes) * 100) %>%
+  dplyr::select(TotalPopSE, TotalPopCV, PopDSE, PopDCV, Black, BlackSE, BlackCV, MedianIncomeSE, MedianIncomeCV, MobileHomes, MobileHomesSE, MobileHomesCV)
+
+df = df[is.finite(rowSums(df)),]
+```
+
 Now focus on cleaning up the sf object (combine ages and margins of error)
 ```{r}
 US2010.sf = US2010.sf %>%
@@ -488,6 +517,7 @@ US2010.sf = US2010.sf %>%
          MedianIncome_2010 = MedianIncome * 1.032,
          MedianIncomeM = MedianIncomeM * 1.032)
 ```
+
 
 ```{r}
 maps::map("usa")

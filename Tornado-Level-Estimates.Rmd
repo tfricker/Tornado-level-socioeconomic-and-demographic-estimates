@@ -283,23 +283,22 @@ summary(df)
 
 Margins of error for population density data are more complicated. Manually edit here:
 ```{r}
-x = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
-xx = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
-xxx = xx/(x + xx)
-summary(xxx)
+PopD = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
+PopD2 = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
+PopDM = PopD2/(PopD + PopD2)
+summary(PopDM)
 ```
 
 Investigate the mobile homes MOE in more detail.
 ```{r}
 df2 = data.frame(US2010.sf) %>%
   mutate(MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM)) %>%
-  select(MobileHomes, MobileHomesM)
+  dplyr::select(MobileHomes, MobileHomesM)
 
 df2 = df2[df2$MobileHomes != 0,]
 
 summary(df2)
 ```
-
 
 Try areal weighted interpolation
 
