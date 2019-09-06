@@ -473,7 +473,8 @@ df = US2010.sf
 df$PopD = PopD
 df$PopDM = PopDM
 
-df = data.frame(df) %>%
+df = df %>%
+  group_by(STATE, COUNTY, TRACTA) %>%
   mutate(TotalPopSE = TotalPopM/1.645,
          TotalPopCV = (TotalPopSE/TotalPop) * 100,
          PopDSE = PopDM/1.645,
@@ -488,7 +489,21 @@ df = data.frame(df) %>%
          MobileHomesCV = (MobileHomesSE/MobileHomes) * 100) %>%
   dplyr::select(TotalPopSE, TotalPopCV, PopDSE, PopDCV, Black, BlackSE, BlackCV, MedianIncomeSE, MedianIncomeCV, MobileHomes, MobileHomesSE, MobileHomesCV)
 
-df = df[is.finite(rowSums(df)),]
+
+dfIntersects <- st_intersection(TornDAT.sfdf, df)
+
+df2 <-  data.frame(dfIntersects)
+
+library(IDPmisc)
+df2 <- NaRV.omit(df2)
+
+df3 <- df2 %>%
+  group_by(Name) %>%
+  dplyr::summarize(AvgTotalPopCV = mean(TotalPopCV),
+            AvgPopDCV = mean(PopDCV),
+            AvgMedianIncomeCV = mean(MedianIncomeCV),
+            AvgMobileHomesCV = mean(MobileHomesCV),
+            AvgBlackCV = mean(BlackCV)) 
 ```
 
 Now focus on cleaning up the sf object (combine ages and margins of error)
