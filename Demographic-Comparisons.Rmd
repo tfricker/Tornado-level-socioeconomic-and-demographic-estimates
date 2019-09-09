@@ -479,6 +479,12 @@ df = df %>%
          TotalPopCV = (TotalPopSE/TotalPop) * 100,
          PopDSE = PopDM/1.645,
          PopDCV = (PopDSE/PopD) * 100,
+         MaleSE = TotalMaleP/1.645,
+         MaleCV = (MaleSE/TotalMale) * 100,
+         FemaleSE = TotalFemaleM/1.645,
+         FemaleCV = (FemaleSE/TotalFemale) * 100,
+         WhiteSE = WhiteM/1.645,
+         WhiteCV = (WhiteSE/White) * 100,
          Black = Black,
          BlackSE = BlackM/1.645,
          BlackCV = (BlackSE/Black) * 100,
@@ -487,7 +493,7 @@ df = df %>%
          MobileHomes = MobileHomes,
          MobileHomesSE = MobileHomesM/1.645,
          MobileHomesCV = (MobileHomesSE/MobileHomes) * 100) %>%
-  dplyr::select(TotalPopSE, TotalPopCV, PopDSE, PopDCV, Black, BlackSE, BlackCV, MedianIncomeSE, MedianIncomeCV, MobileHomes, MobileHomesSE, MobileHomesCV)
+  dplyr::select(TotalPopSE, TotalPopCV, PopDSE, PopDCV, MaleSE, MaleCV, FemaleSE, FemaleCV, WhiteSE, WhiteCV, Black, BlackSE, BlackCV, MedianIncomeSE, MedianIncomeCV, MobileHomes, MobileHomesSE, MobileHomesCV)
 
 
 dfIntersects <- st_intersection(TornDAT.sfdf, df)
@@ -499,6 +505,16 @@ df2 <- NaRV.omit(df2)
 
 df3 <- df2 %>%
   group_by(Name) %>%
+  dplyr::summarize(AvgTotalPopCV = mean(TotalPopCV),
+            AvgPopDCV = mean(PopDCV),
+            AvgMedianIncomeCV = mean(MedianIncomeCV),
+            AvgMobileHomesCV = mean(MobileHomesCV),
+            AvgBlackCV = mean(BlackCV))
+
+
+xx <- df2 %>%
+  group_by(Name) %>%
+  filter(MobileHomes > 100) %>%
   dplyr::summarize(AvgTotalPopCV = mean(TotalPopCV),
             AvgPopDCV = mean(PopDCV),
             AvgMedianIncomeCV = mean(MedianIncomeCV),
@@ -587,7 +603,6 @@ tm_shape(TornDAT.sfdf[2,]) +
 ```
 
 Areal weighted interpolation
-
 ```{r}
 TornDAT.sfdf$ID = 1:nrow(TornDAT.sfdf)
 TornDAT.sfdf <- st_transform(TornDAT.sfdf, crs = st_crs(TornSC.sf))
@@ -614,130 +629,6 @@ out2010.sf$Pop45to64 = out2010.sf$Male45to64_2010 + out2010.sf$Female45to64_2010
 out2010.sf$PopOver65 = out2010.sf$MaleOver65_2010 + out2010.sf$FemaleOver65_2010
 ```
 
-Run the code to estimate socioeconomic and demographic variables via the 2010 Census Tracts. This data is from the American Community Survey.
-```{r}
-spT2010 = spTransform(us2010SP, CRS(proj4string(TornDAT)))
-
-inter = gIntersects(spT2010, TornDAT, byid = TRUE)
-ids = which(inter, arr.ind = TRUE)
-
-Areas2010 = list()
-for(i in 1:nrow(ids)){
-    Areas2010[[i]] = gArea(gIntersection(spT2010[ids[i, 2], ], TornDAT[ids[i, 1], ]))
-    }
-Areas2010.df = data.frame(matrix(unlist(Areas2010), ncol = 1, byrow = TRUE))
-names(Areas2010.df) = "TornAreaInTract"
-Areas2010.df$Tract = ids[, 2]
-Areas2010.df$Torn = ids[, 1]
-```
-
-```{r}
-AreaTor2010 = gArea(TornDAT, byid = TRUE)
-AreaTract2010 = gArea(spT2010, byid = TRUE)
-Areas2010.df$TractArea = AreaTract2010[Areas2010.df$Tract]
-Areas2010.df$TornArea = AreaTor2010[Areas2010.df$Torn]
-Areas2010.df$GEOID = spT2010$GEOID[Areas2010.df$Tract]
-Areas2010.df$TractPopulation2010 = us2010SP$B01001_001E[Areas2010.df$Tract]
-Areas2010.df$TractMalePopulation2010 = us2010SP$B01001_002E[Areas2010.df$Tract]
-Areas2010.df$TractMale2010PopulationUnder17 = us2010SP$B01001_003E[Areas2010.df$Tract] + us2010SP$B01001_004E[Areas2010.df$Tract] + us2010SP$B01001_005E[Areas2010.df$Tract] + us2010SP$B01001_006E[Areas2010.df$Tract]
-Areas2010.df$TractMale2010Population18to44 = us2010SP$B01001_007E[Areas2010.df$Tract] + us2010SP$B01001_008E[Areas2010.df$Tract] + us2010SP$B01001_009E[Areas2010.df$Tract] + us2010SP$B01001_010E[Areas2010.df$Tract] + us2010SP$B01001_011E[Areas2010.df$Tract] + us2010SP$B01001_012E[Areas2010.df$Tract] + us2010SP$B01001_013E[Areas2010.df$Tract] + us2010SP$B01001_014E[Areas2010.df$Tract]
-Areas2010.df$TractMale2010Population45to64 = us2010SP$B01001_015E[Areas2010.df$Tract] + us2010SP$B01001_016E[Areas2010.df$Tract] + us2010SP$B01001_017E[Areas2010.df$Tract] + us2010SP$B01001_018E[Areas2010.df$Tract] + us2010SP$B01001_019E[Areas2010.df$Tract]
-Areas2010.df$TractMale2010PopulationOver65 = us2010SP$B01001_020E[Areas2010.df$Tract] + us2010SP$B01001_021E[Areas2010.df$Tract] + us2010SP$B01001_022E[Areas2010.df$Tract] + us2010SP$B01001_023E[Areas2010.df$Tract] + us2010SP$B01001_024E[Areas2010.df$Tract] + us2010SP$B01001_025E[Areas2010.df$Tract]
-Areas2010.df$TractFemalePopulation2010 = us2010SP$B01001_026E[Areas2010.df$Tract]
-Areas2010.df$TractFemale2010PopulationUnder17 = us2010SP$B01001_027E[Areas2010.df$Tract] + us2010SP$B01001_028E[Areas2010.df$Tract] + us2010SP$B01001_029E[Areas2010.df$Tract] + us2010SP$B01001_030E[Areas2010.df$Tract]
-Areas2010.df$TractFemale2010Population18to44 = us2010SP$B01001_031E[Areas2010.df$Tract] + us2010SP$B01001_032E[Areas2010.df$Tract] + us2010SP$B01001_033E[Areas2010.df$Tract] + us2010SP$B01001_034E[Areas2010.df$Tract] + us2010SP$B01001_035E[Areas2010.df$Tract] + us2010SP$B01001_036E[Areas2010.df$Tract] + us2010SP$B01001_037E[Areas2010.df$Tract] + us2010SP$B01001_038E[Areas2010.df$Tract]
-Areas2010.df$TractFemale2010Population45to64 = us2010SP$B01001_039E[Areas2010.df$Tract] + us2010SP$B01001_040E[Areas2010.df$Tract] + us2010SP$B01001_041E[Areas2010.df$Tract] + us2010SP$B01001_042E[Areas2010.df$Tract] + us2010SP$B01001_043E[Areas2010.df$Tract]
-Areas2010.df$TractFemale2010PopulationOver65 = us2010SP$B01001_044E[Areas2010.df$Tract] + us2010SP$B01001_045E[Areas2010.df$Tract] + us2010SP$B01001_046E[Areas2010.df$Tract] + us2010SP$B01001_047E[Areas2010.df$Tract] + us2010SP$B01001_048E[Areas2010.df$Tract] + us2010SP$B01001_049E[Areas2010.df$Tract]
-Areas2010.df$TractWhitePopulation2010 = us2010SP$B02001_002E[Areas2010.df$Tract]
-Areas2010.df$TractBlackPopulation2010 = us2010SP$B02001_003E[Areas2010.df$Tract]
-Areas2010.df$TractMedianIncome2010 = us2010SP$B19013_001E[Areas2010.df$Tract]
-Areas2010.df$TractMobileHomes2010 = us2010SP$B25024_010E[Areas2010.df$Tract]
-
-df4 = Areas2010.df %>%
-  mutate(ratio = TornAreaInTract/TractArea,
-         ratio2 = TornAreaInTract/TornArea,
-         PeopleInTornadoPerTract2010 = TractPopulation2010 * ratio,
-         MalesInTornadoPerTract2010 = TractMalePopulation2010 * ratio,
-         MalesUnder17InTornaoPerTract2010 = TractMale2010PopulationUnder17 * ratio,
-         Males18to44InTornaoPerTract2010 = TractMale2010Population18to44 * ratio,
-         Males45to64InTornaoPerTract2010 = TractMale2010Population45to64 * ratio,
-         MalesOver65InTornaoPerTract2010 = TractMale2010PopulationOver65 * ratio,
-         FemalesInTornadoPerTract2010 = TractFemalePopulation2010 * ratio,
-         FemalesUnder17InTornaoPerTract2010 = TractFemale2010PopulationUnder17 * ratio,
-         Females18to44InTornaoPerTract2010 = TractFemale2010Population18to44 * ratio,
-         Females45to64InTornaoPerTract2010 = TractFemale2010Population45to64 * ratio,
-         FemalesOver65InTornaoPerTract2010 = TractFemale2010PopulationOver65 * ratio,
-         WhitePeopleInTornadoPerTract2010 = TractWhitePopulation2010 * ratio,
-         BlackPeopleInTornadoPerTract2010 = TractBlackPopulation2010 * ratio,
-         IncomeInTornadoPerTract2010 = TractMedianIncome2010 * ratio2,
-         MobileHomesInTornadoPerTract2010 = TractMobileHomes2010 * ratio) %>%
-  group_by(Torn) %>%
-  dplyr::summarize(TotalPeople2010 = sum(PeopleInTornadoPerTract2010),
-                   TotalMales2010 = sum(MalesInTornadoPerTract2010),
-                   Total2010MalesUnder17 = sum(MalesUnder17InTornaoPerTract2010),
-                   Total2010Males18to44 = sum(Males18to44InTornaoPerTract2010),
-                   Total2010Males45to64 = sum(Males45to64InTornaoPerTract2010),
-                   Total2010MalesOver65 = sum(MalesOver65InTornaoPerTract2010),
-                   TotalFemales2010 = sum(FemalesInTornadoPerTract2010),
-                   Total2010FemalesUnder17 = sum(FemalesUnder17InTornaoPerTract2010),
-                   Total2010Females18to44 = sum(Females18to44InTornaoPerTract2010),
-                   Total2010Females45to64 = sum(Females45to64InTornaoPerTract2010),
-                   Total2010FemalesOver65 = sum(FemalesOver65InTornaoPerTract2010),
-                   TotalWhitePeople2010 = sum(WhitePeopleInTornadoPerTract2010),
-                   TotalBlackPeople2010 = sum(BlackPeopleInTornadoPerTract2010),
-                   MedianIncome2010 = sum(IncomeInTornadoPerTract2010),
-                   MobileHomes2010 = sum(MobileHomesInTornadoPerTract2010))
-
-df4$TotalPeople = df4$TotalPeople2010
-df4$TotalMales = df4$TotalMales2010
-df4$TotalFemales = df4$TotalFemales2010
-df4$PeopleUnder17 = df4$Total2010MalesUnder17 + df4$Total2010FemalesUnder17
-df4$People18to44 = df4$Total2010Males18to44 + df4$Total2010Females18to44
-df4$People45to64 = df4$Total2010Males45to64 + df4$Total2010Females45to64
-df4$PeopleOver65 = df4$Total2010MalesOver65 + df4$Total2010FemalesOver65
-df4$WhitePeople = df4$TotalWhitePeople2010
-df4$BlackPeople = df4$TotalBlackPeople2010
-df4$MedianIncome = df4$MedianIncome2010
-df4$MobileHomes = df4$MobileHomes2010
-df4$popD = df4$TotalPeople/(AreaTor2010/10^6)
-
-df4 = df4[,c(1,17:28)]
-```
-
-OLD CODE
-
-Put the Data together
-```{r}
-SPC.df = Torn.df %>%
-  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 614437 | sfdf$om == 613862 | sfdf$om == 296616 | sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 | sfdf$om == 306606 | sfdf$om == 305917 | sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 613642)
-SPC.df = SPC.df[,c(1,19:30)]
-SPC.df = SPC.df %>%
-  rename("Torn" = "om") %>%
-  rename("popD" = "popD2") %>%
-  mutate(Torn = c(2,1,7,8,5,18,11,9,16,13,17,10,14,15,6,20,19,4,12,3))  
-
-Complete.df = rbind(df4, SPC.df)
-
-Complete.df = Complete.df %>%
-  arrange(Complete.df$Torn)
-
-df4 = df4 %>%
-  arrange(df4$Torn)
-
-SPC.df = SPC.df %>%
-  arrange(SPC.df$Torn)
-
-cor.test((df4$TotalPeople), (SPC.df$TotalPeople))
-cor.test((df4$popD), (SPC.df$popD))
-cor.test((df4$TotalMales), (SPC.df$TotalMales))
-cor.test((df4$TotalFemales), (SPC.df$TotalFemales))
-cor.test((df4$WhitePeople), (SPC.df$WhitePeople))
-cor.test((df4$BlackPeople), (SPC.df$BlackPeople))
-cor.test((df4$MedianIncome), (SPC.df$MedianIncome))
-cor.test((df4$MobileHomes), (SPC.df$MobileHomes))
-```
-
-NEW CODE
 Put the Data together
 ```{r}
 SPC.sf = TornSC.sf %>%
@@ -771,7 +662,6 @@ cor.test((out2010.sf$MedianIncome_2010), (SPC.sf$MdnIncm))
 cor.test((out2010.sf$MobileHomes_2010), (SPC.sf$MoblHms))
 ```
 
-### NEW CODE
 Root Mean Square Error
 ```{r}
 # Total People
@@ -1097,6 +987,129 @@ out1990.sf <- aw_interpolate(Dayton.sfdf,
 
 In 1990, the Dayton, OH tornado would have impacted an estimated 86,777 people.
 
+
+### OLD CODE
+
+Run the code to estimate socioeconomic and demographic variables via the 2010 Census Tracts. This data is from the American Community Survey.
+```{r}
+spT2010 = spTransform(us2010SP, CRS(proj4string(TornDAT)))
+
+inter = gIntersects(spT2010, TornDAT, byid = TRUE)
+ids = which(inter, arr.ind = TRUE)
+
+Areas2010 = list()
+for(i in 1:nrow(ids)){
+    Areas2010[[i]] = gArea(gIntersection(spT2010[ids[i, 2], ], TornDAT[ids[i, 1], ]))
+    }
+Areas2010.df = data.frame(matrix(unlist(Areas2010), ncol = 1, byrow = TRUE))
+names(Areas2010.df) = "TornAreaInTract"
+Areas2010.df$Tract = ids[, 2]
+Areas2010.df$Torn = ids[, 1]
+```
+
+```{r}
+AreaTor2010 = gArea(TornDAT, byid = TRUE)
+AreaTract2010 = gArea(spT2010, byid = TRUE)
+Areas2010.df$TractArea = AreaTract2010[Areas2010.df$Tract]
+Areas2010.df$TornArea = AreaTor2010[Areas2010.df$Torn]
+Areas2010.df$GEOID = spT2010$GEOID[Areas2010.df$Tract]
+Areas2010.df$TractPopulation2010 = us2010SP$B01001_001E[Areas2010.df$Tract]
+Areas2010.df$TractMalePopulation2010 = us2010SP$B01001_002E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationUnder17 = us2010SP$B01001_003E[Areas2010.df$Tract] + us2010SP$B01001_004E[Areas2010.df$Tract] + us2010SP$B01001_005E[Areas2010.df$Tract] + us2010SP$B01001_006E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population18to44 = us2010SP$B01001_007E[Areas2010.df$Tract] + us2010SP$B01001_008E[Areas2010.df$Tract] + us2010SP$B01001_009E[Areas2010.df$Tract] + us2010SP$B01001_010E[Areas2010.df$Tract] + us2010SP$B01001_011E[Areas2010.df$Tract] + us2010SP$B01001_012E[Areas2010.df$Tract] + us2010SP$B01001_013E[Areas2010.df$Tract] + us2010SP$B01001_014E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010Population45to64 = us2010SP$B01001_015E[Areas2010.df$Tract] + us2010SP$B01001_016E[Areas2010.df$Tract] + us2010SP$B01001_017E[Areas2010.df$Tract] + us2010SP$B01001_018E[Areas2010.df$Tract] + us2010SP$B01001_019E[Areas2010.df$Tract]
+Areas2010.df$TractMale2010PopulationOver65 = us2010SP$B01001_020E[Areas2010.df$Tract] + us2010SP$B01001_021E[Areas2010.df$Tract] + us2010SP$B01001_022E[Areas2010.df$Tract] + us2010SP$B01001_023E[Areas2010.df$Tract] + us2010SP$B01001_024E[Areas2010.df$Tract] + us2010SP$B01001_025E[Areas2010.df$Tract]
+Areas2010.df$TractFemalePopulation2010 = us2010SP$B01001_026E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationUnder17 = us2010SP$B01001_027E[Areas2010.df$Tract] + us2010SP$B01001_028E[Areas2010.df$Tract] + us2010SP$B01001_029E[Areas2010.df$Tract] + us2010SP$B01001_030E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population18to44 = us2010SP$B01001_031E[Areas2010.df$Tract] + us2010SP$B01001_032E[Areas2010.df$Tract] + us2010SP$B01001_033E[Areas2010.df$Tract] + us2010SP$B01001_034E[Areas2010.df$Tract] + us2010SP$B01001_035E[Areas2010.df$Tract] + us2010SP$B01001_036E[Areas2010.df$Tract] + us2010SP$B01001_037E[Areas2010.df$Tract] + us2010SP$B01001_038E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010Population45to64 = us2010SP$B01001_039E[Areas2010.df$Tract] + us2010SP$B01001_040E[Areas2010.df$Tract] + us2010SP$B01001_041E[Areas2010.df$Tract] + us2010SP$B01001_042E[Areas2010.df$Tract] + us2010SP$B01001_043E[Areas2010.df$Tract]
+Areas2010.df$TractFemale2010PopulationOver65 = us2010SP$B01001_044E[Areas2010.df$Tract] + us2010SP$B01001_045E[Areas2010.df$Tract] + us2010SP$B01001_046E[Areas2010.df$Tract] + us2010SP$B01001_047E[Areas2010.df$Tract] + us2010SP$B01001_048E[Areas2010.df$Tract] + us2010SP$B01001_049E[Areas2010.df$Tract]
+Areas2010.df$TractWhitePopulation2010 = us2010SP$B02001_002E[Areas2010.df$Tract]
+Areas2010.df$TractBlackPopulation2010 = us2010SP$B02001_003E[Areas2010.df$Tract]
+Areas2010.df$TractMedianIncome2010 = us2010SP$B19013_001E[Areas2010.df$Tract]
+Areas2010.df$TractMobileHomes2010 = us2010SP$B25024_010E[Areas2010.df$Tract]
+
+df4 = Areas2010.df %>%
+  mutate(ratio = TornAreaInTract/TractArea,
+         ratio2 = TornAreaInTract/TornArea,
+         PeopleInTornadoPerTract2010 = TractPopulation2010 * ratio,
+         MalesInTornadoPerTract2010 = TractMalePopulation2010 * ratio,
+         MalesUnder17InTornaoPerTract2010 = TractMale2010PopulationUnder17 * ratio,
+         Males18to44InTornaoPerTract2010 = TractMale2010Population18to44 * ratio,
+         Males45to64InTornaoPerTract2010 = TractMale2010Population45to64 * ratio,
+         MalesOver65InTornaoPerTract2010 = TractMale2010PopulationOver65 * ratio,
+         FemalesInTornadoPerTract2010 = TractFemalePopulation2010 * ratio,
+         FemalesUnder17InTornaoPerTract2010 = TractFemale2010PopulationUnder17 * ratio,
+         Females18to44InTornaoPerTract2010 = TractFemale2010Population18to44 * ratio,
+         Females45to64InTornaoPerTract2010 = TractFemale2010Population45to64 * ratio,
+         FemalesOver65InTornaoPerTract2010 = TractFemale2010PopulationOver65 * ratio,
+         WhitePeopleInTornadoPerTract2010 = TractWhitePopulation2010 * ratio,
+         BlackPeopleInTornadoPerTract2010 = TractBlackPopulation2010 * ratio,
+         IncomeInTornadoPerTract2010 = TractMedianIncome2010 * ratio2,
+         MobileHomesInTornadoPerTract2010 = TractMobileHomes2010 * ratio) %>%
+  group_by(Torn) %>%
+  dplyr::summarize(TotalPeople2010 = sum(PeopleInTornadoPerTract2010),
+                   TotalMales2010 = sum(MalesInTornadoPerTract2010),
+                   Total2010MalesUnder17 = sum(MalesUnder17InTornaoPerTract2010),
+                   Total2010Males18to44 = sum(Males18to44InTornaoPerTract2010),
+                   Total2010Males45to64 = sum(Males45to64InTornaoPerTract2010),
+                   Total2010MalesOver65 = sum(MalesOver65InTornaoPerTract2010),
+                   TotalFemales2010 = sum(FemalesInTornadoPerTract2010),
+                   Total2010FemalesUnder17 = sum(FemalesUnder17InTornaoPerTract2010),
+                   Total2010Females18to44 = sum(Females18to44InTornaoPerTract2010),
+                   Total2010Females45to64 = sum(Females45to64InTornaoPerTract2010),
+                   Total2010FemalesOver65 = sum(FemalesOver65InTornaoPerTract2010),
+                   TotalWhitePeople2010 = sum(WhitePeopleInTornadoPerTract2010),
+                   TotalBlackPeople2010 = sum(BlackPeopleInTornadoPerTract2010),
+                   MedianIncome2010 = sum(IncomeInTornadoPerTract2010),
+                   MobileHomes2010 = sum(MobileHomesInTornadoPerTract2010))
+
+df4$TotalPeople = df4$TotalPeople2010
+df4$TotalMales = df4$TotalMales2010
+df4$TotalFemales = df4$TotalFemales2010
+df4$PeopleUnder17 = df4$Total2010MalesUnder17 + df4$Total2010FemalesUnder17
+df4$People18to44 = df4$Total2010Males18to44 + df4$Total2010Females18to44
+df4$People45to64 = df4$Total2010Males45to64 + df4$Total2010Females45to64
+df4$PeopleOver65 = df4$Total2010MalesOver65 + df4$Total2010FemalesOver65
+df4$WhitePeople = df4$TotalWhitePeople2010
+df4$BlackPeople = df4$TotalBlackPeople2010
+df4$MedianIncome = df4$MedianIncome2010
+df4$MobileHomes = df4$MobileHomes2010
+df4$popD = df4$TotalPeople/(AreaTor2010/10^6)
+
+df4 = df4[,c(1,17:28)]
+```
+
+Put the Data together
+```{r}
+SPC.df = Torn.df %>%
+  filter(sfdf$om == 314625 | sfdf$om == 301943 | sfdf$om == 614437 | sfdf$om == 613862 | sfdf$om == 296616 | sfdf$om == 606471 | sfdf$om == 552175 | sfdf$om == 574336 | sfdf$om == 306606 | sfdf$om == 305917 | sfdf$om == 607146 | sfdf$om == 523250 | sfdf$om == 547725 | sfdf$om == 552705 | sfdf$om == 483896 | sfdf$om == 560160 | sfdf$om == 480993 | sfdf$om == 613718 | sfdf$om == 613878 | sfdf$om == 613642)
+SPC.df = SPC.df[,c(1,19:30)]
+SPC.df = SPC.df %>%
+  rename("Torn" = "om") %>%
+  rename("popD" = "popD2") %>%
+  mutate(Torn = c(2,1,7,8,5,18,11,9,16,13,17,10,14,15,6,20,19,4,12,3))  
+
+Complete.df = rbind(df4, SPC.df)
+
+Complete.df = Complete.df %>%
+  arrange(Complete.df$Torn)
+
+df4 = df4 %>%
+  arrange(df4$Torn)
+
+SPC.df = SPC.df %>%
+  arrange(SPC.df$Torn)
+
+cor.test((df4$TotalPeople), (SPC.df$TotalPeople))
+cor.test((df4$popD), (SPC.df$popD))
+cor.test((df4$TotalMales), (SPC.df$TotalMales))
+cor.test((df4$TotalFemales), (SPC.df$TotalFemales))
+cor.test((df4$WhitePeople), (SPC.df$WhitePeople))
+cor.test((df4$BlackPeople), (SPC.df$BlackPeople))
+cor.test((df4$MedianIncome), (SPC.df$MedianIncome))
+cor.test((df4$MobileHomes), (SPC.df$MobileHomes))
+```
 
 OLD CODE
 Root Mean Square Error
