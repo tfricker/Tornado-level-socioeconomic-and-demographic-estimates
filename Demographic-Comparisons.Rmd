@@ -642,7 +642,8 @@ SPC.sf = SPC.sf %>%
   rename("Name" = "om") %>%
   mutate(Name = c("Arab, AL", "Tuscaloosa-Birmingham, AL", "Cartersville, GA", "Griffin, GA", "Joplin, MO", "Westville, IL", "Brookport, IL",  "Salem, AL", "Blountstown, FL", "Columbia, MS", "Laurel, MS", "Tulsa, OK", "Rochelle, IL",  "Lutts, TN", "Garland-Rowlett, TX", "Dermott, AR", "Edison, GA", "Katie, OK", "Boswell, OK", "Rosalie, AL"))
 
-out2010.sf$AreaPath = SPC.sf$AreaPth[c(2,1,20,18,5,15,4,3,8,12,7,19,10,13,14,9,11,6,17,16)]
+# Matching order of SPC to out2010.sf
+out2010.sf$AreaPath = SPC.sf$AreaPth[c(1,9,19,7,3,10,16,17,15,4,5,18,11,14,13,20,8,12,2,6)]
 out2010.sf$popD = out2010.sf$TotalPop_2010/out2010.sf$AreaPath * 10^6
 
 
@@ -660,6 +661,24 @@ cor.test((out2010.sf$White_2010), (SPC.sf$White))
 cor.test((out2010.sf$Black_2010), (SPC.sf$Black))
 cor.test((out2010.sf$MedianIncome_2010), (SPC.sf$MdnIncm))
 cor.test((out2010.sf$MobileHomes_2010), (SPC.sf$MoblHms))
+```
+
+Areal weighted interpolation for margins of error
+```{r}
+out2010M.sf <- aw_interpolate(TornDAT.sfdf, 
+               tid = "ID", 
+               source = US2010.sf, 
+               sid = "ID2",
+               extensive = c("TotalPopM", "MobileHomesM"),
+               intensive = c("MedianIncomeM"),
+               weight = "total", 
+               output = "sf")
+
+out2010M.sf$AreaPath = SPC.sf$AreaPth[c(1,9,19,7,3,10,16,17,15,4,5,18,11,14,13,20,8,12,2,6)]
+out2010M.sf$popD = out2010.sf$TotalPop_2010/out2010M.sf$AreaPath * 10^6
+
+out2010M.sf = out2010M.sf %>%
+  arrange(out2010M.sf$Name)
 ```
 
 Root Mean Square Error
