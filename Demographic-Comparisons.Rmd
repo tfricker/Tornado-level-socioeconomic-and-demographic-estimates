@@ -669,7 +669,7 @@ out2010M.sf <- aw_interpolate(TornDAT.sfdf,
                tid = "ID", 
                source = US2010.sf, 
                sid = "ID2",
-               extensive = c("TotalPopM", "MobileHomesM"),
+               extensive = c("TotalPopM", "MobileHomesM", "BlackM"),
                intensive = c("MedianIncomeM"),
                weight = "total", 
                output = "sf")
