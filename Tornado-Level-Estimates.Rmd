@@ -271,7 +271,7 @@ df = data.frame(US2010.sf) %>%
          TotalHousingUnitsM = TotalHousingUnitsM/(TotalHousingUnits + TotalHousingUnitsM),
          MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM),
          MedianIncomeM = MedianIncomeM/(MedianIncome + MedianIncomeM)) %>%
-  select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
+  dplyr::select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
          Male45to64M, MaleOver65M, TotalFemaleM, FemaleUnder18M, Female18to44M,
          Female45to64M, FemaleOver65M, WhiteM, BlackM, TotalHousingUnitsM, MobileHomesM, MedianIncomeM)
 ```
