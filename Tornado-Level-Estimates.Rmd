@@ -268,11 +268,12 @@ df = data.frame(US2010.sf) %>%
          Female70.74M + Female75.79M + Female80.84.1 + FemaleOver85.1)),
          WhiteM = WhiteM/(White + WhiteM),
          BlackM = BlackM/(Black + BlackM),
+         TotalHousingUnitsM = TotalHousingUnitsM/(TotalHousingUnits + TotalHousingUnitsM),
          MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM),
          MedianIncomeM = MedianIncomeM/(MedianIncome + MedianIncomeM)) %>%
-  select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
+  dplyr::select(STATE, COUNTY, NAME_E, TotalPopM, TotalMaleM, MaleUnder18M, Male18to44M,
          Male45to64M, MaleOver65M, TotalFemaleM, FemaleUnder18M, Female18to44M,
-         Female45to64M, FemaleOver65M, WhiteM, BlackM, MobileHomesM, MedianIncomeM)
+         Female45to64M, FemaleOver65M, WhiteM, BlackM, TotalHousingUnitsM, MobileHomesM, MedianIncomeM)
 ```
 
 Summarize the MOE from 2010 ACS data.
@@ -282,23 +283,22 @@ summary(df)
 
 Margins of error for population density data are more complicated. Manually edit here:
 ```{r}
-x = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
-xx = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
-xxx = xx/(x + xx)
-summary(xxx)
+PopD = (US2010.sf$TotalPop/US2010.sf$Shape_Area) * 10^6
+PopD2 = (US2010.sf$TotalPopM/US2010.sf$Shape_Area) * 10^6
+PopDM = PopD2/(PopD + PopD2)
+summary(PopDM)
 ```
 
 Investigate the mobile homes MOE in more detail.
 ```{r}
 df2 = data.frame(US2010.sf) %>%
   mutate(MobileHomesM = MobileHomesM/(MobileHomes + MobileHomesM)) %>%
-  select(MobileHomes, MobileHomesM)
+  dplyr::select(MobileHomes, MobileHomesM)
 
 df2 = df2[df2$MobileHomes != 0,]
 
 summary(df2)
 ```
-
 
 Try areal weighted interpolation
 
