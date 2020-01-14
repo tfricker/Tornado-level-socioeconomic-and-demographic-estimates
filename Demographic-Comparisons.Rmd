@@ -511,6 +511,7 @@ df3 <- df2 %>%
             AvgMobileHomesCV = mean(MobileHomesCV),
             AvgBlackCV = mean(BlackCV))
 
+
 xx <- df2 %>%
   group_by(Name) %>%
   filter(MobileHomes > 100) %>%
@@ -547,6 +548,7 @@ US2010.sf = US2010.sf %>%
          MedianIncome_2010 = MedianIncome * 1.032,
          MedianIncomeM = MedianIncomeM * 1.032)
 ```
+
 
 ```{r}
 maps::map("usa")
