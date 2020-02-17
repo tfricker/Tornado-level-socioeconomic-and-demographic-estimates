@@ -1160,7 +1160,7 @@ B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_bubbles("OldCas", col = "blue", 
              sizes.legend = c(100, 200, 300, 400), 
              alpha = 0.3, 
-             title.size="Estimated Elderly Casualties", 
+             title.size="Estimated Older Adult Casualties", 
              scale = 4/3) +
   tm_shape(us_geo) + 
   tm_borders(col = "grey", alpha = 0.3) +
