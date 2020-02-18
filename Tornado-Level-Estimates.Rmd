@@ -1115,7 +1115,7 @@ B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 
-tmap_arrange(A, B, ncol = 1) #Export as 8x6 PDF
+tmap_arrange(A, B, ncol = 1) #Export as 8.5x6 PDF
 ```
 
 The median number of white casualties for the set of 2,201 tornadoes is 1.96 people with an interquartile range of 0.97 and 5.61 people. In comparison, the median number of black casualties for the same set of tornadoes is 0.12 people with an interquartile range of 0.01 and 0.63. The average number of white casualties is 9.19 people and the average number of black casualties is 1.91 people. Of the top 10 tornadoes ranked by white casualties, three occurred in the state of Oklahoma, two in the state of Alabama, and one in Arkansas, Kentucky, Missouri, Georgia, and Texas. Of the top 10 tornadoes ranked by black casualties, only one (1997 Detroit, Michigan tornado) occurred in a state outside of the Southeast.
@@ -1171,7 +1171,7 @@ B = tm_shape(us_geo, projection ="+init=epsg:2163") +
   tm_scale_bar(position = c("right", "bottom")) +
   tm_layout(frame = FALSE, attr.outside=TRUE)
 
-tmap_arrange(A, B, ncol = 1) #Export as 8x6 PDF
+tmap_arrange(A, B, ncol = 1) #Export as 8.5x6 PDF
 ```
 
 The median number of young casualties for the set of 2,201 tornadoes is 0.64 people with an interquartile range of 0.28 and 1.78. In comparison, the median number of older adult casualties is 0.37 with an interquartile range of 0.17 and 0.99. The average number of young casualties is 2.91 and the average number of older adult casualties is 1.64. Of the top 10 tornadoes ranked by young and older adult casualties, only one (1998 Spencer, South Dakota tornado) occurred in a state outside the southern Great Plains or Southeast.
